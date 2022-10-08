@@ -1,13 +1,15 @@
-## Getting Started
+# CSE 416: Fall 2022 Project - Cloud Drive Sharing Manager
 
-First, run the development server:
-
+### Running the development server:
 ```bash
 npm run dev
 ```
 
-You can start editing the page by modifying `pages/index.tsx`. The page auto-updates as you edit the file.
+## API routes
+The `pages/api` directory is mapped to `/api/*`. Files in this directory are treated as [API routes](https://nextjs.org/docs/api-routes/introduction) instead of React pages. This also stores the necessary files for OAuth2 authentication.
 
-[API routes](https://nextjs.org/docs/api-routes/introduction) can be accessed on [http://localhost:3000/api/hello](http://localhost:3000/api/hello). This endpoint can be edited in `pages/api/hello.ts`.
+## Environment variables
+This project requires the use of a file .env.local in the project root, which is not pushed to the repository for obvious reasons. If you are a contributor, contact Kevin Li (kevin.li.7@stonybrook.edu) for the file.
 
-The `pages/api` directory is mapped to `/api/*`. Files in this directory are treated as [API routes](https://nextjs.org/docs/api-routes/introduction) instead of React pages.
+## MongoDB database
+To store user information and data pertinent to this project, a local MongoDB instance should suffice for development. For a more permanent solution, we will need a cloud-hosted MongoDB instance.
