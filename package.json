@@ -10,6 +10,7 @@
   },
   "dependencies": {
     "axios": "^1.1.2",
+    "bootstrap": "^5.2.2",
     "google-auth-library": "^8.5.2",
     "googleapis": "^108.0.0",
     "mongodb": "^4.10.0",
@@ -17,6 +18,7 @@
     "next": "12.3.1",
     "next-auth": "^4.12.3",
     "react": "18.2.0",
+    "react-bootstrap": "^2.5.0",
     "react-dom": "18.2.0"
   },
   "devDependencies": {

@@ -1,6 +1,7 @@
+import axios from 'axios';
 import { useSession, signIn, signOut } from 'next-auth/react';
 import { useEffect, useState } from 'react';
-import axios from 'axios';
+import { Button } from 'react-bootstrap';
 
 export default function Home() {
   const { data: session } = useSession();
@@ -14,25 +15,33 @@ export default function Home() {
       setFiles(fileData.data.files);
     }
 
-    console.log(session);
     if (session) getFiles();
   }, [session]);
 
   if (session) {
     return (
-      <table>
-        <tbody>
-          { files.map(f => {
-            return (
-              <tr key={f.id}>
-                <td>{f.name}</td>
-              </tr>
-            );
-          }) }
-        </tbody>
-      </table>
+      <>
+        <a href='/api/auth/signout'>
+          <Button variant='primary'>Sign out</Button>
+        </a>
+        <table>
+          <tbody>
+            { files.map(f => {
+              return (
+                <tr key={f.id}>
+                  <td>{f.name}</td>
+                </tr>
+              );
+            }) }
+          </tbody>
+        </table>
+      </>
     );
   } else {
-    return <a href='/api/auth/signin'>Sign in</a>
+    return (
+      <a href='/api/auth/signin'>
+        <Button variant='primary'>Sign in</Button>
+      </a>
+    );
   }
 };
