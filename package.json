@@ -9,7 +9,6 @@
     "lint": "next lint"
   },
   "dependencies": {
-    "@next-auth/mongodb-adapter": "^1.1.0",
     "axios": "^1.1.2",
     "google-auth-library": "^8.5.2",
     "googleapis": "^108.0.0",

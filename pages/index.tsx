@@ -9,15 +9,16 @@ export default function Home() {
   useEffect(() => {
     async function getFiles() {
       let fileData = await axios.post('/api/google', {
-        token: session.token
+        accessToken: session.accessToken
       });
       setFiles(fileData.data.files);
     }
 
+    console.log(session);
     if (session) getFiles();
   }, [session]);
 
-  if (files) {
+  if (session) {
     return (
       <table>
         <tbody>
@@ -32,6 +33,6 @@ export default function Home() {
       </table>
     );
   } else {
-    return 'Not signed in.';
+    return <a href='/api/auth/signin'>Sign in</a>
   }
 };

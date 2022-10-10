@@ -1,44 +1,71 @@
+import axios from 'axios';
 import NextAuth, { NextAuthOptions } from 'next-auth';
-import { MongoDBAdapter } from '@next-auth/mongodb-adapter';
-import { clientPromise, mongooseConnect } from '../../../lib/mongodb';
 import GoogleProvider from 'next-auth/providers/google';
 import Account from '../../../models/Account';
 
-mongooseConnect(); // Mongoose supremacy! Native driver inferiority.
+const scopes = ['openid', 'email', 'profile', 'https://www.googleapis.com/auth/drive'];
+const GOOGLE_AUTHORIZATION_URL = 
+  'https://accounts.google.com/o/oauth2/v2/auth?' +
+  new URLSearchParams({
+    prompt: 'consent',
+    access_type: 'offline',
+    response_type: 'code',
+    scope: scopes.join(' ')
+  });
 
-const scopes = [
-  'openid',
-  'email',
-  'profile',
-  'https://www.googleapis.com/auth/drive'
-];
-const authOptions: NextAuthOptions = {
+// Takes a token, and returns a new, updated token
+async function refreshAccessToken(token) {
+  let url = 
+    'https://oauth2.googleapis.com/token?' +
+    new URLSearchParams({
+      client_id: process.env.GOOGLE_ID,
+      client_secret: process.env.GOOGLE_SECRET,
+      grant_type: 'refresh_token',
+      refresh_token: token.refreshToken
+    });
+
+  let res = await axios.post(url);
+  return {
+    accessToken: res.data.access_token,
+    // Google returns an expires_at attribute set to 3600 seconds.
+    accessTokenExpires: Date.now() + res.data.expires_in * 1000,
+    refreshToken: token.refreshToken, // Reuse previous refresh token
+    user: token.user
+  }
+}
+
+export default NextAuth({
   providers: [
     GoogleProvider({
       clientId: process.env.GOOGLE_ID,
       clientSecret: process.env.GOOGLE_SECRET,
-      authorization: { params: { 
-          scope: scopes.join(' '),
-          access_type: 'offline'
-      } }
+      authorization: GOOGLE_AUTHORIZATION_URL
     })
   ],
-  adapter: MongoDBAdapter(clientPromise),
-  session: { strategy: 'jwt' },
-  secret: process.env.NEXTAUTH_SECRET,
   callbacks: {
-    // Store token from DB into session object
+    async jwt({ token, user, account }) {
+      // Initial sign in, user/account are undefined in the future
+      if (account && user) {
+        return {
+          accessToken: account.access_token,
+          accessTokenExpires: account.expires_at,
+          refreshToken: account.refresh_token,
+          user: user
+        };
+      }
+
+      // Return previous token if the access token has not expired yet
+      if (Date.now() < token.accessTokenExpires) {
+;        return token;
+      } else { // Access token has expired, refresh it
+        console.log('Access token expired - refreshing');
+        return refreshAccessToken(token);
+      }
+    },
     async session({ session, token }) {
-      let userId = token.sub;
-      let account = await Account.findOne({ userId: userId });
-      let googleToken = { 
-        access_token: account.access_token,
-        refresh_token: account.refresh_token
-      };
-      session.token = googleToken;
+      session.user = token.user;
+      session.accessToken = token.accessToken;
       return session;
     }
   }
-};
-
-export default NextAuth(authOptions);
+});

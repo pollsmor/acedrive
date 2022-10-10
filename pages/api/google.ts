@@ -9,7 +9,9 @@ const drive = google.drive({ auth, version: 'v3' });
 export default function handler(req, res) {
   return new Promise(resolve => {
     if (req.method === 'POST') {
-      auth.setCredentials(req.body.token);
+      auth.setCredentials({
+        access_token: req.body.accessToken
+      });
 
       drive.files.list().then(data => {
         res.json({ files: data.data.files });
