@@ -1,18 +1,36 @@
 import { useSession, signIn, signOut } from 'next-auth/react';
-import { useEffect } from 'react';
-import { google } from 'googleapis';
+import { useEffect, useState } from 'react';
+import axios from 'axios';
 
 export default function Home() {
   const { data: session } = useSession();
+  const [files, setFiles] = useState([]);
 
   useEffect(() => {
-    if (session) {
-      console.log(session.access_token);
+    async function getFiles() {
+      let fileData = await axios.post('/api/google', {
+        token: session.token
+      });
+      setFiles(fileData.data.files);
     }
+
+    if (session) getFiles();
   }, [session]);
 
-  if (session) {
-    return 'Signed in!';
+  if (files) {
+    return (
+      <table>
+        <tbody>
+          { files.map(f => {
+            return (
+              <tr key={f.id}>
+                <td>{f.name}</td>
+              </tr>
+            );
+          }) }
+        </tbody>
+      </table>
+    );
   } else {
     return 'Not signed in.';
   }

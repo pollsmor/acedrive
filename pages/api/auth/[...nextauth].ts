@@ -17,20 +17,25 @@ const authOptions: NextAuthOptions = {
     GoogleProvider({
       clientId: process.env.GOOGLE_ID,
       clientSecret: process.env.GOOGLE_SECRET,
-      authorization: {
-        params: { scope: scopes.join(' ') }
-      }
+      authorization: { params: { 
+          scope: scopes.join(' '),
+          access_type: 'offline'
+      } }
     })
   ],
   adapter: MongoDBAdapter(clientPromise),
-  secret: process.env.NEXTAUTH_SECRET,
   session: { strategy: 'jwt' },
+  secret: process.env.NEXTAUTH_SECRET,
   callbacks: {
-    // Store access token from DB into session object
+    // Store token from DB into session object
     async session({ session, token }) {
       let userId = token.sub;
       let account = await Account.findOne({ userId: userId });
-      session.access_token = account.access_token;
+      let googleToken = { 
+        access_token: account.access_token,
+        refresh_token: account.refresh_token
+      };
+      session.token = googleToken;
       return session;
     }
   }

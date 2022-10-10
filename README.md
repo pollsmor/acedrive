@@ -13,3 +13,6 @@ This project requires the use of a file `.env.local` in the project root, which 
 
 ## MongoDB database
 To store user information and data pertinent to this project, a local MongoDB instance should suffice for development. For a more permanent solution, we will need a cloud-hosted MongoDB instance.
+
+## Want to test this program?
+Because this is an external-facing app that is not reviewed by Google, we must manually add the email of those who wish to use this application. Drop a message to one of the group members, and we'll get it sorted out.
