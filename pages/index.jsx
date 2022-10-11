@@ -1,6 +1,7 @@
 import axios from 'axios';
-import { useSession, signIn, signOut } from 'next-auth/react';
+import Link from 'next/link';
 import { useEffect, useState } from 'react';
+import { useSession } from 'next-auth/react';
 import { Button } from 'react-bootstrap';
 
 export default function Home() {
@@ -21,15 +22,15 @@ export default function Home() {
   if (session) {
     return (
       <>
-        <a href='/api/auth/signout'>
+        <Link href='/api/auth/signout'>
           <Button variant='primary'>Sign out</Button>
-        </a>
+        </Link>
         <table>
           <tbody>
             { files.map(f => {
               return (
                 <tr key={f.id}>
-                  <td>{f.name}</td>
+                  <td>{JSON.stringify(f)}</td>
                 </tr>
               );
             }) }
@@ -39,9 +40,9 @@ export default function Home() {
     );
   } else {
     return (
-      <a href='/api/auth/signin'>
+      <Link href='/api/auth/signin'>
         <Button variant='primary'>Sign in</Button>
-      </a>
+      </Link>
     );
   }
 };

@@ -1,7 +1,7 @@
 import axios from 'axios';
-import NextAuth, { NextAuthOptions } from 'next-auth';
+import NextAuth from 'next-auth';
 import GoogleProvider from 'next-auth/providers/google';
-import Account from '../../../models/Account';
+//import Account from '../../../models/Account';
 
 const scopes = ['openid', 'email', 'profile', 'https://www.googleapis.com/auth/drive'];
 const GOOGLE_AUTHORIZATION_URL = 
