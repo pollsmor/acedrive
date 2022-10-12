@@ -2,6 +2,7 @@ import Head from 'next/head';
 import { useSession } from 'next-auth/react';
 import Banner from './components/banner';
 import Welcome from './components/welcome';
+import SearchResults from './components/searchresults';
 
 export default function Home() {
   const { data: session, status } = useSession();
@@ -18,8 +19,8 @@ export default function Home() {
         <Banner session={session} />
         {/* If session is found, render home page. Else, render a welcome screen. */}
         { session ? 
-          'Hello World' :
-          <Welcome />
+          <SearchResults accessToken={session.accessToken} /> :
+          <Welcome token={session.accessToken} />
         }
       </>
     );

@@ -14,7 +14,9 @@ export default async function handler(req, res) {
       access_token: req.body.accessToken
     });
 
-    let googleRes = await drive.files.list();
+    let googleRes = await drive.files.list({
+      q: `mimeType=\'image/jpeg\'`
+    });
     res.json({ files: googleRes.data.files})
   } else {
     res.end('Not signed in or not a POST request.');
