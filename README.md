@@ -16,3 +16,6 @@ To store user information and data pertinent to this project, a local MongoDB in
 
 ## Want to test this program?
 Because this is an external-facing app that is not reviewed by Google, we must manually add the email of those who wish to use this application. Drop a message to one of the group members, and we'll get it sorted out.
+
+## Deploying to a cloud instance
+The only thing that needs to change is to adjust NEXTAUTH_URL to the appropriate link of the cloud server. It would probably also be prudent to build for production rather than for dev with npm.

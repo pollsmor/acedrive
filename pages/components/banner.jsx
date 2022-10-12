@@ -18,8 +18,7 @@ export default function Banner(props) {
           <Navbar.Brand>AceDrive</Navbar.Brand>
           {/* If logged in, render the top portion. If not, the bottom. */}
           { props.session ? <>
-              <Nav.Link onClick={signOut}>Sign out</Nav.Link> 
-              <Form onSubmit={onSearch}>
+              <Form onSubmit={onSearch} className='d-flex'>
                 <FormControl 
                   type='search' 
                   placeholder='Search...' 
@@ -27,6 +26,12 @@ export default function Banner(props) {
                   onChange={e => setQuery(e.target.value)}
                 />
               </Form>
+                <img 
+                  src={props.session.user.image} 
+                  className='avatar d-flex' 
+                  alt='Avatar' 
+                />
+              <Nav.Link onClick={signOut}>Sign out</Nav.Link> 
             </> : <>
               <Nav.Link onClick={() => signIn('google')}>Sign in with Google</Nav.Link>
             </>

@@ -1,8 +1,10 @@
 import axios from 'axios';
 import NextAuth from 'next-auth';
 import GoogleProvider from 'next-auth/providers/google';
-//import Account from '../../../models/Account';
+import { mongooseConnect } from '../../../lib/mongo';
+import User from '../../../lib/models/User';
 
+mongooseConnect();
 const scopes = ['openid', 'email', 'profile', 'https://www.googleapis.com/auth/drive'];
 const GOOGLE_AUTHORIZATION_URL = 
   'https://accounts.google.com/o/oauth2/v2/auth?' +
@@ -46,6 +48,9 @@ export default NextAuth({
     async jwt({ token, user, account }) {
       // Initial sign in, user/account are undefined in the future
       if (account && user) {
+        let storedUser = new User(user); // Matches Mongoose model
+        storedUser.save();
+
         return {
           accessToken: account.access_token,
           accessTokenExpires: account.expires_at,

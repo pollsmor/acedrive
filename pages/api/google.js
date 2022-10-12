@@ -1,4 +1,5 @@
 import { google } from 'googleapis';
+import { getToken } from 'next-auth/jwt';
 
 const auth = new google.auth.OAuth2({
   client_id: process.env.GOOGLE_ID,
@@ -6,20 +7,16 @@ const auth = new google.auth.OAuth2({
 });
 const drive = google.drive({ auth, version: 'v3' });
 
-export default function handler(req, res) {
-  return new Promise(resolve => {
-    if (req.method === 'POST') {
-      auth.setCredentials({
-        access_token: req.body.accessToken
-      });
+export default async function handler(req, res) {
+  const token = await getToken({ req });
+  if (token && req.method === 'POST') {
+    auth.setCredentials({
+      access_token: req.body.accessToken
+    });
 
-      drive.files.list().then(data => {
-        res.json({ files: data.data.files });
-        resolve();
-      });
-    } else {
-      res.end('Only POST requests allowed.');
-      resolve();
-    }
-  });
+    let googleRes = await drive.files.list();
+    res.json({ files: googleRes.data.files})
+  } else {
+    res.end('Not signed in or not a POST request.');
+  }
 }
