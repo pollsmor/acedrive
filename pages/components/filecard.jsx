@@ -1,6 +1,6 @@
 import { Card } from 'react-bootstrap';
 
-export default function File(props) {
+export default function FileCard(props) {
     const file = props.data
     let modifyTime = new Date(Date.parse(file.modifiedTime)).toString()
 
