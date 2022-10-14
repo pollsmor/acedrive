@@ -16,7 +16,7 @@ export default function SearchResults(props) {
     }
 
     fetchData();
-  }, []);
+  }, [props.accessToken]);
 
   return (
     <Table responsive striped bordered>

@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import Image from 'next/future/image';
 import { Container, Nav, Navbar, Form, FormControl } from 'react-bootstrap';
 import { signIn, signOut } from 'next-auth/react';
 
@@ -26,11 +27,13 @@ export default function Banner(props) {
                   onChange={e => setQuery(e.target.value)}
                 />
               </Form>
-                <img 
-                  src={props.session.user.image} 
-                  className='avatar d-flex' 
-                  alt='Avatar' 
-                />
+              <Image 
+                src={props.session.user.image} 
+                width={40}
+                height={40}
+                className='avatar' 
+                alt='Avatar' 
+              />
               <Nav.Link onClick={signOut}>Sign out</Nav.Link> 
             </> : <>
               <Nav.Link onClick={() => signIn('google')}>Sign in with Google</Nav.Link>
