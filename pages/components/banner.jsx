@@ -1,3 +1,4 @@
+import axios from 'axios';
 import { useState } from 'react';
 import Image from 'next/future/image';
 import { Container, Nav, Navbar, Form, FormControl } from 'react-bootstrap';
@@ -10,6 +11,12 @@ export default function Banner(props) {
     e.preventDefault();
     if (query === '') return;
     console.log(`Searching ${query}.`);
+  }
+
+  async function takeSnapshot() {
+    await axios.post('/api/takeSnapshot', {
+      accessToken: props.session.accessToken
+    });
   }
 
   return (
@@ -27,6 +34,7 @@ export default function Banner(props) {
                   onChange={e => setQuery(e.target.value)}
                 />
               </Form>
+              <Nav.Link onClick={takeSnapshot}>Take snapshot</Nav.Link>
               <Image 
                 src={props.session.user.image} 
                 width={40}

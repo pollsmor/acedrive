@@ -19,3 +19,6 @@ Because this is an external-facing app that is not reviewed by Google, we must m
 
 ## Deploying to a cloud instance
 The only thing that needs to change is to adjust NEXTAUTH_URL to the appropriate link of the cloud server. It would probably also be prudent to build for production rather than for dev with npm.
+
+## Snapshots
+For now, a snapshot is analagous to a list of (parsed) files.

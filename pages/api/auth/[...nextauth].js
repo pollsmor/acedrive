@@ -50,7 +50,8 @@ export default NextAuth({
       if (account && user) {
         let storedUser = new User(user); // Matches Mongoose model
         storedUser.save(err => {
-          if (err) console.log('Account already created - using that one.');
+          if (err) 
+            console.log(err.toString());
         });
 
         return {
