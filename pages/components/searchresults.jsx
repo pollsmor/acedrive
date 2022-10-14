@@ -1,7 +1,7 @@
 import axios from 'axios';
 import { useState, useEffect } from 'react';
-import { Table, Container, Row, Col} from 'react-bootstrap';
-import File from './file';
+import {Container, Row} from 'react-bootstrap';
+import FileCard from './filecard';
 
 export default function SearchResults(props) {
   const [files, setFiles] = useState([]);
@@ -23,17 +23,10 @@ export default function SearchResults(props) {
         <Row>
             { files.map(f => {
               return (
-                    <File key={f.id} data={f}/>
+                    <FileCard key={f.id} data={f}/>
               )
             }) }
         </Row>
       </Container>
   );
 }
-
-
-// return (
-//   <tr key={f.id}>
-//     <td style={{ 'wordBreak': 'break-all', 'fontSize': '12px' }}>{JSON.stringify(f)}</td>
-//   </tr>
-// );
