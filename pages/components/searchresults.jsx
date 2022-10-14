@@ -8,7 +8,8 @@ export default function SearchResults(props) {
   useEffect(() => {
     async function fetchData() {
       let res = await axios.post('/api/google', {
-        accessToken: props.accessToken
+        accessToken: props.accessToken,
+        query: ``
       });
 
       setFiles(res.data.files);
@@ -18,15 +19,15 @@ export default function SearchResults(props) {
   }, []);
 
   return (
-    <Table striped bordered hover>
+    <Table responsive striped bordered>
       <tbody>
-        { files.map(f => {
-          return (
-            <tr key={f.id}>
-              <td>{JSON.stringify(f)}</td>
-            </tr>
-          );
-        }) }
+      { files.map(f => {
+        return (
+          <tr key={f.id}>
+            <td>{JSON.stringify(f)}</td>
+          </tr>
+        );
+      }) }
       </tbody>
     </Table>
   );

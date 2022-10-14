@@ -49,7 +49,9 @@ export default NextAuth({
       // Initial sign in, user/account are undefined in the future
       if (account && user) {
         let storedUser = new User(user); // Matches Mongoose model
-        storedUser.save();
+        storedUser.save(err => {
+          if (err) console.log('Account already created - using that one.');
+        });
 
         return {
           accessToken: account.access_token,

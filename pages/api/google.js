@@ -15,7 +15,9 @@ export default async function handler(req, res) {
     });
 
     let googleRes = await drive.files.list({
-      q: `mimeType=\'image/jpeg\'`
+      fields: 'files(kind,id,name,mimeType,webViewLink,permissions)',
+      pageSize: 10,
+      query: req.body.query
     });
     res.json({ files: googleRes.data.files})
   } else {
