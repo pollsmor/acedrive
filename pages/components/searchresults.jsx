@@ -1,10 +1,12 @@
 import axios from 'axios';
 import { useState, useEffect } from 'react';
-import {Container, Row} from 'react-bootstrap';
+import {Container, Row, Form, FormControl} from 'react-bootstrap';
 import FileCard from './filecard';
+import SearchQuery from '../searchQuery';
 
 export default function SearchResults(props) {
   const [files, setFiles] = useState([]);
+  const [query, setQuery] = useState('');
 
   useEffect(() => {
     async function fetchLatestSnapshot() {
@@ -18,7 +20,31 @@ export default function SearchResults(props) {
     fetchLatestSnapshot();
   }, []);
 
+  function onSearch(e) {
+    e.preventDefault();
+    if (query === '') return;
+
+    console.log(`searching ${query}`)
+    let search = new SearchQuery(query)
+    if(search.valid === false){
+      setQuery("invalid")
+      return
+    }
+    else {
+      filtered = FilterFiles(files, search)
+    }
+  }
+
   return (
+    <>
+      <Form onSubmit={onSearch} className='d-flex'>
+      <FormControl 
+        type='search' 
+        placeholder='Search...' 
+        value={query}
+        onChange={e => setQuery(e.target.value)}
+      />
+    </Form>
       <Container fluid="lg">
         <Row>
             { files.map(f => {
@@ -28,5 +54,6 @@ export default function SearchResults(props) {
             }) }
         </Row>
       </Container>
+    </>
   );
 }
