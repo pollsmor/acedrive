@@ -18,8 +18,6 @@ export default function Home() {
     setViewing("")
   }
 
-  console.log(viewing)
-
   if (status === 'loading') return null;
   return (
     <>
