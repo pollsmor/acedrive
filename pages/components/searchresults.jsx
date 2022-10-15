@@ -1,7 +1,8 @@
 import axios from 'axios';
 import { useState, useEffect } from 'react';
-import {Container, Row, Form, FormControl} from 'react-bootstrap';
+import {Container, Row, Form, FormControl, Col} from 'react-bootstrap';
 import FileCard from './filecard';
+import FolderCard from './foldercard';
 
 export default function SearchResults(props) {
   const [files, setFiles] = useState([]);
@@ -10,10 +11,8 @@ export default function SearchResults(props) {
   useEffect(() => {
     async function fetchLatestSnapshot() {
       let res = await axios.post('/api/getUser');
-      console.log(res)
       if (res.data.snapshotIDs.length > 0) {
         let snapshot = await axios.post('/api/getSnapshot', res.data.snapshotIDs[0])
-          console.log(snapshot)
           setFiles(snapshot.data.files);
       }
     }
@@ -40,13 +39,13 @@ export default function SearchResults(props) {
         onChange={e => setQuery(e.target.value)}
       />
     </Form>
-      <Container fluid="lg">
+      <Container>
         <Row>
-            { files.map(f => {
-              return (
-                    <FileCard key={f.id} data={f}/>
-              )
-            }) }
+            <Col>
+              { files.map(f => {
+                return (f.content? <FolderCard key={f.id} data={f}/> : <FileCard key={f.id} data={f}/>)
+              }) }
+            </Col>
         </Row>
       </Container>
     </>
