@@ -12,7 +12,7 @@ export default function FileCard(props) {
                     Owner: {file.owners[0].emailAddress}
                 </Card.Text>
                 <Card.Text>
-                    Last Modified: {(modifyTime)}
+                    Path: {(file.path)}
                 </Card.Text>
             </Card.Body>
         </Card>

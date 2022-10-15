@@ -1,23 +1,21 @@
 import axios from 'axios';
 import { useState, useEffect } from 'react';
-import {Container, Row, Form, FormControl, Col} from 'react-bootstrap';
+import {Container, Row, Form, FormControl, Col, Button} from 'react-bootstrap';
 import FileCard from './filecard';
 import FolderCard from './foldercard';
 
-export default function SearchResults(props) {
+export default function FileViewWindow(props) {
   const [files, setFiles] = useState([]);
   const [query, setQuery] = useState('');
+  const snapshotID = props.snapshotID
 
   useEffect(() => {
-    async function fetchLatestSnapshot() {
-      let res = await axios.post('/api/getUser');
-      if (res.data.snapshotIDs.length > 0) {
-        let snapshot = await axios.post('/api/getSnapshot', res.data.snapshotIDs[0])
+    async function fetchSnapshot() {
+        let snapshot = await axios.post('/api/getSnapshot', snapshotID)
           setFiles(snapshot.data.files);
       }
-    }
-
-    fetchLatestSnapshot();
+  
+      fetchSnapshot()
   }, []);
 
   function onSearch(e) {
@@ -29,8 +27,13 @@ export default function SearchResults(props) {
     filtered = FilterFiles(files, search)
   }
 
+  function closeView() {
+    props.closeViewCallback()
+  }
+ 
   return (
     <>
+      <Button onClick={closeView} variant='danger'>Close File View</Button>
       <Form onSubmit={onSearch} className='d-flex'>
       <FormControl 
         type='search' 

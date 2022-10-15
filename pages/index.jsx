@@ -1,11 +1,24 @@
 import Head from 'next/head';
 import { useSession, signIn } from 'next-auth/react';
+import { useState } from 'react' 
 import Banner from './components/banner';
 import Welcome from './components/welcome';
-import SearchResults from './components/searchresults';
+import FileViewWindow from './components/fileviewwindow';
+import HomePage from './components/homepage.jsx'
 
 export default function Home() {
   const { data: session, status } = useSession();
+  const [viewing, setViewing] = useState("")
+
+  function handleView(selectedFiles) {
+    setViewing(selectedFiles[0])
+  }
+
+  function closeView() {
+    setViewing("")
+  }
+
+  console.log(viewing)
 
   if (status === 'loading') return null;
   return (
@@ -17,7 +30,8 @@ export default function Home() {
       <Banner session={session} />
       {/* If session is found, render home page. Else, render a welcome screen. */}
       { session ? 
-        <SearchResults accessToken={session.accessToken} /> :
+        (viewing==="" ? <HomePage accessToken={session.accessToken} viewCallback={handleView}/> : 
+        <FileViewWindow accessToken={session.accessToken} snapshotID={viewing} closeViewCallback={closeView}/>) :
         <Welcome />
       }
     </>
