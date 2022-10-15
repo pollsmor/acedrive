@@ -103,6 +103,7 @@ function parseFiles(all_files, root_id) {
           name: file.name,
           mimeType: file.mimeType,
           modifiedTime: file.modifiedTime,
+          path: '/' + file.name, 
           parent: file.parents ? file.parents[0] : undefined,
           thumbnailLink: file.thumbnailLink? file.thumbnailLink : undefined, 
           sharingUser: file.sharingUser ? file.sharingUser : undefined,
@@ -115,11 +116,11 @@ function parseFiles(all_files, root_id) {
   }
 
   // now, populate all the subfolders of the top level folders, and recursively populate any other subfolders
-  populateSubfolders(top_level_files, all_files)
+  populateSubfolders(top_level_files, all_files, "/")
   return top_level_files
 }
 
-function populateSubfolders(files_to_populate, all_files) {
+function populateSubfolders(files_to_populate, all_files, current_path) {
   // go through every file, and for each folder
   for(let top_level_file of files_to_populate) {
     if(top_level_file.mimeType === 'application/vnd.google-apps.folder') {
@@ -148,6 +149,7 @@ function populateSubfolders(files_to_populate, all_files) {
               name: child_file_candidate.name,
               mimeType: child_file_candidate.mimeType,
               modifiedTime: child_file_candidate.modifiedTime,
+              path: current_path + top_level_file.name + '/' + child_file_candidate.name,
               parent: child_file_candidate.parents ? child_file_candidate.parents[0] : undefined,
               thumbnailLink: child_file_candidate.thumbnailLink? child_file_candidate.thumbnailLink : undefined, 
               sharingUser: child_file_candidate.sharingUser ? child_file_candidate.sharingUser : undefined,
@@ -161,7 +163,7 @@ function populateSubfolders(files_to_populate, all_files) {
       }
 
       // now, populate any subfolders we just found
-      populateSubfolders(top_level_file.content, all_files)
+      populateSubfolders(top_level_file.content, all_files, current_path + top_level_file.name + '/')
     }
   }
 }
