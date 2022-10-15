@@ -9,7 +9,7 @@ export default function FileCard(props) {
             <Card.Body>
                 <Card.Title>{file.name}</Card.Title>
                 <Card.Text>
-                    Owner: {file.owner}
+                    Owner: {file.owners[0].emailAddress}
                 </Card.Text>
                 <Card.Text>
                     Last Modified: {(modifyTime)}
