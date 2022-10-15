@@ -12,3 +12,10 @@ html, body {
   border-radius: 50%;
   margin-left: 8px;
 }
+
+.folder {
+  border-style: solid;
+  border-radius: 15px;
+  border-width: 2px;
+  margin: 5px;
+}

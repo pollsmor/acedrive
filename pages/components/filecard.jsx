@@ -6,6 +6,7 @@ export default function FileCard(props) {
 
     return (
         <Card style={{width: '18rem', padding: '2px', margin: '10px'}}>
+            {file.content? <Card.Img variant='top' src='https://uas.edu.kw/wp-content/uploads/2018/12/folder-icon.png' /> : ""}
             <Card.Body>
                 <Card.Title>{file.name}</Card.Title>
                 <Card.Text>
