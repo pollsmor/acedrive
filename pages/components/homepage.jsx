@@ -3,6 +3,7 @@ import { useState, useEffect} from 'react';
 import { Container, Nav, Navbar, Button, Modal, Form} from "react-bootstrap";
 import SnapshotCard from './snapshotCard';
 import AnalyzeDeviant from '../algorithms/AnalyzeDeviant';
+import AnalyzeFileFolderDifferences from '../algorithms/FileFolderDifferences';
 import ErrorModal from './errormodal';
 
 export default function HomePage(props) {
@@ -87,11 +88,11 @@ export default function HomePage(props) {
             if(analyze === "Deviant Sharing") {
                 AnalyzeDeviant(selectedFiles[0], path, drive, threshold)
             }
-            else{
-                console.log(`analyze type: ${analyze}`)
-                console.log(`analyze path: ${path}`)
-                console.log(`analyze drive: ${drive}`)
-                console.log(`snapshot: ${selectedFiles[0]}`)
+            else if(analyze === "File-Folder Sharing Differences") {
+                AnalyzeFileFolderDifferences(selectedFiles[0], path, drive)
+            }
+            else {
+                console.log("hie :)")
             }
         }
     }
