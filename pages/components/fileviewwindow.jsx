@@ -13,8 +13,7 @@ export default function FileViewWindow(props) {
 
     async function fetchSnapshot() {
         let snapshot = await axios.post('/api/getSnapshot', {id: snapshotID})
-          console.log(snapshot.data.files)
-          setFiles(snapshot.data.files);
+        setFiles(snapshot.data.files);
       }
   
       fetchSnapshot()

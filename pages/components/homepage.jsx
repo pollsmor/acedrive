@@ -2,6 +2,8 @@ import axios from 'axios';
 import { useState, useEffect} from 'react';
 import { Container, Nav, Navbar, Button, Modal, Form} from "react-bootstrap";
 import SnapshotCard from './snapshotCard';
+import AnalyzeDeviant from '../algorithms/AnalyzeDeviant';
+import ErrorModal from './errormodal';
 
 export default function HomePage(props) {
     const [snapshots, setSnapshots] = useState([])
@@ -12,6 +14,7 @@ export default function HomePage(props) {
     const [drive, setDrive] = useState("")
     const [show, setShow] = useState(false)
     const [selectedFiles, setSelectedFiles] = useState([])
+    const [errorMsg, setErrorMsg] = useState("")
 
     useEffect( () => {
         async function fetchUser() {
@@ -80,18 +83,36 @@ export default function HomePage(props) {
             props.viewCallback(selectedFiles)
         }
         else{
-            // switch to call analysis functions
-            console.log(`analyze type: ${analyze}`)
-            console.log(`analyze path: ${path}`)
-            console.log(`analyze drive: ${drive}`)
-            console.log(`snapshot: ${selectedFiles[0]}`)
+            // call analysis functions
+            if(analyze === "Deviant Sharing") {
+                AnalyzeDeviant(selectedFiles[0], path, drive, threshold)
+            }
+            else{
+                console.log(`analyze type: ${analyze}`)
+                console.log(`analyze path: ${path}`)
+                console.log(`analyze drive: ${drive}`)
+                console.log(`snapshot: ${selectedFiles[0]}`)
+            }
         }
     }
 
+    function clearErrorMsg() {
+        setErrorMsg("")
+    }
+
     const handleClose = () => setShow(false)
-    const handleOpen = () => setShow(true)
+    const handleOpen = () => {setShow(true); setAnalyze("Deviant Sharing")}
+    
     function handleAnalyze(e) {
         e.preventDefault();
+
+        if(analyze === "Deviant Sharing") {
+            let num = parseFloat(threshold)
+            if(num < 50 || num > 100) {
+                setErrorMsg("Deviant Sharing threshold must be between 50 and 100")
+                return
+            }
+        }
         handleClose()
         setSelecting(true)
         toggleSelect(null, 0)
@@ -122,6 +143,7 @@ export default function HomePage(props) {
                     <Button onClick={handleViewClick}>View & Search Snapshot Files</Button> 
                     <Button onClick={handleOpen}>Analyze Snapshot</Button>
                 </Container>
+                <ErrorModal msg={errorMsg} clearErrorCallback={clearErrorMsg} />
                 <Modal show={show} onHide={handleClose}>
                     <Modal.Header closeButton>
                     <Modal.Title>Analyze Snapshot</Modal.Title>
@@ -142,8 +164,10 @@ export default function HomePage(props) {
                             </Form.Control>
                         </Form.Group>
                        
-                        {analyze === "Devian Sharing"?<Form.Group> <Form.Label> Threshold </Form.Label>
-                            <Form.Control placeholder="Deviance Threshhold" onChange={e => setThreshold(e.target.value)}/></Form.Group>: ""}
+                        <Form.Group> 
+                            <Form.Label> Threshold (Deviant Sharing Only) </Form.Label>
+                            <Form.Control placeholder="Deviance Threshhold" onChange={e => setThreshold(e.target.value)} disabled={analyze!=="Deviant Sharing"}/>
+                        </Form.Group>
 
                         <Form.Group className="mb-3" controlId="formBasicPath">
                             <Form.Label>Path (Optional)</Form.Label>
