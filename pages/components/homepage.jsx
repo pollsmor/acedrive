@@ -5,6 +5,7 @@ import SnapshotCard from './snapshotCard';
 import AnalyzeDeviant from '../algorithms/AnalyzeDeviant';
 import AnalyzeFileFolderDifferences from '../algorithms/FileFolderDifferences';
 import AnalyzeSharingChanges from '../algorithms/SharingChanges';
+import AnalysisResultsModal from './AnalysisResultsModal';
 import ErrorModal from './errormodal';
 
 export default function HomePage(props) {
@@ -14,6 +15,7 @@ export default function HomePage(props) {
     const [threshold, setThreshold] = useState("80")
     const [path, setPath] = useState("")
     const [drive, setDrive] = useState("")
+    const [results, setResults] = useState(null)
     const [show, setShow] = useState(false)
     const [selectedFiles, setSelectedFiles] = useState([])
     const [errorMsg, setErrorMsg] = useState("")
@@ -80,21 +82,23 @@ export default function HomePage(props) {
         setSelecting(!selecting)
     }
 
-    function handleConfirmClick(e) {
+    async function handleConfirmClick(e) {
         if(analyze === "") {
             props.viewCallback(selectedFiles)
         }
         else{
+            let results = null  
             // call analysis functions
             if(analyze === "Deviant Sharing") {
-                AnalyzeDeviant(selectedFiles[0], path, drive, threshold)
+                results = await AnalyzeDeviant(selectedFiles[0], path, drive, threshold)
             }
             else if(analyze === "File-Folder Sharing Differences") {
-                AnalyzeFileFolderDifferences(selectedFiles[0], path, drive)
+                results = await AnalyzeFileFolderDifferences(selectedFiles[0], path, drive)
             }
             else {
-                AnalyzeSharingChanges(selectedFiles[0], selectedFiles[1], path, drive)
+                results = await AnalyzeSharingChanges(selectedFiles[0], selectedFiles[1], path, drive)
             }
+            setResults(results)
         }
     }
 
@@ -110,6 +114,10 @@ export default function HomePage(props) {
 
         if(analyze === "Deviant Sharing") {
             let num = parseFloat(threshold)
+            if(Number.isNaN(num)) {
+                setErrorMsg("Deviant Sharing threshold must be a number")
+                return
+            }
             if(num < 50 || num > 100) {
                 setErrorMsg("Deviant Sharing threshold must be between 50 and 100")
                 return
@@ -122,6 +130,13 @@ export default function HomePage(props) {
         }
     }
     
+    function closeAnalysisResults() {
+        setResults(null)
+        setAnalyze("")
+        setSelectedFiles([])
+        setSelecting(false)
+    }
+
     let windowContents = "Take a snapshot to begin"
     if(snapshots.length > 0) {
         windowContents =
@@ -143,10 +158,11 @@ export default function HomePage(props) {
             <Navbar>
                 <Container>
                     <Navbar.Brand> Snapshots: </Navbar.Brand>
-                    <Nav.Link onClick={takeSnapshot}>Take snapshot</Nav.Link>
-                    <Button onClick={handleViewClick}>View & Search Snapshot Files</Button> 
-                    <Button onClick={handleOpen}>Analyze Snapshot</Button>
+                    <Nav.Link onClick={takeSnapshot} disabled={selecting}>Take snapshot</Nav.Link>
+                    <Button onClick={handleViewClick} disabled={selecting}>View & Search Snapshot Files</Button> 
+                    <Button onClick={handleOpen} disabled={selecting}>Analyze Snapshot</Button>
                 </Container>
+                <AnalysisResultsModal show={(results!==null)} closeResultsCallback={closeAnalysisResults} analysis={analyze} results={results}/>
                 <ErrorModal msg={errorMsg} clearErrorCallback={clearErrorMsg} />
                 <Modal show={show} onHide={handleClose}>
                     <Modal.Header closeButton>
