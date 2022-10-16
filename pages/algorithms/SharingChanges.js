@@ -9,12 +9,14 @@ export default async function AnalyzeSharingChanges(first_snapshot_id, second_sn
     
     // results will be an array of objects describing the deviant files
     let result = []
-    AnalyzeSharingChangesAlgo(first_files, second_files, path, drive, result)
-    console.log(result)
+    AnalyzeSharingChangesAlgo(first_files, second_files, path, drive, result, first_snapshot_id, second_snapshot_id)
     return result
 }
 
-function AnalyzeSharingChangesAlgo(first_files, second_files, path, drive, result) {
+function AnalyzeSharingChangesAlgo(first_files, second_files, path, drive, result, first_snapshot_id, second_snapshot_id) {
+    console.log(first_snapshot_id)
+    console.log(second_snapshot_id)
+
     let first_all = []
     addAllFiles(first_files, first_all)
     
@@ -64,7 +66,10 @@ function AnalyzeSharingChangesAlgo(first_files, second_files, path, drive, resul
             // should always be empty, since children inherit perms from parents
             let deleted_perms = first_perms_str.filter(x => !shared_perms.includes(x))
 
-            let result_obj = {type: "updated", file: first_shared_file.name, new_perms: new_perms, deleted_perms: deleted_perms}
+            let result_obj = {type: "updated", file: first_shared_file.name, 
+                                new_perms: new_perms, deleted_perms: deleted_perms,
+                                first_snapshot_perms: first_perms_str, second_snapshot_perms: second_perms_str,
+                                first_snapshot_id: first_snapshot_id, second_snapshot_id: second_snapshot_id}
             result.push(result_obj)
         }
     }
@@ -79,7 +84,8 @@ function AnalyzeSharingChangesAlgo(first_files, second_files, path, drive, resul
             new_file_perms.push(JSON.stringify(new_file_perm, ["email", "type", "role", "domain"]))
         }
 
-        let result_obj = {type: "new", file: new_file.name, permissions: new_file_perms}
+        let result_obj = {type: "new", file: new_file.name, permissions: new_file_perms, 
+                            first_snapshot_id: first_snapshot_id, second_snapshot_id: second_snapshot_id}
         result.push(result_obj)
     }
 }

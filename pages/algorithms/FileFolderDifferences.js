@@ -48,7 +48,9 @@ function AnalyzeFileFolderDifferencesAlgo(files, path, drive, result) {
                     // should always be empty, since children inherit perms from parents
                     let missing_perms = parent_permissions.filter(x => !shared_perms.includes(x))
 
-                    let result_obj = {file: subfile.name, parent: parent_file.name, extra: extra_perms, missing: missing_perms}
+                    let result_obj = {file: subfile.name, parent: parent_file.name, 
+                            file_perms: subfile_permissions, parent_perms: parent_permissions,
+                            extra: extra_perms, missing: missing_perms}
                     result.push(result_obj)
                 }
             }

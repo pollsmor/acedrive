@@ -71,7 +71,9 @@ function AnalyzeDeviantAlgo(files, path, drive, threshold, result) {
 
                     // put a separate object into result for every file in this group
                     for (let file of entry[1]) {
-                        let result_obj = {file: file, parent: parent_file.name, extra: extra_perms, missing: missing_perms}
+                        let result_obj = {file: file, parent: parent_file.name, 
+                                            file_perms: perm, standard_perms: standard, 
+                                            extra: extra_perms, missing: missing_perms}
                         result.push(result_obj)
                     }
                 }
