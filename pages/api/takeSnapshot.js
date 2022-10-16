@@ -94,7 +94,7 @@ function parseFiles(all_files, root_id) {
           role: p.role,
           type: p.type,
           domain: p.domain,
-          is_inherited: false, // these are top level files, so they can't be inherited :p
+          permissionDetails: p.permissionDetails ? p.permissionDetails : undefined 
         });
       }) : undefined;
 
@@ -124,7 +124,6 @@ function populateSubfolders(files_to_populate, all_files, current_path) {
   // go through every file, and for each folder
   for(let top_level_file of files_to_populate) {
     if(top_level_file.mimeType === 'application/vnd.google-apps.folder') {
-      let parent_permissions = top_level_file.permissions // save to compare to child file laters
       top_level_file.content = []
 
       //search through all files to find the children of this folder
@@ -139,7 +138,7 @@ function populateSubfolders(files_to_populate, all_files, current_path) {
                 role: p.role,
                 type: p.type,
                 domain: p.domain,
-                is_inherited: (p in parent_permissions ? true : false) // these are top level files, so they can't be inherited :p
+                permissionDetails: p.permissionDetails ? p.permissionDetails : undefined
               });
             }) : undefined;
 
