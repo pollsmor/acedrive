@@ -13,7 +13,7 @@ export default function SnapshotCard(props) {
     return (
         <Card style={{width: '18rem', padding: '2px', margin: '10px',}} bg={selected ? 'primary' : 'light'}>
             <Card.Body>
-                <Card.Title>{position+1 + "." + (position===0? "Most Recent Snapshot" : "")}</Card.Title>
+                <Card.Title>{position+1 + ". " + (position===0? "Most Recent Snapshot" : "")}</Card.Title>
                 <Card.Text> {"ID: " + id} </Card.Text>
                 {selecting?
                 <div>
