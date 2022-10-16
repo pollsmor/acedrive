@@ -4,6 +4,11 @@ export default async function AnalyzeFileFolderDifferences(snapshot_id, path, dr
     console.log("analyzing snapshot for file-folder differences")
     let snapshot = await axios.post('/api/getSnapshot', {id: snapshot_id})
     let files = snapshot.data.files
+    path = (path === "" ? "/" : path)
+    if(path.charAt(0) !== '/') {
+        path = "/" + path
+    }
+
     // results will be an array of objects describing the deviant files
     let result = []
     AnalyzeFileFolderDifferencesAlgo(files, path, drive, result)
@@ -16,6 +21,14 @@ function AnalyzeFileFolderDifferencesAlgo(files, path, drive, result) {
 
         // if this is a folder, go through and find differences between its permission and the permission of all of its children
         if(parent_file.mimeType === 'application/vnd.google-apps.folder') {
+
+            // if we aren't IN the path yet, we don't want to analyze this folder itself
+            if(parent_file.path.indexOf(path) !== 0) {    
+                // subdirectory might be path though, so continue dfs
+                AnalyzeFileFolderDifferencesAlgo(parent_file.content, path, drive, result)
+                continue
+            }
+
             // file.permissions is an array of objects
             // we will convert to an array of strings for easier comparison/manipulation
             let parent_permissions = []

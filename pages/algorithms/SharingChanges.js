@@ -92,7 +92,10 @@ function AnalyzeSharingChangesAlgo(first_files, second_files, path, drive, resul
 
 function addAllFiles(folder, all_files) {
     for (let file of folder) {
-        all_files.push(file)
+        // if we are in the path, add this file to the list to be analyzed
+        if(parent_file.path.indexOf(path) === 0) {    
+            all_files.push(file)
+        }
         if(file.mimeType === 'application/vnd.google-apps.folder') {
             addAllFiles(file.content, all_files)
         }

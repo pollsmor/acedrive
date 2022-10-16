@@ -5,6 +5,11 @@ export default async function AnalyzeDeviant(snapshot_id, path, drive, threshold
     let snapshot = await axios.post('/api/getSnapshot', {id: snapshot_id})
     let files = snapshot.data.files
     threshold = parseFloat(threshold)/100
+    path = (path === "" ? "/" : path)
+    if(path.charAt(0) !== '/') {
+        path = "/" + path
+    }
+
     // results will be an array of objects describing the deviant files
     let result = []
     AnalyzeDeviantAlgo(files, path, drive, threshold, result)
@@ -16,11 +21,20 @@ export default async function AnalyzeDeviant(snapshot_id, path, drive, threshold
 // this implementation would not report that
 // this was a design choice rather than a limitation, and can be changed in the future as necessary
 function AnalyzeDeviantAlgo(files, path, drive, threshold, result) {
+
     // for every file in this folder
     for (let parent_file of files) {
         
         // if the file is a folder
         if(parent_file.mimeType === 'application/vnd.google-apps.folder') {
+
+            // if we aren't IN the path yet, we don't want to analyze this folder itself
+            if(parent_file.path.indexOf(path) !== 0) {    
+                // subdirectory might be path though, so continue dfs
+                AnalyzeDeviantAlgo(parent_file.content, path, drive, threshold, result)
+                continue
+            }
+
             let groupings = new Map()
             let total_files = parent_file.content.length
 
