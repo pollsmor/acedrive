@@ -1,16 +1,8 @@
-import axios from 'axios';
-import { useState } from 'react';
 import Image from 'next/future/image';
 import { Container, Nav, Navbar } from 'react-bootstrap';
 import { signIn, signOut } from 'next-auth/react';
 
 export default function Banner(props) {
-  async function takeSnapshot() {
-    await axios.post('/api/takeSnapshot', {
-      accessToken: props.session.accessToken
-    });
-  }
-
   return (
     <Navbar bg='dark' variant='dark'>
       <Container fluid>
@@ -18,7 +10,6 @@ export default function Banner(props) {
           <Navbar.Brand>AceDrive</Navbar.Brand>
           {/* If logged in, render the top portion. If not, the bottom. */}
           { props.session ? <>
-              <Nav.Link onClick={takeSnapshot}>Take snapshot</Nav.Link>
               <Image 
                 src={props.session.user.image} 
                 width={40}

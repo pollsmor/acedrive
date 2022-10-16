@@ -74,7 +74,7 @@ export default async function handler(req, res) {
     await user.save();
 
     console.log("success")
-    res.end('Hello world');
+    res.json({id: snapshot_id});
   } else {
     res.end('Not signed in or not a POST request.');
   }

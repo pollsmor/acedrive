@@ -1,12 +1,13 @@
 import axios from 'axios';
 import { useState, useEffect} from 'react';
-import { Container, Navbar, Button, Modal, Form} from "react-bootstrap";
+import { Container, Nav, Navbar, Button, Modal, Form} from "react-bootstrap";
 import SnapshotCard from './snapshotCard';
 
 export default function HomePage(props) {
     const [snapshots, setSnapshots] = useState([])
     const [selecting, setSelecting] = useState(false)
     const [analyze, setAnalyze] = useState("")
+    const [threshold, setThreshold] = useState("80")
     const [path, setPath] = useState("")
     const [drive, setDrive] = useState("")
     const [show, setShow] = useState(false)
@@ -22,6 +23,16 @@ export default function HomePage(props) {
     
         fetchUser();
     }, []);
+
+    async function takeSnapshot() {
+        let res = await axios.post('/api/takeSnapshot', {
+          accessToken: props.accessToken
+        });
+    
+        let new_array = [res.data.id, ...snapshots]
+        setSnapshots(new_array)
+      }
+    
 
     function toggleSelect(e, index) {
         let new_selected
@@ -50,6 +61,11 @@ export default function HomePage(props) {
                 setSelectedFiles(new_selected)
             }
         }
+    }
+
+    function stopSelecting() {
+        setSelectedFiles([])
+        setSelecting(false)
     }
 
     function handleViewClick(e) {
@@ -84,7 +100,7 @@ export default function HomePage(props) {
     let windowContents = "Take a snapshot to begin"
     if(snapshots.length > 0) {
         windowContents =
-            <Container>
+            <Container style={{marginBottom: '65px'}}>
                 {snapshots.map((snapshot, index) => {
                     return <SnapshotCard key={index} id={snapshot} position={index} selecting={selecting} selected={selectedFiles.includes(snapshot)} clickCallback={toggleSelect}/>
                 })}
@@ -93,6 +109,7 @@ export default function HomePage(props) {
 
     let buttonEnabled = (selectedFiles.length === 1 && analyze !== "Sharing Changes") || (selectedFiles.length === 2 && analyze === "Sharing Changes")
     let confirmNavbar = <Navbar fixed="bottom" bg='light' className="justify-content-center">
+                            <Button onClick={stopSelecting} size="lg" variant='primary'> Close </Button>
                             <Button onClick={handleConfirmClick} size="lg" variant='success' disabled={!buttonEnabled}> Confirm Selected Files</Button>
                         </Navbar>
 
@@ -101,6 +118,7 @@ export default function HomePage(props) {
             <Navbar>
                 <Container>
                     <Navbar.Brand> Snapshots: </Navbar.Brand>
+                    <Nav.Link onClick={takeSnapshot}>Take snapshot</Nav.Link>
                     <Button onClick={handleViewClick}>View & Search Snapshot Files</Button> 
                     <Button onClick={handleOpen}>Analyze Snapshot</Button>
                 </Container>
@@ -118,13 +136,15 @@ export default function HomePage(props) {
                                 onChange={e => {
                                     setAnalyze(e.target.value);
                                 }}>
-                                <option>Redundant Sharing</option>
                                 <option>Deviant Sharing</option>
                                 <option>File-Folder Sharing Differences</option>
                                 <option>Sharing Changes</option>
                             </Form.Control>
                         </Form.Group>
                        
+                        {analyze === "Devian Sharing"?<Form.Group> <Form.Label> Threshold </Form.Label>
+                            <Form.Control placeholder="Deviance Threshhold" onChange={e => setThreshold(e.target.value)}/></Form.Group>: ""}
+
                         <Form.Group className="mb-3" controlId="formBasicPath">
                             <Form.Label>Path (Optional)</Form.Label>
                             <Form.Control type="path" placeholder="Enter path" onChange={e => setPath(e.target.value)}/>
