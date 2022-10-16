@@ -7,7 +7,6 @@ export default async function AnalyzeFileFolderDifferences(snapshot_id, path, dr
     // results will be an array of objects describing the deviant files
     let result = []
     AnalyzeFileFolderDifferencesAlgo(files, path, drive, result)
-    console.log(result)
     return result
 }
 
@@ -17,7 +16,6 @@ function AnalyzeFileFolderDifferencesAlgo(files, path, drive, result) {
 
         // if this is a folder, go through and find differences between its permission and the permission of all of its children
         if(parent_file.mimeType === 'application/vnd.google-apps.folder') {
-            console.log(`checking folder: ${parent_file.name}`)
             // file.permissions is an array of objects
             // we will convert to an array of strings for easier comparison/manipulation
             let parent_permissions = []
@@ -30,7 +28,6 @@ function AnalyzeFileFolderDifferencesAlgo(files, path, drive, result) {
 
             // now get the same permissions string for each child, and compare
             for (let subfile of parent_file.content) {
-                console.log(`checking subfile: ${subfile.name}`)
                 let subfile_permissions = []
                 for (let object of subfile.permissions) {
                     // make sure we don't include permission object ID's in the string - they are always unique
@@ -39,9 +36,6 @@ function AnalyzeFileFolderDifferencesAlgo(files, path, drive, result) {
 
                 let subfile_perms_string = JSON.stringify(subfile_permissions)
 
-                console.log(parent_perms_string)
-                console.log(subfile_perms_string)
-                
                 // put all file-folder differences into result
                 if (parent_perms_string !== subfile_perms_string) {
                     // get the perms in both the folder and the subfile
