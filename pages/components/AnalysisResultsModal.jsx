@@ -132,7 +132,7 @@ function createFileFolderExplanation(result, index) {
     let content = 
         <Container>
             <Row>
-                Parent folder {result.parent} has the following permissions:
+                Parent folder "{result.parent}" has the following permissions:
             </Row>
                 {result.parent_perms.map((permission_string) => {
                     return (
@@ -143,7 +143,7 @@ function createFileFolderExplanation(result, index) {
                 })}
             <Row><p></p></Row>
             <Row>
-                While file {result.file} has the following permissions:
+                While file "{result.file}" has the following permissions:
             </Row>
                 {result.file_perms.map((permission_string) => {
                         return (
@@ -154,7 +154,7 @@ function createFileFolderExplanation(result, index) {
                     })}
             <Row><p></p></Row>
             <Row>
-                Permissions that {result.file} has that {result.parent} does not:
+                Permissions that "{result.file}" has that "{result.parent}" does not:
             </Row>
                 {result.extra.map((permission_string) => {
                         return (
@@ -166,7 +166,7 @@ function createFileFolderExplanation(result, index) {
 
             <Row><p></p></Row>
             <Row>
-                Permissions that {result.parent} has that {result.file} does not:
+                Permissions that "{result.parent}" has that "{result.file}" does not:
             </Row>
                 {result.missing.map((permission_string) => {
                         return (
@@ -206,7 +206,7 @@ function createSharingChangesExplanation(result, index) {
         content = 
         <Container>
             <Row>
-                File {result.file} is a new file with the following permissions:
+                File "{result.file}" is a new file with the following permissions:
             </Row>
                 {result.permissions.map((permission_string) => {
                     return (
@@ -221,7 +221,7 @@ function createSharingChangesExplanation(result, index) {
         content = 
         <Container>
             <Row>
-                File {result.file} had the following permissions in the first Snapshot:
+                File "{result.file}" had the following permissions in the first Snapshot:
             </Row>
                 {result.first_snapshot_perms.map((permission_string) => {
                     return (
@@ -232,7 +232,7 @@ function createSharingChangesExplanation(result, index) {
                 })}
             <Row><p></p></Row>
             <Row>
-                While file {result.file} has the following permissions in the more recent Snapshot:
+                While file "{result.file}" has the following permissions in the more recent Snapshot:
             </Row>
                 {result.second_snapshot_perms.map((permission_string) => {
                         return (
@@ -243,7 +243,7 @@ function createSharingChangesExplanation(result, index) {
                     })}
             <Row><p></p></Row>
             <Row>
-                Permissions that {result.file} has in the new Snapshot that it did not in the earlier:
+                Permissions that "{result.file}" has in the new Snapshot that it did not in the earlier:
             </Row>
                 {result.new_perms.map((permission_string) => {
                         return (
@@ -255,7 +255,7 @@ function createSharingChangesExplanation(result, index) {
 
             <Row><p></p></Row>
             <Row>
-                Permissions that {result.file} had in the earlier Snapshot that it does not in the more recent:
+                Permissions that "{result.file}" had in the earlier Snapshot that it does not in the more recent:
             </Row>
                 {result.deleted_perms.map((permission_string) => {
                         return (

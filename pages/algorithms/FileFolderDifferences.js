@@ -24,11 +24,13 @@ function AnalyzeFileFolderDifferencesAlgo(files, path, drive, result) {
 
             // if we aren't IN the path yet, we don't want to analyze this folder itself
             if(parent_file.path.indexOf(path) !== 0) {    
+                console.log(`skipping analysis on file contents of ${parent_file.path}`)
                 // subdirectory might be path though, so continue dfs
                 AnalyzeFileFolderDifferencesAlgo(parent_file.content, path, drive, result)
                 continue
             }
 
+            console.log(`analyzing file contents of ${parent_file.path}`)
             // file.permissions is an array of objects
             // we will convert to an array of strings for easier comparison/manipulation
             let parent_permissions = []

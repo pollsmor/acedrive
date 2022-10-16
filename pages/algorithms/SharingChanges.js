@@ -6,7 +6,12 @@ export default async function AnalyzeSharingChanges(first_snapshot_id, second_sn
     let second_snapshot = await axios.post('/api/getSnapshot', {id: second_snapshot_id})
     let first_files = first_snapshot.data.files
     let second_files = second_snapshot.data.files
-    
+    path = path ? path : "/"
+    path = (path === "" ? "/" : path)
+    if(path.charAt(0) !== '/') {
+        path = "/" + path
+    }
+
     // results will be an array of objects describing the deviant files
     let result = []
     AnalyzeSharingChangesAlgo(first_files, second_files, path, drive, result, first_snapshot_id, second_snapshot_id)
@@ -14,14 +19,12 @@ export default async function AnalyzeSharingChanges(first_snapshot_id, second_sn
 }
 
 function AnalyzeSharingChangesAlgo(first_files, second_files, path, drive, result, first_snapshot_id, second_snapshot_id) {
-    console.log(first_snapshot_id)
-    console.log(second_snapshot_id)
 
     let first_all = []
-    addAllFiles(first_files, first_all)
+    addAllFiles(first_files, first_all, path)
     
     let second_all = []
-    addAllFiles(second_files, second_all)
+    addAllFiles(second_files, second_all, path)
 
     let first_all_ids = []
     for (let first_file of first_all) [
@@ -90,14 +93,14 @@ function AnalyzeSharingChangesAlgo(first_files, second_files, path, drive, resul
     }
 }
 
-function addAllFiles(folder, all_files) {
+function addAllFiles(folder, all_files, path) {
     for (let file of folder) {
         // if we are in the path, add this file to the list to be analyzed
-        if(parent_file.path.indexOf(path) === 0) {    
+        if(file.path.indexOf(path) === 0) {    
             all_files.push(file)
         }
         if(file.mimeType === 'application/vnd.google-apps.folder') {
-            addAllFiles(file.content, all_files)
+            addAllFiles(file.content, all_files, path)
         }
     }
 }
