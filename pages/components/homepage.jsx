@@ -100,7 +100,7 @@ export default function HomePage(props) {
         setErrorMsg("")
     }
 
-    const handleClose = () => setShow(false)
+    const handleClose = () => {setAnalyze(""); setShow(false)}
     const handleOpen = () => {setShow(true); setAnalyze("Deviant Sharing")}
     
     function handleAnalyze(e) {
@@ -113,7 +113,8 @@ export default function HomePage(props) {
                 return
             }
         }
-        handleClose()
+        setShow(false)
+        setAnalyze("")
         setSelecting(true)
         toggleSelect(null, 0)
     }
