@@ -10,7 +10,7 @@ export default function FileCard(props) {
             <Card.Body>
                 <Card.Title>{file.name}</Card.Title>
                 <Card.Text>
-                    Owner: {file.owners[0].emailAddress}
+                    Owner: {(file.owners.length > 0) ? file.owners[0].emailAddress : `Shared Drive`}
                 </Card.Text>
                 <Card.Text>
                     Path: {(file.path)}

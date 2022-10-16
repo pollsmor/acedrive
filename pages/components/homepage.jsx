@@ -71,8 +71,13 @@ export default function HomePage(props) {
     }
 
     function stopSelecting() {
+        setResults(null)
+        setAnalyze("")
         setSelectedFiles([])
         setSelecting(false)
+        setThreshold(80)
+        setPath("")
+        setDrive("")
     }
 
     function handleViewClick(e) {
@@ -129,13 +134,6 @@ export default function HomePage(props) {
             toggleSelect(null, 0)
         }
     }
-    
-    function closeAnalysisResults() {
-        setResults(null)
-        setAnalyze("")
-        setSelectedFiles([])
-        setSelecting(false)
-    }
 
     let windowContents = "Take a snapshot to begin"
     if(snapshots.length > 0) {
@@ -162,7 +160,7 @@ export default function HomePage(props) {
                     <Button onClick={handleViewClick} disabled={selecting}>View & Search Snapshot Files</Button> 
                     <Button onClick={handleOpen} disabled={selecting}>Analyze Snapshot</Button>
                 </Container>
-                <AnalysisResultsModal show={(results!==null)} closeResultsCallback={closeAnalysisResults} analysis={analyze} results={results}/>
+                <AnalysisResultsModal show={(results!==null)} closeResultsCallback={stopSelecting} analysis={analyze} results={results}/>
                 <ErrorModal msg={errorMsg} clearErrorCallback={clearErrorMsg} />
                 <Modal show={show} onHide={handleClose}>
                     <Modal.Header closeButton>

@@ -31,7 +31,8 @@ export default function AnalysisResultsModal(props) {
                     <Row>
                         <Col sm={6}>
                         <ListGroup>
-                            {props.results ? props.results.map(listCardMap) : ""} 
+                            {!props.results ? "" :
+                             (props.results.length > 0) ? props.results.map(listCardMap) : <ListGroup.Item>No Results</ListGroup.Item>}
                         </ListGroup>
                         </Col>
                         
