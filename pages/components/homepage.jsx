@@ -114,7 +114,6 @@ export default function HomePage(props) {
             }
         }
         setShow(false)
-        setAnalyze("")
         setSelecting(true)
         toggleSelect(null, 0)
     }

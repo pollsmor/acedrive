@@ -12,7 +12,6 @@ export default async function AnalyzeDeviant(snapshot_id, path, drive, threshold
 }
 
 function AnalyzeDeviantAlgo(files, path, drive, threshold, result) {
-    
     // for every file in this folder
     for (let top_level_file of files) {
         
@@ -33,9 +32,7 @@ function AnalyzeDeviantAlgo(files, path, drive, threshold, result) {
 
                 let key = JSON.stringify(file_permissions)
                 if (groupings.has(key)) {
-                    let file_id_array = groupings.get(key)
-                    file_id_array.push(subfile.name)
-                    groupings.set(key, file_id_array)       
+                    groupings.get(key).push(subfile.name)   
                 }    
                 else {
                     groupings.set(key, [subfile.name])
@@ -45,7 +42,7 @@ function AnalyzeDeviantAlgo(files, path, drive, threshold, result) {
             // see if any group is threshold% of the total files
             let standard
             for (let entry of groupings) {
-                if ((entry[1].length/total_files) > threshold) {
+                if ((entry[1].length/total_files) >= threshold) {
                     // when we decide on a standard, save the permissions
                     // then remove from the map so we are left with just the "deviant" files
                     standard = JSON.parse(entry[0])
