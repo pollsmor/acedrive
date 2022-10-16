@@ -4,6 +4,7 @@ import { Container, Nav, Navbar, Button, Modal, Form} from "react-bootstrap";
 import SnapshotCard from './snapshotCard';
 import AnalyzeDeviant from '../algorithms/AnalyzeDeviant';
 import AnalyzeFileFolderDifferences from '../algorithms/FileFolderDifferences';
+import AnalyzeSharingChanges from '../algorithms/SharingChanges';
 import ErrorModal from './errormodal';
 
 export default function HomePage(props) {
@@ -92,7 +93,7 @@ export default function HomePage(props) {
                 AnalyzeFileFolderDifferences(selectedFiles[0], path, drive)
             }
             else {
-                console.log("hie :)")
+                AnalyzeSharingChanges(selectedFiles[0], selectedFiles[1], path, drive)
             }
         }
     }
@@ -116,7 +117,9 @@ export default function HomePage(props) {
         }
         setShow(false)
         setSelecting(true)
-        toggleSelect(null, 0)
+        if(analyze !== "Sharing Changes") {
+            toggleSelect(null, 0)
+        }
     }
     
     let windowContents = "Take a snapshot to begin"
