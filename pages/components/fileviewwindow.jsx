@@ -10,8 +10,10 @@ export default function FileViewWindow(props) {
   const snapshotID = props.snapshotID
 
   useEffect(() => {
+
     async function fetchSnapshot() {
-        let snapshot = await axios.post('/api/getSnapshot', snapshotID)
+        let snapshot = await axios.post('/api/getSnapshot', {id: snapshotID})
+          console.log(snapshot.data.files)
           setFiles(snapshot.data.files);
       }
   
