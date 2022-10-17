@@ -21,10 +21,10 @@ export default async function AnalyzeSharingChanges(first_snapshot_id, second_sn
 function AnalyzeSharingChangesAlgo(first_files, second_files, path, drive, result, first_snapshot_id, second_snapshot_id) {
 
     let first_all = []
-    addAllFiles(first_files, first_all, path)
+    addAllFiles(first_files, first_all, path, drive)
     
     let second_all = []
-    addAllFiles(second_files, second_all, path)
+    addAllFiles(second_files, second_all, path, drive)
 
     let first_all_ids = []
     for (let first_file of first_all) [
@@ -93,8 +93,13 @@ function AnalyzeSharingChangesAlgo(first_files, second_files, path, drive, resul
     }
 }
 
-function addAllFiles(folder, all_files, path) {
+function addAllFiles(folder, all_files, path, drive) {
     for (let file of folder) {
+
+        if(drive !== "" && file.driveName !== drive) {
+            continue;
+        }
+
         // if we are in the path, add this file to the list to be analyzed
         if(file.path.indexOf(path) === 0) {    
             all_files.push(file)

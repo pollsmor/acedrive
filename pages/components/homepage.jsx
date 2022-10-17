@@ -2,21 +2,23 @@ import axios from 'axios';
 import { useState, useEffect} from 'react';
 import { Container, Nav, Navbar, Button, Modal, Form} from "react-bootstrap";
 import SnapshotCard from './snapshotCard';
-import AnalyzeDeviant from '../algorithms/AnalyzeDeviant';
-import AnalyzeFileFolderDifferences from '../algorithms/FileFolderDifferences';
-import AnalyzeSharingChanges from '../algorithms/SharingChanges';
+import AnalyzeDeviant from '../../algorithms/AnalyzeDeviant';
+import AnalyzeFileFolderDifferences from '../../algorithms/FileFolderDifferences';
+import AnalyzeSharingChanges from '../../algorithms/SharingChanges';
 import AnalysisResultsModal from './AnalysisResultsModal';
 import ErrorModal from './errormodal';
+import LoadingModal from './loadingmodal';
 
 export default function HomePage(props) {
     const [snapshots, setSnapshots] = useState([])
     const [selecting, setSelecting] = useState(false)
+    const [loading, setLoading] = useState(false)
     const [analyze, setAnalyze] = useState("")
     const [threshold, setThreshold] = useState("80")
     const [path, setPath] = useState("")
     const [drive, setDrive] = useState("")
     const [results, setResults] = useState(null)
-    const [show, setShow] = useState(false)
+    const [showMenu, setShowMenu] = useState(false)
     const [selectedFiles, setSelectedFiles] = useState([])
     const [errorMsg, setErrorMsg] = useState("")
 
@@ -32,15 +34,16 @@ export default function HomePage(props) {
     }, []);
 
     async function takeSnapshot() {
+        setLoading(true)
         let res = await axios.post('/api/takeSnapshot', {
           accessToken: props.accessToken
         });
-    
+        
         let new_array = [res.data.id, ...snapshots]
         setSnapshots(new_array)
+        setLoading(false)
       }
     
-
     function toggleSelect(e, index) {
         let new_selected
         if(analyze !== "Sharing Changes") {
@@ -111,8 +114,8 @@ export default function HomePage(props) {
         setErrorMsg("")
     }
 
-    const handleClose = () => {setAnalyze(""); setShow(false)}
-    const handleOpen = () => {setShow(true); setAnalyze("Deviant Sharing")}
+    const handleClose = () => {setAnalyze(""); setShowMenu(false)}
+    const handleOpen = () => {setShowMenu(true); setAnalyze("Deviant Sharing")}
     
     function handleAnalyze(e) {
         e.preventDefault();
@@ -128,7 +131,7 @@ export default function HomePage(props) {
                 return
             }
         }
-        setShow(false)
+        setShowMenu(false)
         setSelecting(true)
         if(analyze !== "Sharing Changes") {
             toggleSelect(null, 0)
@@ -156,13 +159,14 @@ export default function HomePage(props) {
             <Navbar>
                 <Container>
                     <Navbar.Brand> Snapshots: </Navbar.Brand>
-                    <Nav.Link onClick={takeSnapshot} disabled={selecting}>Take snapshot</Nav.Link>
+                    <Button variant='secondary' onClick={takeSnapshot} disabled={selecting}>Take snapshot</Button>
                     <Button onClick={handleViewClick} disabled={selecting}>View & Search Snapshot Files</Button> 
                     <Button onClick={handleOpen} disabled={selecting}>Analyze Snapshot</Button>
                 </Container>
                 <AnalysisResultsModal show={(results!==null)} closeResultsCallback={stopSelecting} analysis={analyze} results={results}/>
                 <ErrorModal msg={errorMsg} clearErrorCallback={clearErrorMsg} />
-                <Modal show={show} onHide={handleClose}>
+                <LoadingModal show={loading}></LoadingModal>
+                <Modal show={showMenu} onHide={handleClose}>
                     <Modal.Header closeButton>
                     <Modal.Title>Analyze Snapshot</Modal.Title>
                     </Modal.Header>

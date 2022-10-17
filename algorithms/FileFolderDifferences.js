@@ -18,6 +18,11 @@ export default async function AnalyzeFileFolderDifferences(snapshot_id, path, dr
 function AnalyzeFileFolderDifferencesAlgo(files, path, drive, result) {
     // for every file in this folder
     for (let parent_file of files) {
+        // if there is a drive condition, and this file isn't in that drive, skip it
+        if(drive !== "" && parent_file.driveName !== drive) {
+            continue;
+        }
+        
 
         // if this is a folder, go through and find differences between its permission and the permission of all of its children
         if(parent_file.mimeType === 'application/vnd.google-apps.folder') {

@@ -24,7 +24,11 @@ function AnalyzeDeviantAlgo(files, path, drive, threshold, result) {
 
     // for every file in this folder
     for (let parent_file of files) {
-        
+        // if there is a drive condition, and this file isn't in that drive, skip it
+        if(drive !== "" && parent_file.driveName !== drive) {
+            continue;
+        }
+
         // if the file is a folder
         if(parent_file.mimeType === 'application/vnd.google-apps.folder') {
 

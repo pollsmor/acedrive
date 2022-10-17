@@ -54,9 +54,12 @@ export default async function handler(req, res) {
     })
     let root_id = rootRes.data.id
     
+    // many fields aren't populated, so we will go through and populate many of them
+    await populateMissingFields(files, root_id)
+
     // files are currently just a list of everything, we want to 
     // parse that into a data structure that will allow for easier analysis/search
-    let file_data_structure = parseFiles(files, root_id)
+    let file_data_structure = parseFiles(files)
     
     // Save snapshot to database
     let userId = token.user.id;
@@ -80,15 +83,60 @@ export default async function handler(req, res) {
   }
 }
 
+async function populateMissingFields(all_files, root_id) {
+  // mape for driveId's to driveName's so we don't have to repeat queries
+  let driveIdToName = new Map()
+
+  for (let file of all_files) {
+
+    // shared drive files are missing different fields from mydrive files
+    if(file.driveId) {
+      // get the drive name
+      if (driveIdToName.has(file.driveId)) {
+        file.driveName = driveIdToName.get(file.driveId)
+      }
+      else {
+        let driveRes = await drive.drives.get({driveId: file.driveId})
+        file.driveName = driveRes.data.name
+        driveIdToName.set(file.driveId, file.driveName)
+      }
+
+      // get permmissions
+      let permRes = await drive.permissions.list({fileId: file.id, fields: '*', supportsAllDrives: true})
+      file.permissions = permRes.data.permissions
+
+      // set folder-related metadata
+      // set folder-related metadata
+      file.isFolder = (file.mimeType === 'application/vnd.google-apps.folder')
+      file.content = []
+
+      // set owners to empty
+      file.owners = []
+    }
+    else {
+      // set driveId and driveName
+      file.driveId = root_id
+      file.driveName = "MyDrive"
+
+      // set folder-related metadata
+      file.isFolder = (file.mimeType === 'application/vnd.google-apps.folder')
+      file.content = []
+    }
+
+  }
+}
+
+
 // get the top level files, then populate all subfiles recursively
 function parseFiles(all_files, root_id) {
   let top_level_files = []
   for (let file of all_files) {
-    // shared top level files have no parents, mydrive top level has root as parent
-    if (!file.parents || root_id == file.parents) {
 
-      // create a file object and array of permission objects
-      let permissions = file.permissions ? file.permissions.map(p => {
+    // shared top level files have no parents, otherwise, parent is driveID
+    if (!file.parents || file.parents.includes(file.driveId)) {
+
+      // create a list of permission objects
+      let permissions = file.permissions.map(p => {
         return new Permission({
           email: p.emailAddress,
           role: p.role,
@@ -96,21 +144,27 @@ function parseFiles(all_files, root_id) {
           domain: p.domain,
           permissionDetails: p.permissionDetails ? p.permissionDetails : undefined 
         });
-      }) : undefined;
+      });
 
+      // create a file object for this file, with the list of permissions as a field
       let file_object = new File({
           id: file.id,
           name: file.name,
           mimeType: file.mimeType,
+          isFolder: file.isFolder,
           modifiedTime: file.modifiedTime,
           path: '/' + file.name, 
-          parent: file.parents ? file.parents[0] : undefined,
+          parents: file.parents ? file.parents : undefined,
           thumbnailLink: file.thumbnailLink? file.thumbnailLink : undefined, 
           sharingUser: file.sharingUser ? file.sharingUser : undefined,
-          owners: file.owners ? file.owners : undefined,
+          owners: file.owners,
           driveId: file.driveId,
-          permissions: permissions
+          driveName: file.driveName,
+          permissions: permissions,
+          content: file.content
       });
+
+      // add it the array
       top_level_files.push(file_object)
     } 
   }
@@ -121,48 +175,49 @@ function parseFiles(all_files, root_id) {
 }
 
 function populateSubfolders(files_to_populate, all_files, current_path) {
-  // go through every file, and for each folder
-  for(let top_level_file of files_to_populate) {
-    if(top_level_file.mimeType === 'application/vnd.google-apps.folder') {
-      top_level_file.content = []
+
+  for(let parent_file of files_to_populate) {
+
+    if(parent_file.isFolder) {
 
       //search through all files to find the children of this folder
-      for(let child_file_candidate of all_files) {
-        if(child_file_candidate.parents) {
-          if (top_level_file.id == child_file_candidate.parents || top_level_file.id in child_file_candidate.parents) {
+      for (let file of all_files) {
+        if (file.parents && (file.parents.includes(parent_file))) {
+          // create a list of permission objects
+          let permissions = file.permissions.map(p => {
+            return new Permission({
+              email: p.emailAddress,
+              role: p.role,
+              type: p.type,
+              domain: p.domain,
+              permissionDetails: p.permissionDetails ? p.permissionDetails : undefined 
+            });
+          });
 
-            // create new permissions objects and new file object
-            let permissions = child_file_candidate.permissions ? child_file_candidate.permissions.map(p => {
-              return new Permission({
-                email: p.emailAddress,
-                role: p.role,
-                type: p.type,
-                domain: p.domain,
-                permissionDetails: p.permissionDetails ? p.permissionDetails : undefined
-              });
-            }) : undefined;
+          // add child to parent's content list
+          let file_object = new File({
+            id: file.id,
+            name: file.name,
+            mimeType: file.mimeType,
+            isFolder: file.isFolder,
+            modifiedTime: file.modifiedTime,
+            path: current_path + parent_file.name + '/' + file.name,
+            parents: file.parents ? file.parents : undefined,
+            thumbnailLink: file.thumbnailLink? file.thumbnailLink : undefined, 
+            sharingUser: file.sharingUser ? file.sharingUser : undefined,
+            owners: file.owners,
+            driveId: file.driveId,
+            driveName: file.driveName,
+            permissions: permissions,
+            content: file.content
+          })
 
-            // add child to parent's content list
-            let file_object = new File({
-              id: child_file_candidate.id,
-              name: child_file_candidate.name,
-              mimeType: child_file_candidate.mimeType,
-              modifiedTime: child_file_candidate.modifiedTime,
-              path: current_path + top_level_file.name + '/' + child_file_candidate.name,
-              parent: child_file_candidate.parents ? child_file_candidate.parents[0] : undefined,
-              thumbnailLink: child_file_candidate.thumbnailLink? child_file_candidate.thumbnailLink : undefined, 
-              sharingUser: child_file_candidate.sharingUser ? child_file_candidate.sharingUser : undefined,
-              owners: child_file_candidate.owners ? child_file_candidate.owners : undefined,
-              driveId: child_file_candidate.driveId,
-              permissions: permissions
-            })
-            top_level_file.content.push(file_object)
-          }
+          parent_file.content.push(file_object)
         }
       }
 
       // now, populate any subfolders we just found
-      populateSubfolders(top_level_file.content, all_files, current_path + top_level_file.name + '/')
+      populateSubfolders(parent_file.content, all_files, current_path + parent_file.content.name + '/')
     }
   }
 }
