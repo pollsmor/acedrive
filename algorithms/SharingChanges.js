@@ -6,6 +6,7 @@ export default async function AnalyzeSharingChanges(first_snapshot_id, second_sn
     let second_snapshot = await axios.post('/api/getSnapshot', {id: second_snapshot_id})
     let first_files = first_snapshot.data.files
     let second_files = second_snapshot.data.files
+
     path = path ? path : "/"
     path = (path === "" ? "/" : path)
     if(path.charAt(0) !== '/') {
@@ -97,15 +98,18 @@ function addAllFiles(folder, all_files, path, drive) {
     for (let file of folder) {
 
         if(drive !== "" && file.driveName !== drive) {
-            continue;
+            if(file.driveName !== drive) {
+                continue;
+            }
         }
 
         // if we are in the path, add this file to the list to be analyzed
         if(file.path.indexOf(path) === 0) {    
             all_files.push(file)
         }
-        if(file.mimeType === 'application/vnd.google-apps.folder') {
-            addAllFiles(file.content, all_files, path)
+
+        if(file.isFolder) {
+            addAllFiles(file.content, all_files, path, drive)
         }
     }
 }

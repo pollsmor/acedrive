@@ -128,7 +128,7 @@ async function populateMissingFields(all_files, root_id) {
 
 
 // get the top level files, then populate all subfiles recursively
-function parseFiles(all_files, root_id) {
+function parseFiles(all_files) {
   let top_level_files = []
   for (let file of all_files) {
 
@@ -179,10 +179,11 @@ function populateSubfolders(files_to_populate, all_files, current_path) {
   for(let parent_file of files_to_populate) {
 
     if(parent_file.isFolder) {
-
+      
       //search through all files to find the children of this folder
       for (let file of all_files) {
-        if (file.parents && (file.parents.includes(parent_file))) {
+        if (file.parents.includes(parent_file.id)) {
+          
           // create a list of permission objects
           let permissions = file.permissions.map(p => {
             return new Permission({
