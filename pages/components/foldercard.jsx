@@ -13,7 +13,7 @@ export default function FolderCard(props) {
                 </Row>
                     <Row>
                             { subfiles.map(f => {
-                                return (f.content? <FolderCard key={f.id} data={f}/> : <FileCard key={f.id} data={f}/>)
+                                return (f.isFolder ? <FolderCard key={f.id} data={f}/> : <FileCard key={f.id} data={f}/>)
                             }) }
                     </Row>
         </Container>

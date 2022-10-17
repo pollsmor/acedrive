@@ -6,14 +6,14 @@ export default function FileCard(props) {
 
     return (
         <Card style={{width: '18rem', padding: '2px', margin: '10px'}}>
-            {file.content? <Card.Img variant='top' src='https://uas.edu.kw/wp-content/uploads/2018/12/folder-icon.png' /> : ""}
+            {file.isFolder ? <Card.Img variant='top' src='https://uas.edu.kw/wp-content/uploads/2018/12/folder-icon.png' /> : ""}
             <Card.Body>
                 <Card.Title>{file.name}</Card.Title>
                 <Card.Text>
-                    Owner: {(file.owners.length > 0) ? file.owners[0].emailAddress : `Shared Drive`}
+                    Drive: {file.driveName}
                 </Card.Text>
                 <Card.Text>
-                    Path: {(file.path)}
+                    Path: {file.path}
                 </Card.Text>
             </Card.Body>
         </Card>
