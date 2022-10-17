@@ -47,7 +47,7 @@ export default function FileViewWindow(props) {
         <Row>
             <Col>
               { files.map(f => {
-                return (f.content? <FolderCard key={f.id} data={f}/> : <FileCard key={f.id} data={f}/>)
+                return (f.isFolder ? <FolderCard key={f.id} file={f}/> : <FileCard key={f.id} file={f}/>)
               }) }
             </Col>
         </Row>
