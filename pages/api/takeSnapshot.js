@@ -89,6 +89,12 @@ async function populateMissingFields(all_files, root_id) {
 
   for (let file of all_files) {
 
+    // save this for when we are creating our data structure
+    // we will decrement this counter every time we add a file
+    // as a subfile of a folder, once it reaches 0,
+    // we can remove it from the list of all files
+    file.parents_length = file.parents.length
+
     // shared drive files are missing different fields from mydrive files
     if(file.driveId) {
       // get the drive name
@@ -170,7 +176,13 @@ function parseFiles(all_files) {
 
       // add it the array
       top_level_files.push(file_object)
-      all_files.splice(i, 1)
+
+      // we've added it to one of its parents
+      // so check if we can remove it from all files
+      file.parents_length -= 1
+      if (file.parents_length == 0){ 
+        all_files.splice(i, 1)
+      }
     } 
   }
 
@@ -221,9 +233,10 @@ function populateSubfolders(files_to_populate, all_files, current_path) {
 
           parent_file.content.push(file_object)
 
-          // some files can have multiple parent folders
-          // we will not remove those 
-          if (file.parents.length < 2) {
+          // we've added it to one of its parents
+          // so check if we can remove it from all files
+          file.parents_length -= 1
+          if (file.parents_length == 0){ 
             all_files.splice(k, 1)
           }
         }
