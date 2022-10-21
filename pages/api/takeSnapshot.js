@@ -130,7 +130,11 @@ async function populateMissingFields(all_files, root_id) {
 // get the top level files, then populate all subfiles recursively
 function parseFiles(all_files) {
   let top_level_files = []
-  for (let file of all_files) {
+
+  // iterate using index so we can remove this file from the all files array
+  // once we've processed it into our data structure
+  for (let i = 0; i < all_files.length; i++) {
+    let file = all_files[i]
 
     // shared top level files have no parents, otherwise, parent is driveID
     if (!file.parents || file.parents.includes(file.driveId)) {
@@ -166,6 +170,7 @@ function parseFiles(all_files) {
 
       // add it the array
       top_level_files.push(file_object)
+      all_files.splice(i, 1)
     } 
   }
 
@@ -181,9 +186,10 @@ function populateSubfolders(files_to_populate, all_files, current_path) {
     if(parent_file.isFolder) {
       
       //search through all files to find the children of this folder
-      for (let file of all_files) {
+      for (let k = 0; k < all_files.length; k++) {
+        let file = all_files[k]
+
         if (file.parents.includes(parent_file.id)) {
-          
           // create a list of permission objects
           let permissions = file.permissions.map(p => {
             return new Permission({
@@ -214,6 +220,12 @@ function populateSubfolders(files_to_populate, all_files, current_path) {
           })
 
           parent_file.content.push(file_object)
+
+          // some files can have multiple parent folders
+          // we will not remove those 
+          if (file.parents.length < 2) {
+            all_files.splice(k, 1)
+          }
         }
       }
 
