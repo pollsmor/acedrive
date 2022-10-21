@@ -23,7 +23,7 @@ export default async function handler(req, res) {
       access_token: req.body.accessToken
     });
 
-    console.log("taking snapshot...")
+    console.time("Snapshot Time")
     let googleRes = await drive.files.list({
       //fields: '*', // Retrieve all fields - useful for testing
       fields: `files(${fields.join(',')}), nextPageToken`,
@@ -55,7 +55,9 @@ export default async function handler(req, res) {
     let root_id = rootRes.data.id
     
     // many fields aren't populated, so we will go through and populate many of them
+    console.time("populateMissingFields call")
     await populateMissingFields(files, root_id)
+    console.timeEnd("populateMissingFields call")
 
     // files are currently just a list of everything, we want to 
     // parse that into a data structure that will allow for easier analysis/search
@@ -76,7 +78,7 @@ export default async function handler(req, res) {
     user.snapshotIDs.unshift(snapshot_id);
     await user.save();
 
-    console.log("success")
+    console.timeEnd("Snapshot Time")
     res.json({id: snapshot_id});
   } else {
     res.end('Not signed in or not a POST request.');
@@ -102,16 +104,15 @@ async function populateMissingFields(all_files, root_id) {
         file.driveName = driveIdToName.get(file.driveId)
       }
       else {
-        let driveRes = await drive.drives.get({driveId: file.driveId})
+        let driveRes = await drive.drives.get({driveId: file.driveId, fields: 'name', supportsAllDrives: true})
         file.driveName = driveRes.data.name
         driveIdToName.set(file.driveId, file.driveName)
       }
 
       // get permmissions
-      let permRes = await drive.permissions.list({fileId: file.id, fields: '*', supportsAllDrives: true})
+      let permRes = await drive.permissions.list({fileId: file.id, fields: 'permissions(role,emailAddress,type,domain)', supportsAllDrives: true})
       file.permissions = permRes.data.permissions
 
-      // set folder-related metadata
       // set folder-related metadata
       file.isFolder = (file.mimeType === 'application/vnd.google-apps.folder')
       file.content = []
@@ -142,7 +143,8 @@ function parseFiles(all_files) {
   for (let i = 0; i < all_files.length; i++) {
     let file = all_files[i]
 
-    // shared top level files have no parents, otherwise, parent is driveID
+    // files shared directly with user have no parent
+    // all other top level files have the driveId in the parents list
     if (!file.parents || file.parents.includes(file.driveId)) {
 
       // create a list of permission objects
