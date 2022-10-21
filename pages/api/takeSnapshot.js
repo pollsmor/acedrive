@@ -243,7 +243,7 @@ function populateSubfolders(files_to_populate, all_files, current_path) {
       }
 
       // now, populate any subfolders we just found
-      populateSubfolders(parent_file.content, all_files, current_path + parent_file.content.name + '/')
+      populateSubfolders(parent_file.content, all_files, current_path + parent_file.name + '/')
     }
   }
 }
