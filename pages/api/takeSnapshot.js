@@ -108,6 +108,7 @@ async function populateMissingFields(all_files, root_id) {
 		// we will decrement this counter every time we add a file
 		// as a subfile of a folder, once it reaches 0,
 		// we can remove it from the list of all files
+		//TODO: CHECK when to use giving error in case off undefined
 		// file.parents_length = file?.parents.length;
 
 		// shared drive files are missing different fields from mydrive files
@@ -205,6 +206,7 @@ function parseFiles(all_files) {
 
 				// we've added it to one of its parents
 				// so check if we can remove it from all files
+				//TODO: CHECK when to use giving error in case off undefined
 				// file.parents_length -= 1;
 				// if (file.parents_length == 0) {
 				// 	all_files.splice(i, 1);
@@ -266,6 +268,7 @@ function populateSubfolders(files_to_populate, all_files, current_path) {
 						parent_file.content.push(file_object);
 						// we've added it to one of its parents
 						// so check if we can remove it from all files
+						//TODO: CHECK when to use giving error in case off undefined
 						// file.parents_length -= 1;
 						// if (file.parents_length == 0) {
 						// 	all_files.splice(k, 1);
