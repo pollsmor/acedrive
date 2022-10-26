@@ -3,6 +3,7 @@ import { Container, Nav, Navbar } from 'react-bootstrap';
 import { signOut } from 'next-auth/react';
 
 export default function Banner(props) {
+  if (!props.session) return; // To get "npm run build" prerendering off my back
   return (
     <Navbar bg='dark' variant='dark'>
       <Container fluid>
