@@ -1,10 +1,10 @@
 import axios from 'axios';
 import NextAuth from 'next-auth';
 import GoogleProvider from 'next-auth/providers/google';
-import { mongooseConnect } from '../../../lib/mongo';
+import mongoose from 'mongoose';
 import User from '../../../lib/models/User';
 
-mongooseConnect();
+mongoose.connect(process.env.MONGODB_URI), { autoIndex: true }; // autoIndex handles dupes
 const scopes = ['openid', 'email', 'profile', 'https://www.googleapis.com/auth/drive'];
 const GOOGLE_AUTHORIZATION_URL = 
   'https://accounts.google.com/o/oauth2/v2/auth?' +
@@ -50,8 +50,11 @@ export default NextAuth({
       if (account && user) {
         let storedUser = new User(user); // Matches Mongoose model
         storedUser.save(err => {
-          if (err) 
-            console.log(err.toString());
+          if (err) {
+            if (err.name === 'MongoServerError') {
+              console.log('Account found - using that one.');
+            } else console.log(err.toString());
+          }
         });
 
         return {

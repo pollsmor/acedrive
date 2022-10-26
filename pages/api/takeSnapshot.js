@@ -14,7 +14,7 @@ const fields = [
   'id', 'name', 'mimeType', 'parents', 'thumbnailLink', 'modifiedTime',
   'sharingUser', 'owners', 'permissions', 'driveId'
 ];
-// Note: there doesn't seem to be a way to see who created a file, only its owner.
+// Note: there doesn't seem to be a way to see who created a file, only its current owner.
 
 export default async function handler(req, res) {
   const token = await getToken({ req });
@@ -23,7 +23,7 @@ export default async function handler(req, res) {
       access_token: req.body.accessToken
     });
 
-    console.time("Snapshot Time")
+    console.time('Snapshot time')
     let googleRes = await drive.files.list({
       //fields: '*', // Retrieve all fields - useful for testing
       fields: `files(${fields.join(',')}), nextPageToken`,
@@ -31,10 +31,11 @@ export default async function handler(req, res) {
       supportsAllDrives: true
     });
 
-    let nextpage = googleRes.data.nextPageToken 
-    let files = googleRes.data.files
+    let nextpage = googleRes.data.nextPageToken;
+    let files = googleRes.data.files;
 
-    while(nextpage) {
+    // Continue pagination as long as next page token exists
+    while (nextpage) {
       googleRes = await drive.files.list({
         //fields: '*', // Retrieve all fields - useful for testing
         fields: `files(${fields.join(',')}), nextPageToken`,
@@ -43,25 +44,24 @@ export default async function handler(req, res) {
         supportsAllDrives: true
       });
     
-      nextpage = googleRes.data.nextPageToken
-      files = files.concat(googleRes.data.files)
+      nextpage = googleRes.data.nextPageToken;
+      // Append to list of files from previous pages
+      files = files.concat(googleRes.data.files);
     }
 
-    // root will always alias to the root of the drive, but we want to know its actual id
+    // Root will always alias to the root of the drive, but we want to know its actual id
     // so that we can identify top level folders for easier parsing
-    let rootRes = await drive.files.get({
-      fileId: 'root',
-    })
-    let root_id = rootRes.data.id
+    let rootRes = await drive.files.get({ fileId: 'root' });
+    let root_id = rootRes.data.id;
     
-    // many fields aren't populated, so we will go through and populate many of them
-    console.time("populateMissingFields call")
-    await populateMissingFields(files, root_id)
-    console.timeEnd("populateMissingFields call")
+    // Many fields aren't populated, so we will go through and populate many of them
+    console.time('populateMissingFields call');
+    await populateMissingFields(files, root_id);
+    console.timeEnd('populateMissingFields call');
 
-    // files are currently just a list of everything, we want to 
-    // parse that into a data structure that will allow for easier analysis/search
-    let file_data_structure = parseFiles(files)
+    // Files are currently just a list of everything, we want to 
+    // parse that into a data structure to allow for easier analysis/search
+    let file_data_structure = parseFiles(files);
     
     // Save snapshot to database
     let userId = token.user.id;
@@ -72,83 +72,89 @@ export default async function handler(req, res) {
       files: file_data_structure
     })
 
-    // add this snapshot to the user profile
+    // Add this snapshot to the user profile
     let saved_snapshot = await snapshot.save()
     let snapshot_id = saved_snapshot._id.toString()
     user.snapshotIDs.unshift(snapshot_id);
     await user.save();
 
-    console.timeEnd("Snapshot Time")
-    res.json({id: snapshot_id});
+    console.timeEnd('Snapshot time');
+    res.json({ id: snapshot_id });
   } else {
     res.end('Not signed in or not a POST request.');
   }
 }
 
 async function populateMissingFields(all_files, root_id) {
-  // mape for driveId's to driveName's so we don't have to repeat queries
-  let driveIdToName = new Map()
+  // Map for driveIds to driveNames so we don't have to repeat queries
+  let driveIdToName = new Map();
 
   for (let file of all_files) {
+    /*
+      Save this for when we are creating our data structure.
+      We will decrement this counter every time we add a file
+      as a subfile of a folder, once it reaches 0,
+      we can remove it from the list of all files.
+      NOTE: Not all files have a "parent" attribute.
+    */
+    file.parents_length = file.parents ? file.parents.length : 1;
 
-    // save this for when we are creating our data structure
-    // we will decrement this counter every time we add a file
-    // as a subfile of a folder, once it reaches 0,
-    // we can remove it from the list of all files
-    file.parents_length = file.parents.length
-
-    // shared drive files are missing different fields from mydrive files
-    if(file.driveId) {
-      // get the drive name
-      if (driveIdToName.has(file.driveId)) {
-        file.driveName = driveIdToName.get(file.driveId)
-      }
+    // Shared drive files are missing different fields from MyDrive files
+    if (file.driveId) {
+      // Get the drive name
+      if (driveIdToName.has(file.driveId)) 
+        file.driveName = driveIdToName.get(file.driveId);
       else {
-        let driveRes = await drive.drives.get({driveId: file.driveId, fields: 'name', supportsAllDrives: true})
-        file.driveName = driveRes.data.name
-        driveIdToName.set(file.driveId, file.driveName)
+        let driveRes = await drive.drives.get({
+          driveId: file.driveId, 
+          fields: 'name', 
+          supportsAllDrives: true 
+        });
+        file.driveName = driveRes.data.name;
+        driveIdToName.set(file.driveId, file.driveName);
       }
 
-      // get permmissions
-      let permRes = await drive.permissions.list({fileId: file.id, fields: 'permissions(role,emailAddress,type,domain)', supportsAllDrives: true})
-      file.permissions = permRes.data.permissions
+      // Get permmissions
+      let permRes = await drive.permissions.list({
+        fileId: file.id, 
+        fields: 'permissions(role,emailAddress,type,domain)', 
+        supportsAllDrives: true
+      });
+      file.permissions = permRes.data.permissions;
 
-      // set folder-related metadata
-      file.isFolder = (file.mimeType === 'application/vnd.google-apps.folder')
-      file.content = []
+      // Set folder-related metadata
+      file.isFolder = (file.mimeType === 'application/vnd.google-apps.folder');
+      file.content = [];
 
-      // set owners to empty
-      file.owners = []
+      file.owners = []; // Set owners to empty
+    } else {
+      // Set driveId and driveName
+      file.driveId = root_id;
+      file.driveName = 'MyDrive';
+
+      // Set folder-related metadata
+      file.isFolder = (file.mimeType === 'application/vnd.google-apps.folder');
+      file.content = [];
     }
-    else {
-      // set driveId and driveName
-      file.driveId = root_id
-      file.driveName = "MyDrive"
-
-      // set folder-related metadata
-      file.isFolder = (file.mimeType === 'application/vnd.google-apps.folder')
-      file.content = []
-    }
-
   }
 }
 
 
-// get the top level files, then populate all subfiles recursively
+// Get the top level files, then populate all subfiles recursively
 function parseFiles(all_files) {
-  let top_level_files = []
+  let top_level_files = [];
 
-  // iterate using index so we can remove this file from the all files array
+  // Iterate using index so we can remove this file from the all files array
   // once we've processed it into our data structure
   for (let i = 0; i < all_files.length; i++) {
-    let file = all_files[i]
+    let file = all_files[i];
+    console.log(file);
 
-    // files shared directly with user have no parent
-    // all other top level files have the driveId in the parents list
+    // Files shared directly with user have no parent
+    // All other top level files have the driveId in the parents list
     if (!file.parents || file.parents.includes(file.driveId)) {
-
-      // create a list of permission objects
-      let permissions = file.permissions.map(p => {
+      // Create a list of permission objects
+      let permissions = !file.permissions ? [] : file.permissions.map(p => {
         return new Permission({
           email: p.emailAddress,
           role: p.role,
@@ -158,54 +164,49 @@ function parseFiles(all_files) {
         });
       });
 
-      // create a file object for this file, with the list of permissions as a field
+      // Create a file object for this file, with the list of permissions as a field
       let file_object = new File({
-          id: file.id,
-          name: file.name,
-          mimeType: file.mimeType,
-          isFolder: file.isFolder,
-          modifiedTime: file.modifiedTime,
-          path: '/' + file.name, 
-          parents: file.parents ? file.parents : undefined,
-          thumbnailLink: file.thumbnailLink? file.thumbnailLink : undefined, 
-          sharingUser: file.sharingUser ? file.sharingUser : undefined,
-          owners: file.owners,
-          driveId: file.driveId,
-          driveName: file.driveName,
-          permissions: permissions,
-          content: file.content
+        id: file.id,
+        name: file.name,
+        mimeType: file.mimeType,
+        isFolder: file.isFolder,
+        modifiedTime: file.modifiedTime,
+        path: '/' + file.name, 
+        parents: file.parents ? file.parents : undefined,
+        thumbnailLink: file.thumbnailLink? file.thumbnailLink : undefined, 
+        sharingUser: file.sharingUser ? file.sharingUser : undefined,
+        owners: file.owners,
+        driveId: file.driveId,
+        driveName: file.driveName,
+        permissions: permissions,
+        content: file.content
       });
 
-      // add it the array
-      top_level_files.push(file_object)
+      // Add it the array
+      top_level_files.push(file_object);
 
-      // we've added it to one of its parents
+      // We've added it to one of its parents,
       // so check if we can remove it from all files
-      file.parents_length -= 1
-      if (file.parents_length == 0){ 
-        all_files.splice(i, 1)
-      }
+      file.parents_length -= 1;
+      if (file.parents_length == 0) all_files.splice(i, 1);
     } 
   }
 
   // now, populate all the subfolders of the top level folders, and recursively populate any other subfolders
-  populateSubfolders(top_level_files, all_files, "/")
-  return top_level_files
+  populateSubfolders(top_level_files, all_files, '/');
+  return top_level_files;
 }
 
 function populateSubfolders(files_to_populate, all_files, current_path) {
-
-  for(let parent_file of files_to_populate) {
-
+  for (let parent_file of files_to_populate) {
     if(parent_file.isFolder) {
-      
-      //search through all files to find the children of this folder
+      // Search through all files to find the children of this folder
       for (let k = 0; k < all_files.length; k++) {
-        let file = all_files[k]
+        let file = all_files[k];
 
-        if (file.parents.includes(parent_file.id)) {
-          // create a list of permission objects
-          let permissions = file.permissions.map(p => {
+        if (file.parents && file.parents.includes(parent_file.id)) {
+          // Create a list of permission objects
+          let permissions = !file.permissions ? [] : file.permissions.map(p => {
             return new Permission({
               email: p.emailAddress,
               role: p.role,
@@ -231,21 +232,19 @@ function populateSubfolders(files_to_populate, all_files, current_path) {
             driveName: file.driveName,
             permissions: permissions,
             content: file.content
-          })
+          });
 
-          parent_file.content.push(file_object)
+          parent_file.content.push(file_object);
 
-          // we've added it to one of its parents
+          // We've added it to one of its parents,
           // so check if we can remove it from all files
-          file.parents_length -= 1
-          if (file.parents_length == 0){ 
-            all_files.splice(k, 1)
-          }
+          file.parents_length -= 1;
+          if (file.parents_length == 0) all_files.splice(k, 1);
         }
       }
 
-      // now, populate any subfolders we just found
-      populateSubfolders(parent_file.content, all_files, current_path + parent_file.name + '/')
+      // Now, populate any subfolders we just found
+      populateSubfolders(parent_file.content, all_files, current_path + parent_file.name + '/');
     }
   }
 }

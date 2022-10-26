@@ -1,8 +1,8 @@
 import axios from 'axios';
 import { useState, useEffect } from 'react';
-import {Container, Row, Form, FormControl, Col, Button} from 'react-bootstrap';
-import FileCard from './filecard';
-import FolderCard from './foldercard';
+import { Container, Row, Form, FormControl, Col, Button } from 'react-bootstrap';
+import FileCard from './FileCard';
+import FolderCard from './FolderCard';
 
 export default function FileViewWindow(props) {
   const [files, setFiles] = useState([]);
@@ -10,21 +10,20 @@ export default function FileViewWindow(props) {
   const snapshotID = props.snapshotID
 
   useEffect(() => {
-
     async function fetchSnapshot() {
-        let snapshot = await axios.post('/api/getSnapshot', {id: snapshotID})
-        setFiles(snapshot.data.files);
-      }
+      let snapshot = await axios.post('/api/getSnapshot', { id: snapshotID });
+      setFiles(snapshot.data.files);
+    }
   
-      fetchSnapshot()
-  }, []);
+    fetchSnapshot();
+  }, [snapshotID]);
 
   function onSearch(e) {
     e.preventDefault();
     if (query === '') return;
+    console.log(`Searching ${query}...`);
 
-    console.log(`searching ${query}`)
-    let search = new SearchQuery(query)
+    let search = new SearchQuery(query);
     filtered = FilterFiles(files, search)
   }
 
@@ -36,20 +35,21 @@ export default function FileViewWindow(props) {
     <>
       <Button onClick={closeView} variant='danger'>Close File View</Button>
       <Form onSubmit={onSearch} className='d-flex'>
-      <FormControl 
-        type='search' 
-        placeholder='Search...' 
-        value={query}
-        onChange={e => setQuery(e.target.value)}
-      />
-    </Form>
+        <FormControl 
+          type='search' 
+          placeholder='Search...' 
+          value={query}
+          onChange={e => setQuery(e.target.value)}
+        />
+      </Form>
       <Container>
         <Row>
-            <Col>
-              { files.map(f => {
-                return (f.isFolder ? <FolderCard key={f.id} file={f}/> : <FileCard key={f.id} file={f}/>)
-              }) }
-            </Col>
+          <Col>
+            { files.map(f => {
+              if (f.isFolder) return <FolderCard key={f.id} file={f} />;
+              else return <FileCard key={f.id} file={f} />;
+            }) }
+          </Col>
         </Row>
       </Container>
     </>

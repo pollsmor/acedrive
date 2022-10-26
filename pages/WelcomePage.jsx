@@ -1,4 +1,5 @@
-import { Container, ListGroup } from 'react-bootstrap';
+import { signIn } from 'next-auth/react';
+import { Container, ListGroup, Button } from 'react-bootstrap';
 
 export default function Welcome() {
   return (
@@ -9,6 +10,7 @@ export default function Welcome() {
         semester. This application extends the sharing functionality of cloud storage services 
         such as Google Drive and Microsoft OneDrive, supporting features such as:
       </h5>
+
       <ListGroup>
         <ListGroup.Item>
           Maintaining a user profile with recent search queries, access control requirements, etc.
@@ -26,7 +28,9 @@ export default function Welcome() {
           And more!
         </ListGroup.Item>
       </ListGroup>
-      <h3 className='my-2'>To get started, sign in with your Google account!</h3>
+
+      <br />
+      <Button size='lg' onClick={() => signIn('google')}>Sign in with Google</Button>
     </Container>
   );
 }
