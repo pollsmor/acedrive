@@ -41,6 +41,7 @@ function AnalyzeSharingChangesAlgo(first_files, second_files, path, drive, resul
   let new_ids = second_all_ids.filter(x => !first_all_ids.includes(x));
 
   // For each shared file: 
+  const jsonReplacer = ['email', 'type', 'role', 'domain'];
   for (let shared_id of shared_ids) {
     let first_shared_file_index = first_all_ids.indexOf(shared_id);
     let second_shared_file_index = second_all_ids.indexOf(shared_id);
@@ -49,7 +50,6 @@ function AnalyzeSharingChangesAlgo(first_files, second_files, path, drive, resul
     let second_shared_file = second_all[second_shared_file_index];
 
     // Get perms of both as array of strings
-    const jsonReplacer = ['email', 'type', 'role', 'domain'];
     let first_perms_str = [];
     for (let first_perm of first_shared_file.permissions)
       first_perms_str.push(JSON.stringify(first_perm, jsonReplacer));
