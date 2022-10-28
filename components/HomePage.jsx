@@ -4,13 +4,14 @@ import { Container, Nav, Navbar, Button, Modal, Form } from 'react-bootstrap';
 import AnalyzeDeviant from '../algorithms/AnalyzeDeviant.js';
 import AnalyzeFileFolderDifferences from '../algorithms/FileFolderDifferences.js';
 import AnalyzeSharingChanges from '../algorithms/SharingChanges.js';
-import SnapshotCard from './components/SnapshotCard';
-import AnalysisResultsModal from './components/AnalysisResultsModal';
-import ErrorModal from './components/ErrorModal';
-import LoadingModal from './components/LoadingModal';
+import Banner from './Banner';
+import SnapshotCard from './SnapshotCard';
+import AnalysisResultsModal from './AnalysisResultsModal';
+import ErrorModal from './ErrorModal';
+import LoadingModal from './LoadingModal';
 
 export default function HomePage(props) {
-  const [snapshots, setSnapshots] = useState([]);
+  const [snapshotIDs, setSnapshotIDs] = useState([]);
   const [selecting, setSelecting] = useState(false);
   const [loading, setLoading] = useState(false);
   const [analyze, setAnalyze] = useState('');
@@ -24,10 +25,8 @@ export default function HomePage(props) {
 
   useEffect(() => {
     async function fetchUser() {
-      let res = await axios.post('/api/getUser');
-      if (res.data.snapshotIDs.length > 0) {
-        setSnapshots(res.data.snapshotIDs)
-      }
+      let user = await axios.get('/api/getUser');
+      setSnapshotIDs(user.data.snapshotIDs);
     }
 
     fetchUser();
@@ -39,8 +38,9 @@ export default function HomePage(props) {
       accessToken: props.accessToken
     });
     
-    let new_array = [res.data.id, ...snapshots];
-    setSnapshots(new_array);
+    // Retrieve ID of new snapshot instead of querying getUser again
+    let new_array = [res.data.id, ...snapshotIDs];
+    setSnapshotIDs(new_array);
     setLoading(false);
   }
     
@@ -48,20 +48,20 @@ export default function HomePage(props) {
     let new_selected;
     if (analyze !== 'Sharing Changes') {
         new_selected = [];
-        if (selectedFiles.indexOf(snapshots[index]) < 0 )
-          new_selected.push(snapshots[index]);
+        if (selectedFiles.indexOf(snapshotIDs[index]) < 0 )
+          new_selected.push(snapshotIDs[index]);
         setSelectedFiles(new_selected);
     } else {
       new_selected = [...selectedFiles];
-      if (new_selected.includes(snapshots[index])) {
-        new_selected.splice(new_selected.indexOf(snapshots[index]), 1);
+      if (new_selected.includes(snapshotIDs[index])) {
+        new_selected.splice(new_selected.indexOf(snapshotIDs[index]), 1);
         setSelectedFiles(new_selected);
       } else {
         if (new_selected.length === 2) {
           new_selected.shift();
-          new_selected.push(snapshots[index]);
+          new_selected.push(snapshotIDs[index]);
         } else {
-          new_selected.push(snapshots[index]);
+          new_selected.push(snapshotIDs[index]);
         }
 
         setSelectedFiles(new_selected);
@@ -77,13 +77,6 @@ export default function HomePage(props) {
     setThreshold(80);
     setPath('');
     setDrive('');
-  }
-
-  function handleViewClick(e) {
-    if (selecting === (selectedFiles.indexOf(snapshots[0]) >= 0) )
-      toggleSelect(null, 0);
-
-    setSelecting(!selecting);
   }
 
   async function handleConfirmClick(e) {
@@ -118,7 +111,7 @@ export default function HomePage(props) {
     
   function handleAnalyze(e) {
     e.preventDefault();
-    if(analyze === 'Deviant Sharing') {
+    if (analyze === 'Deviant Sharing') {
         let num = parseFloat(threshold);
         if (Number.isNaN(num)) {
             return setErrorMsg('Deviant sharing threshold must be a number!');
@@ -133,16 +126,17 @@ export default function HomePage(props) {
   }
 
   let windowContents = 'Take a snapshot to begin.';
-  if (snapshots.length > 0) {
+  if (snapshotIDs.length > 0) {
     windowContents = (
-      <Container style={{marginBottom: '65px'}}>
-        { snapshots.map((snapshot, index) => {
+      <Container fluid style={{marginBottom: '65px'}}>
+        <h3>Snapshots are sorted by recency from top to bottom.</h3>
+        { snapshotIDs.map((snapshotID, index) => {
           return <SnapshotCard 
             key={index} 
-            id={snapshot} 
-            position={index} 
+            position={index}
+            id={snapshotID} 
             selecting={selecting} 
-            selected={selectedFiles.includes(snapshot)} clickCallback={toggleSelect}
+            selected={selectedFiles.includes(snapshotID)} clickCallback={toggleSelect}
           />
         })}
       </Container>
@@ -161,11 +155,10 @@ export default function HomePage(props) {
 
   return (
     <>
+      <Banner />
       <Navbar>
         <Container>
-          <Navbar.Brand>Snapshots:</Navbar.Brand>
-          <Button variant='secondary' onClick={takeSnapshot} disabled={selecting}>Take snapshot</Button>
-          <Button onClick={handleViewClick} disabled={selecting}>View & Search Snapshot Files</Button> 
+          <Button variant='secondary' onClick={takeSnapshot} disabled={selecting}>Take snapshot</Button> 
           <Button onClick={handleOpen} disabled={selecting}>Analyze Snapshot</Button>
         </Container>
         <AnalysisResultsModal 

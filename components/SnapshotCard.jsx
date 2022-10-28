@@ -1,9 +1,9 @@
 import { Card, Button } from 'react-bootstrap';
+import Link from 'next/link';
 
 export default function SnapshotCard(props) {
   const id = props.id;
   const selected = props.selected;
-  const position = props.position;
   const selecting = props.selecting;
 
   function handleClick(e) {
@@ -11,13 +11,17 @@ export default function SnapshotCard(props) {
   }
 
   return (
-    <Card style={{ width: '18rem', padding: '2px', margin: '10px' }} bg={selected ? 'primary' : 'light'}>
+    <Card
+      className='my-3'
+      style={{ width: '21rem' }} 
+      bg={selected ? 'warning' : 'light'}
+    >
       <Card.Body>
-          <Card.Title>{ position + 1 + '. ' + ( position=== 0 ? 'Most Recent Snapshot' : '')}</Card.Title>
-          <Card.Text> {`ID: ${id}`} </Card.Text>
+          <Card.Title>
+            <Link href={`/snapshot/${id}`}>{`ID: ${id}`}</Link>
+          </Card.Title>
           { selecting ?
             <div>
-              <Card.Text>Click to select</Card.Text>
               <Button 
                 onClick={handleClick} 
                 variant={ selected ? 'light' : 'primary'}> { selected ? 'Unselect' : 'Select'

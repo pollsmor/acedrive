@@ -19,5 +19,5 @@ export default function LoadingModal(props) {
         </Container>
       </Modal.Body>
     </Modal>
-  )
+  );
 }

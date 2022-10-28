@@ -16,7 +16,7 @@ const fields = [
 ];
 // Note: there doesn't seem to be a way to see who created a file, only its current owner.
 
-export default async function handler(req, res) {
+export default async function takeSnapshot(req, res) {
   const token = await getToken({ req });
   if (token && req.method === 'POST') {
     auth.setCredentials({
