@@ -35,10 +35,10 @@ export default function HomePage(props) {
       <Banner />
       <Container fluid className='mt-2'>
         <Button onClick={takeSnapshot}>Take snapshot</Button> 
+        <LoadingModal show={loading}></LoadingModal>
         { snapshotIDs.length > 0 ? (
         <>
           <h3>Snapshots are sorted by recency from top to bottom.</h3>
-          <LoadingModal show={loading}></LoadingModal>
           { snapshotIDs.map((snapshotID, index) => {
             return <SnapshotCard 
               key={index} 
