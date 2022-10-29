@@ -4,7 +4,11 @@ import GoogleProvider from 'next-auth/providers/google';
 import mongoose from 'mongoose';
 import User from '../../../lib/models/User';
 
-mongoose.connect(process.env.MONGODB_URI), { autoIndex: true }; // autoIndex handles dupes
+const options = {
+  useCreateIndeX: true,
+  autoIndex: true
+}
+mongoose.connect(process.env.MONGODB_URI), options; // Options to handles dupes
 const scopes = ['openid', 'email', 'profile', 'https://www.googleapis.com/auth/drive'];
 const GOOGLE_AUTHORIZATION_URL = 
   'https://accounts.google.com/o/oauth2/v2/auth?' +

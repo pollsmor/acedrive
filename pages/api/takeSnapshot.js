@@ -148,7 +148,7 @@ function parseFiles(all_files) {
   // once we've processed it into our data structure
   for (let i = 0; i < all_files.length; i++) {
     let file = all_files[i];
-    console.log(file);
+    //console.log(file);
 
     // Files shared directly with user have no parent
     // All other top level files have the driveId in the parents list

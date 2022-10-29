@@ -9,10 +9,6 @@ export default function Home() {
   const { data: session, status } = useSession();
   const [viewing, setViewing] = useState('');
 
-  function handleView(selectedFiles) {
-    setViewing(selectedFiles[0]);
-  }
-
   if (status === 'loading') return;
   return (
     <>
@@ -21,7 +17,7 @@ export default function Home() {
         <meta name='viewport' content='initial-scale=1.0, width=device-width' />
       </Head>
       { session ? 
-        <HomePage accessToken={session.accessToken} viewCallback={handleView} /> : 
+        <HomePage accessToken={session.accessToken} /> : 
         <Welcome /> 
       }
     </>

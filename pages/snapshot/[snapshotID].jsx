@@ -1,10 +1,11 @@
 import axios from 'axios';
 import { useState, useEffect } from 'react';
-import { Container, ListGroup, Form, FormControl } from 'react-bootstrap';
+import { Container, ListGroup, Form, FormControl, Button } from 'react-bootstrap';
 import { useRouter } from 'next/router';
+import Banner from '../../components/Banner';
+import AnalysisForm from '../../components/AnalysisForm';
 import FileCard from '../../components/FileCard';
 import FolderCard from '../../components/FolderCard';
-import Banner from '../../components/Banner';
 import lodash from 'lodash'
 
 const queryOperator = {
@@ -30,21 +31,28 @@ const queryOperator = {
 export default function Snapshot() {
   const router = useRouter();
   const { snapshotID } = router.query;
-  const [files, setFiles] = useState([]); // Never changes after initial load
+  const [snapshot, setSnapshot] = useState([]);
   const [query, setQuery] = useState('');
+  const [files,setFiles] = useState([]);
   const [filteredFiles, setFilteredFiles] = useState([]);
 
   useEffect(() => {
     async function fetchSnapshot() {
-      let snapshot = await axios.get('/api/getSnapshot', { 
-        params: { id: snapshotID }
-      });
-      setFiles(snapshot.data.files);
-      setFilteredFiles(snapshot.data.files);
+      try {
+        let snapshot = await axios.get('/api/getSnapshot', { 
+          params: { id: snapshotID }
+        });
+        setSnapshot(snapshot.data);
+        setFiles(snapshot.data.files)
+        setFilteredFiles(snapshot.data.files);
+      } catch (err) {
+        alert('This is not a valid snapshot ID.');
+        window.location.href = '/';
+      }
     }
 
     if (snapshotID) fetchSnapshot();
-  }, [snapshotID])
+  }, [snapshotID]);
 
   function onSearch(e) {
     e.preventDefault();
@@ -103,9 +111,12 @@ export default function Snapshot() {
     //setFilteredFiles(SearchQuery(query));
   }
   return (
-    <>
+    <Container fluid className='p-0'>
       <Banner />
-
+      <Container className='text-center my-2'>
+        <h3 className='fw-bold'>Snapshot {snapshotID}</h3>
+        <h6>Taken: {snapshot.date}</h6>
+      </Container>
       <Form onSubmit={onSearch} className='m-2'>
         <FormControl
           type='search'
@@ -120,6 +131,9 @@ export default function Snapshot() {
         />
       </Form>
 
+      
+      <AnalysisForm snapshotID={snapshotID} />
+
       <ListGroup>
         {
           filteredFiles.map(f =>
@@ -129,7 +143,6 @@ export default function Snapshot() {
             )
         }
       </ListGroup>
-
-    </>
+    </Container>
   );
 }
