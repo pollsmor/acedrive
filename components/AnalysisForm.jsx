@@ -57,8 +57,8 @@ export default function AnalysisForm(props) {
     <Container fluid className='pb-2'>
       <AnalysisResultsModal 
         show={results !== null} 
-        closeResultsCallback={handleClose} 
-        analysis={analysisType} 
+        onHide={handleClose} 
+        analysisType={analysisType} 
         results={results}
       />
       <Accordion defaultActiveKey='lol-idc'>

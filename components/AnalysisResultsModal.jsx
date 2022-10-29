@@ -1,29 +1,25 @@
 import { Modal, ListGroup, Tab, Col, Row, Container } from 'react-bootstrap';
 
 export default function AnalysisResultsModal(props) {
-  function handleClose() {
-    props.closeResultsCallback();
-  }
-
-  let analyze = props.analysis;
-  // Set these two to the correct function depending on props.analysis type
+  let analysisType = props.analysisType;
+  // Set these two to the correct function depending on props.analysisType
   let listCardMap = printError;
   let explanationMap = printError;
-  if (analyze === 'File-Folder Sharing Differences') {
+  if (analysisType === 'File-Folder Sharing Differences') {
     listCardMap = createFileFolderListCard;
     explanationMap = createFileFolderExplanation;
-  } else if (analyze === 'Deviant Sharing') {
+  } else if (analysisType === 'Deviant Sharing') {
     listCardMap = createDeviantShareListCard;
     explanationMap = createDeviantShareExplanation;
-  } else if (analyze === 'Sharing Changes') {
-    listCardMap = createSharingChangesListCard
-    explanationMap = createSharingChangesExplanation
+  } else if (analysisType === 'Sharing Changes') {
+    listCardMap = createSharingChangesListCard;
+    explanationMap = createSharingChangesExplanation;
   }
 
   return (
-    <Modal show={props.show} fullscreen={true} onHide={handleClose}>
+    <Modal show={props.show} fullscreen={true} onHide={props.onHide}>
       <Modal.Header closeButton>
-        <Modal.Title>Analysis Results: {props.analysis}</Modal.Title>
+        <Modal.Title>Analysis Results: {props.analysisType}</Modal.Title>
       </Modal.Header>
       <Modal.Body>
         <Tab.Container defaultActiveKey='#link1'>

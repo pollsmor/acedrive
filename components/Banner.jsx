@@ -11,6 +11,7 @@ export default function Banner() {
         <Container fluid>
           <Nav>
             <Navbar.Brand href='/'>AceDrive</Navbar.Brand>
+            <Nav.Link>{session.user.email}</Nav.Link>
             <Image 
               src={session.user.image} 
               width={40}

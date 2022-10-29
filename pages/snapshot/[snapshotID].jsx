@@ -10,7 +10,7 @@ import FolderCard from '../../components/FolderCard';
 export default function Snapshot() {
   const router = useRouter();
   const { snapshotID } = router.query;
-  const [files, setFiles] = useState([]); // Never changes after initial load
+  const [snapshot, setSnapshot] = useState([]);
   const [query, setQuery] = useState('');
   const [filteredFiles, setFilteredFiles] = useState([]);
 
@@ -19,7 +19,7 @@ export default function Snapshot() {
       let snapshot = await axios.get('/api/getSnapshot', { 
         params: { id: snapshotID }
       });
-      setFiles(snapshot.data.files);
+      setSnapshot(snapshot.data);
       setFilteredFiles(snapshot.data.files);
     }
 
@@ -46,6 +46,7 @@ export default function Snapshot() {
       <Banner />
       <Container className='text-center my-2'>
         <h3 className='fw-bold'>Snapshot {snapshotID}</h3>
+        <h6>Taken: {snapshot.date}</h6>
       </Container>
       <Form onSubmit={onSearch} className='m-2'>
         <FormControl
