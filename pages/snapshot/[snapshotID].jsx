@@ -16,11 +16,16 @@ export default function Snapshot() {
 
   useEffect(() => {
     async function fetchSnapshot() {
-      let snapshot = await axios.get('/api/getSnapshot', { 
-        params: { id: snapshotID }
-      });
-      setSnapshot(snapshot.data);
-      setFilteredFiles(snapshot.data.files);
+      try {
+        let snapshot = await axios.get('/api/getSnapshot', { 
+          params: { id: snapshotID }
+        });
+        setSnapshot(snapshot.data);
+        setFilteredFiles(snapshot.data.files);
+      } catch (err) {
+        alert('This is not a valid snapshot ID.');
+        window.location.href = '/';
+      }
     }
 
     if (snapshotID) fetchSnapshot();

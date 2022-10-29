@@ -5,10 +5,6 @@ export default function SnapshotCard(props) {
   const id = props.id;
   const position = props.position;
 
-  function handleClick(e) {
-    props.clickCallback(e, position);
-  }
-
   return (
     <Card
       className='my-3'
