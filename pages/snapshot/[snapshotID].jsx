@@ -5,6 +5,27 @@ import { useRouter } from 'next/router';
 import FileCard from '../../components/FileCard';
 import FolderCard from '../../components/FolderCard';
 import Banner from '../../components/Banner';
+import lodash from 'lodash'
+
+const queryOperator = {
+  "drive":"driveName",
+  "owner":"owners",
+  "creator":"user",//TODO:Check Where We can get this key
+  "from":"sharingUser",
+  "to":"user",
+  "readable":"user",
+  "writable":"user",
+  "sharable":"user",
+  "name":"regexp",
+  "inFolder":"regexp",
+  "folder":"regexp",
+  "path":"path",
+  "sharing":"none",
+  "sharing":"anyone",
+  "sharing":"individual",
+  "sharing":"domain",
+  "foldersonly":"true"
+}
 
 export default function Snapshot() {
   const router = useRouter();
@@ -27,31 +48,88 @@ export default function Snapshot() {
 
   function onSearch(e) {
     e.preventDefault();
-    if (query === '') return;
-    console.log(`Searching ${query}...`);
+    
 
+    const splitQuery = query.split(":");
+    let searchForKeywords = query;
+    let fieldTofetch = "name";
+
+    if(splitQuery.length > 0){
+      if(Object.keys(queryOperator).includes(splitQuery[0])){
+        fieldTofetch = queryOperator[splitQuery[0]];
+        searchForKeywords = splitQuery[1];
+      }
+    }
+
+    if (query === '' || searchForKeywords === ''){
+      setFilteredFiles(files);
+      return;
+    }
+
+    let searchedFiles = [];
+
+    if(splitQuery[0] === "owner" || splitQuery[0] === "from" ){
+      searchedFiles = files.filter((file)=>{
+        const fileDetails = file[fieldTofetch];
+        let matchedDetails = [];
+        if(Array.isArray(fileDetails)){
+          matchedDetails = lodash.filter(fileDetails,(detail)=>{
+            console.log(detail)
+            if(detail.displayName.toLowerCase().search(searchForKeywords.toLowerCase()) !== -1){
+              return detail;
+            }
+          })
+          if(matchedDetails.length > 0){
+            return file;
+          }
+        }else{
+          if(fileDetails){
+            console.log(fileDetails)
+            if(fileDetails?.displayName.toLowerCase().search(searchForKeywords.toLowerCase()) !== -1){
+              return file;
+            }
+          }
+        }
+      })
+    }else{
+      searchedFiles = files.filter((file)=>{
+        const fileName = file[fieldTofetch].toLowerCase();
+        if(fileName.search(searchForKeywords.toLowerCase()) !== -1){
+          return file;
+        }
+      })
+    }
+    setFilteredFiles(searchedFiles);
     //setFilteredFiles(SearchQuery(query));
   }
-
-  let fileItems = filteredFiles.map(f => {
-    return (
-      <ListGroup.Item key={f.id}>
-        { f.isFolder ? <FolderCard file={f} /> : <FileCard file={f} /> }
-      </ListGroup.Item>
-    )
-  });
   return (
     <>
       <Banner />
+
       <Form onSubmit={onSearch} className='m-2'>
         <FormControl
           type='search'
-          placeholder='Search...'
+          placeholder='Search For File'
           value={query}
-          onChange={e => setQuery(e.target.value)}
+          onChange={(e) =>{
+            setQuery(e.target.value)
+            if(e.target.value === ""){
+              onSearch(e)
+            } 
+        }}
         />
       </Form>
-      <ListGroup>{fileItems}</ListGroup>
+
+      <ListGroup>
+        {
+          filteredFiles.map(f =>
+            <ListGroup.Item key={f.id}>
+              { f.isFolder ? <FolderCard file={f} /> : <FileCard file={f} /> }
+            </ListGroup.Item>
+            )
+        }
+      </ListGroup>
+
     </>
   );
 }

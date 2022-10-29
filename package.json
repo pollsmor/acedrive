@@ -13,6 +13,7 @@
     "bootstrap": "^5.2.2",
     "google-auth-library": "^8.5.2",
     "googleapis": "^108.0.0",
+    "lodash": "^4.17.21",
     "mongoose": "^6.6.5",
     "next": "12.3.1",
     "next-auth": "^4.13.0",
