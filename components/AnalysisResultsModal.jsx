@@ -2,7 +2,7 @@ import { Modal, ListGroup, Tab, Col, Row, Container } from 'react-bootstrap';
 
 export default function AnalysisResultsModal(props) {
   function handleClose() {
-      props.closeResultsCallback();
+    props.closeResultsCallback();
   }
 
   let analyze = props.analysis;

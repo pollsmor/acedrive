@@ -18,7 +18,7 @@ export default function Banner() {
               className='avatar' 
               alt='Avatar' 
             />
-            <Nav.Link onClick={signOut}>Sign out</Nav.Link> 
+            <Nav.Link onClick={() => signOut({ callbackUrl: '/' })}>Sign out</Nav.Link> 
           </Nav>
         </Container>
       </Navbar>

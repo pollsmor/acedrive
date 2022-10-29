@@ -1,10 +1,11 @@
 import axios from 'axios';
 import { useState, useEffect } from 'react';
-import { Container, ListGroup, Form, FormControl } from 'react-bootstrap';
+import { Container, ListGroup, Form, FormControl, Button } from 'react-bootstrap';
 import { useRouter } from 'next/router';
+import Banner from '../../components/Banner';
+import AnalysisForm from '../../components/AnalysisForm';
 import FileCard from '../../components/FileCard';
 import FolderCard from '../../components/FolderCard';
-import Banner from '../../components/Banner';
 
 export default function Snapshot() {
   const router = useRouter();
@@ -23,7 +24,7 @@ export default function Snapshot() {
     }
 
     if (snapshotID) fetchSnapshot();
-  }, [snapshotID])
+  }, [snapshotID]);
 
   function onSearch(e) {
     e.preventDefault();
@@ -41,8 +42,11 @@ export default function Snapshot() {
     )
   });
   return (
-    <>
+    <Container fluid className='p-0'>
       <Banner />
+      <Container className='text-center my-2'>
+        <h3 className='fw-bold'>Snapshot {snapshotID}</h3>
+      </Container>
       <Form onSubmit={onSearch} className='m-2'>
         <FormControl
           type='search'
@@ -51,7 +55,8 @@ export default function Snapshot() {
           onChange={e => setQuery(e.target.value)}
         />
       </Form>
+      <AnalysisForm snapshotID={snapshotID} />
       <ListGroup>{fileItems}</ListGroup>
-    </>
+    </Container>
   );
 }
