@@ -15,7 +15,7 @@ export default function Banner() {
             src={Logo}
             width={45}
             height={40}
-            className='avatar-icon'
+            className='avatar-logo'
             alt='Avatar'
             />
             <Navbar.Brand href='/' style={{color:"lightgreen"}}>AceDrive</Navbar.Brand>
