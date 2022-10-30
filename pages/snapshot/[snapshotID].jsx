@@ -11,11 +11,12 @@ import AnalysisForm from '../../components/AnalysisForm';
 import { Container, ListGroup, Form, FormControl } from 'react-bootstrap';
 
 export default function Snapshot() {
+  
   const router = useRouter();
   const { snapshotID } = router.query;
-  const [snapshot, setSnapshot] = useState([]);
+
   const [query, setQuery] = useState('');
-  const [files,setFiles] = useState([]);
+  const [snapshot, setSnapshot] = useState([]);
   const [filteredFiles, setFilteredFiles] = useState([]);
 
   useEffect(() => {
@@ -25,7 +26,6 @@ export default function Snapshot() {
           params: { id: snapshotID }
         });
         setSnapshot(snapshot.data);
-        setFiles(snapshot.data.files);
         setFilteredFiles(snapshot.data.files);
       } catch (err) {
         alert('This is not a valid snapshot ID.');
@@ -45,11 +45,10 @@ export default function Snapshot() {
       } catch (err) {
         alert('Nothing Matched The Query');
       }
-
   }
+
   const searchSnapShot = async (e) => {
-    e.preventDefault();
-    
+    e.preventDefault();  
     const searchedFiles = await fetchSnapshotSearch(snapshotID,query);
     setFilteredFiles(searchedFiles);
   }
@@ -74,7 +73,6 @@ export default function Snapshot() {
         }}
         />
       </Form>
-
       
       <AnalysisForm snapshotID={snapshotID} />
 

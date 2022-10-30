@@ -1,89 +1,95 @@
-import lodash from 'lodash'
-import { getToken } from 'next-auth/jwt';
-import Snapshot from '../../lib/models/Snapshot';
+import { getToken } from "next-auth/jwt";
+import Snapshot from "../../lib/models/Snapshot";
+import {
+    defaultMethod,
+    methodForSharing,
+    methodForOwnerFrom,
+    methodToCheckFolder,
+    methodForPermissions,
+} from "../../Utils/searchMethods";
 
 const queryOperator = {
-  "drive":"driveName",
-  "owner":"owners",
-  "creator":"user",//TODO:Check Where We can get this key
-  "from":"sharingUser",
-  "to":"user",
-  "readable":"user",
-  "writable":"user",
-  "sharable":"user",
-  "name":"regexp",
-  "inFolder":"regexp",
-  "folder":"regexp",
-  "path":"path",
-  "sharing":"none",
-  "sharing":"anyone",
-  "sharing":"individual",
-  "sharing":"domain",
-  "foldersonly":"true"
-}
+    drive: { key: "driveName", method: "defaultMethod" },
+    owner: { key: "owners", method: "methodForOwnerFrom" },
+    creator: "user", //TODO:Check Where We can get this key
+    from: { key: "sharingUser", method: "methodForOwnerFrom" },
+    to: "user",
+    readable: {
+        key: "permissions",
+        method: "methodForPermissions",
+        role: "reader",
+    },
+    writable: {
+        key: "permissions",
+        method: "methodForPermissions",
+        role: "writer",
+    },
+    sharable: {
+        key: "permissions",
+        method: "methodForPermissions",
+        role: "owner",
+    },
+    name: "regexp",
+    inFolder: "regexp",
+    folder: "regexp",
+    path: { key: "path", method: "defaultMethod" },
+    sharing: {
+        key: ["none", "anyone"],
+        method: "methodForSharing",
+    }, //TODO: Work on Domain
+    foldersonly: { key: "isFolder", method: "methodToCheckFolder" },
+};
+
+const queryOperations = {
+    defaultMethod: defaultMethod,
+    methodForOwnerFrom: methodForOwnerFrom,
+    methodForPermissions: methodForPermissions,
+    methodForSharing: methodForSharing,
+    methodToCheckFolder: methodToCheckFolder,
+};
 
 export default async function getSnapshot(req, res) {
-  const token = await getToken({ req });
-  if (token) {
-    const snapshotId = req.query.id;
-    const searchFor = req.query.query;
-    const snapshot = await Snapshot.findById(snapshotId);
-    const filteredResults = await searchSnapShot (snapshot.files , searchFor);
-    res.json(filteredResults);
-  } else {
-    res.end('Invalid session.');
-  }
+    const token = await getToken({ req });
+    if (token) {
+        const snapshotId = req.query.id;
+        const searchFor = req.query.query;
+        const snapshot = await Snapshot.findById(snapshotId);
+        const filteredResults = await searchSnapShot(snapshot.files, searchFor);
+        res.json(filteredResults);
+    } else {
+        res.end("Invalid session.");
+    }
 }
 
-const searchSnapShot = (files,query) => {
-  const splitQuery = query.split(":");
+const searchSnapShot = async (files, query) => {
+    const splitQuery = query.split(":");
     let searchForKeywords = query;
     let fieldTofetch = "name";
 
-    if(splitQuery.length > 0){
-      if(Object.keys(queryOperator).includes(splitQuery[0])){
-        fieldTofetch = queryOperator[splitQuery[0]];
+    if (splitQuery.length > 0 && splitQuery[0] !== "sharing") {
+        if (Object.keys(queryOperator).includes(splitQuery[0])) {
+            fieldTofetch = queryOperator[splitQuery[0]].key;
+            searchForKeywords = splitQuery[1];
+        }
+    }
+
+    if (query === "" || searchForKeywords === "") {
+        return files;
+    }
+
+    const queryObject = queryOperator[splitQuery[0]];
+
+    let roleToSearchFor = queryObject?.role;
+    if (splitQuery[0] === "sharing") {
+        fieldTofetch = "permissions";
         searchForKeywords = splitQuery[1];
-      }
+        if (queryObject.key.includes(searchForKeywords)) {
+            roleToSearchFor = searchForKeywords;
+        } else roleToSearchFor = "individual";
     }
+    const searchedFiles = await queryOperations[
+        queryObject?.method ? queryObject.method : "defaultMethod"
+    ](files, fieldTofetch, searchForKeywords, roleToSearchFor);
 
-    if (query === '' || searchForKeywords === ''){
-      return (files);
-    }
-
-    let searchedFiles = [];
-
-    if(splitQuery[0] === "owner" || splitQuery[0] === "from" ){
-      searchedFiles = files.filter((file)=>{
-        const fileDetails = file[fieldTofetch];
-        let matchedDetails = [];
-        if(Array.isArray(fileDetails)){
-          matchedDetails = lodash.filter(fileDetails,(detail)=>{
-            console.log(detail)
-            if(detail.displayName.toLowerCase().search(searchForKeywords.toLowerCase()) !== -1){
-              return detail;
-            }
-          })
-          if(matchedDetails.length > 0){
-            return file;
-          }
-        }else{
-          if(fileDetails){
-            console.log(fileDetails)
-            if(fileDetails?.displayName.toLowerCase().search(searchForKeywords.toLowerCase()) !== -1){
-              return file;
-            }
-          }
-        }
-      })
-    }else{
-      searchedFiles = files.filter((file)=>{
-        const fileName = file[fieldTofetch].toLowerCase();
-        if(fileName.search(searchForKeywords.toLowerCase()) !== -1){
-          return file;
-        }
-      })
-    }
-    
     return searchedFiles;
-}
+};
