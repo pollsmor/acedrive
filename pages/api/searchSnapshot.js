@@ -31,13 +31,15 @@ const queryOperator = {
         role: "owner",
     },
     name: {
-        key: "permissions",
+        key: "name",
         method: "methodForRegex",
     },
+    //TODO:Work on Content Files
     inFolder: {
         key: "permissions",
         method: "methodForRegex",
     },
+    //TODO:Work on Content Files
     folder: {
         key: "permissions",
         method: "methodForRegex",

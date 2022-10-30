@@ -125,4 +125,13 @@ export const methodToCheckFolder = (files, fieldTofetch, searchForKeywords) => {
     return searchedFiles;
 };
 
-export const methodForRegex = () => {};
+export const methodForRegex = (files, fieldTofetch, searchForKeywords) => {
+    const regex = new RegExp(searchForKeywords.replaceAll("/", ""), "g");
+    const searchedFiles = files.filter((file) => {
+        const fileName = file[fieldTofetch];
+        if (fileName.search(regex) !== -1) {
+            return file;
+        }
+    });
+    return searchedFiles;
+};
