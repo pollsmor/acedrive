@@ -39,6 +39,7 @@ export default function Snapshot() {
 
   const searchSnapshot = async (e) => {
     e.preventDefault();  
+    
     const fetchSnapshotSearch = async (snapshotID, query) =>{
       try {
         const results = await axios.get('/api/searchSnapshot', { 
@@ -49,6 +50,7 @@ export default function Snapshot() {
         alert('Invalid snapshot ID searched.');
       }
     }
+
     const searchedFiles = await fetchSnapshotSearch(snapshotID, query);
     setFilteredFiles(searchedFiles);
   }
