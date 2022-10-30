@@ -124,3 +124,5 @@ export const methodToCheckFolder = (files, fieldTofetch, searchForKeywords) => {
     });
     return searchedFiles;
 };
+
+export const methodForRegex = () => {};

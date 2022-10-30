@@ -6,6 +6,7 @@ import {
     methodForOwnerFrom,
     methodToCheckFolder,
     methodForPermissions,
+    methodForRegex,
 } from "../../Utils/searchMethods";
 
 const queryOperator = {
@@ -29,9 +30,18 @@ const queryOperator = {
         method: "methodForPermissions",
         role: "owner",
     },
-    name: "regexp",
-    inFolder: "regexp",
-    folder: "regexp",
+    name: {
+        key: "permissions",
+        method: "methodForRegex",
+    },
+    inFolder: {
+        key: "permissions",
+        method: "methodForRegex",
+    },
+    folder: {
+        key: "permissions",
+        method: "methodForRegex",
+    },
     path: { key: "path", method: "defaultMethod" },
     sharing: {
         key: ["none", "anyone"],
@@ -46,6 +56,7 @@ const queryOperations = {
     methodForPermissions: methodForPermissions,
     methodForSharing: methodForSharing,
     methodToCheckFolder: methodToCheckFolder,
+    methodForRegex: methodForRegex,
 };
 
 export default async function getSnapshot(req, res) {
