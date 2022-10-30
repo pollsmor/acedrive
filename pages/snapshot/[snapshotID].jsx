@@ -43,7 +43,7 @@ export default function Snapshot() {
           params: { id: snapshotID }
         });
         setSnapshot(snapshot.data);
-        setFiles(snapshot.data.files)
+        setFiles(snapshot.data.files);
         setFilteredFiles(snapshot.data.files);
       } catch (err) {
         alert('This is not a valid snapshot ID.');
@@ -54,7 +54,7 @@ export default function Snapshot() {
     if (snapshotID) fetchSnapshot();
   }, [snapshotID]);
 
-  function onSearch(e) {
+  const searchSnapShot = (e) => {
     e.preventDefault();
     
 
@@ -108,8 +108,8 @@ export default function Snapshot() {
       })
     }
     setFilteredFiles(searchedFiles);
-    //setFilteredFiles(SearchQuery(query));
   }
+
   return (
     <Container fluid className='p-0'>
       <Banner />
@@ -117,7 +117,7 @@ export default function Snapshot() {
         <h3 className='fw-bold'>Snapshot {snapshotID}</h3>
         <h6>Taken: {snapshot.date}</h6>
       </Container>
-      <Form onSubmit={onSearch} className='m-2'>
+      <Form onSubmit={searchSnapShot} className='m-2'>
         <FormControl
           type='search'
           placeholder='Search For File'
@@ -125,7 +125,7 @@ export default function Snapshot() {
           onChange={(e) =>{
             setQuery(e.target.value)
             if(e.target.value === ""){
-              onSearch(e)
+              searchSnapShot(e)
             } 
         }}
         />
