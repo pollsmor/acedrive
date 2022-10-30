@@ -13,6 +13,12 @@ html, body {
   margin-left: 8px;
 }
 
+.avatar-logo{
+  border-radius: 50%;
+  margin-right: 8px;
+  margin-bottom: 3px;
+}
+
 .folder {
   border-style: solid;
   border-radius: 15px;

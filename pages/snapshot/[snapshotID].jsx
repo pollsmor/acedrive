@@ -8,7 +8,7 @@ import FileCard from '../../components/FileCard';
 import FolderCard from '../../components/FolderCard';
 import AnalysisForm from '../../components/AnalysisForm';
 
-import { Container, ListGroup, Form, FormControl } from 'react-bootstrap';
+import { Container, ListGroup, Form, FormControl, Pagination } from 'react-bootstrap';
 
 export default function Snapshot() {
   
@@ -18,6 +18,7 @@ export default function Snapshot() {
   const [query, setQuery] = useState('');
   const [snapshot, setSnapshot] = useState([]);
   const [filteredFiles, setFilteredFiles] = useState([]);
+  const [activePage, setActivePage] = useState(1);
 
   useEffect(() => {
     async function fetchSnapshot() {
@@ -36,22 +37,43 @@ export default function Snapshot() {
     if (snapshotID) fetchSnapshot();
   }, [snapshotID]);
 
-  const fetchSnapshotSearch = async(snapshotId,query) =>{
-      try {
-        const results = await axios.get('/api/searchSnapShot', { 
-          params: { id: snapshotId ,query: query}
-        });
-        return (results.data)
-      } catch (err) {
-        alert('Nothing Matched The Query');
-      }
-  }
-
-  const searchSnapShot = async (e) => {
+  const searchSnapshot = async (e) => {
     e.preventDefault();  
-    const searchedFiles = await fetchSnapshotSearch(snapshotID,query);
+    const fetchSnapshotSearch = async (snapshotID, query) =>{
+      try {
+        const results = await axios.get('/api/searchSnapshot', { 
+          params: { id: snapshotID , query: query }
+        });
+        return results.data;
+      } catch (err) {
+        alert('Invalid snapshot ID searched.');
+      }
+    }
+    const searchedFiles = await fetchSnapshotSearch(snapshotID, query);
     setFilteredFiles(searchedFiles);
   }
+
+  // Set up pagination =================================
+  let items = [];
+  const filesPerPage = 10;
+  let amtPages = Math.ceil(filteredFiles.length / filesPerPage);
+  for (let page = 1; page <= amtPages; page++) {
+    items.push(
+      <Pagination.Item
+        key={page}
+        active={page === activePage}
+        onClick={() => setActivePage(page)}
+      >
+        {page}
+      </Pagination.Item>
+    );
+  }
+
+  // Only get files present on a specific page
+  let startFileIdx = filesPerPage * (activePage - 1);
+  let endFileIdx = startFileIdx + filesPerPage;
+  let pageFiles = filteredFiles.slice(startFileIdx, endFileIdx);
+  // ====================================================
 
   return (
     <Container fluid className='p-0'>
@@ -60,17 +82,15 @@ export default function Snapshot() {
         <h3 className='fw-bold'>Snapshot {snapshotID}</h3>
         <h6>Taken: {snapshot.date}</h6>
       </Container>
-      <Form onSubmit={searchSnapShot} className='m-2'>
+      <Form onSubmit={searchSnapshot} className='m-2'>
         <FormControl
           type='search'
-          placeholder='Search For File'
+          placeholder='Search...'
           value={query}
-          onChange={(e) =>{
+          onChange={(e) => {
             setQuery(e.target.value)
-            if(e.target.value === ""){
-              searchSnapShot(e)
-            } 
-        }}
+            if (e.target.value === '') searchSnapshot(e);
+          }}
         />
       </Form>
       
@@ -78,13 +98,30 @@ export default function Snapshot() {
 
       <ListGroup>
         {
-          filteredFiles.map(f =>
+          pageFiles.map(f =>
             <ListGroup.Item key={f.id}>
               { f.isFolder ? <FolderCard file={f} /> : <FileCard file={f} /> }
             </ListGroup.Item>
             )
         }
       </ListGroup>
+      <br />
+      <Pagination className='justify-content-center'>
+        <Pagination.Prev
+          disabled={activePage <= 1}
+          onClick={() => setActivePage(activePage - 1)}
+        >
+          prev
+        </Pagination.Prev>
+        { items }
+        <Pagination.Next
+          disabled={activePage >= amtPages}
+          onClick={() => setActivePage(activePage + 1)}
+        >
+          next
+        </Pagination.Next>
+      </Pagination>
+
     </Container>
   );
 }

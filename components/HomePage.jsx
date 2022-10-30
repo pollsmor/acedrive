@@ -47,7 +47,7 @@ export default function HomePage(props) {
             />
           })}
         </>
-      ) : <h4>You do not have any snapshots. Take one to begin.</h4> }
+      ) : <h5 style={{textAlign: "left", color:"gray"}}>You do not have any snapshots. Take one to begin!</h5> }
       </Container>
     </>
   );
