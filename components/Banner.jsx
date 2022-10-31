@@ -33,7 +33,7 @@ export default function Banner() {
               alt='Avatar' 
             />
               <NavDropdown.Item >
-                <Nav.Link onClick={() => signOut({ callbackUrl: '/' }) } variant="dark">Sign out</Nav.Link>
+                <Nav.Link onClick={() => signOut({ callbackUrl: '/' }) } variant="dark" style={{color:"red"}}>Sign out</Nav.Link>
               </NavDropdown.Item>
             </NavDropdown>
             {/*
