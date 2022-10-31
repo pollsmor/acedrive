@@ -17,7 +17,7 @@ export default function OneDriveTest() {
     if (session) getFiles();
   }, [session])
 
-  return (
+  return session ? (
     <ListGroup>
       { files.map(f => {
         return (
@@ -27,5 +27,5 @@ export default function OneDriveTest() {
         );
       }) }
     </ListGroup>
-  );
+   ) : 'Not signed in.';
 };

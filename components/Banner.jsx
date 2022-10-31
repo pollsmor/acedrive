@@ -18,10 +18,10 @@ export default function Banner() {
             className='avatar-logo'
             alt='Avatar'
             />
-            <Navbar.Brand href='/' style={{color:"lightgreen"}}>AceDrive</Navbar.Brand>
+            <Navbar.Brand href='/' style={{color:'lightgreen'}}>AceDrive</Navbar.Brand>
           </Nav>
           <Nav>
-          <Nav.Link >{session.user.email}</Nav.Link>
+          <Nav.Link>{session.user.email}</Nav.Link>
           <Container>
 
             <NavDropdown drop={'start'} menuVariant="dark">
@@ -32,10 +32,14 @@ export default function Banner() {
               className='avatar' 
               alt='Avatar' 
             />
-              <NavDropdown.Item >
-                {/* Using <Nav.Link> here causes a warning. */}
-                <Button onClick={() => signOut({ callbackUrl: '/' }) } variant="dark" style={{color:"red"}}>Sign out</Button>
+              <NavDropdown.Item 
+                onClick={() => signOut({ callbackUrl: '/' })} 
+                variant='dark' 
+                style={{ color: 'red' }}
+              >
+                Sign out
               </NavDropdown.Item>
+              <NavDropdown.Item href='/OneDriveTest'>OneDrive Test</NavDropdown.Item>
             </NavDropdown>
             {/*
             <Nav.Link onClick={() => signOut({ callbackUrl: '/' })}>Sign out</Nav.Link> 

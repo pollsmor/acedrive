@@ -10,6 +10,7 @@ export default async function getOneDriveFiles(req, res) {
       drive: 'me',
       driveId: ''
     });
+
     res.json(files.value);
   } else {
     res.end('Invalid session.');

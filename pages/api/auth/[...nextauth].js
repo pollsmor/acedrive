@@ -69,9 +69,11 @@ export default NextAuth({
     async jwt({ token, user, account }) {
       // Initial sign in, user/account are undefined in the future
       if (account && user) {
-        let storedUser = new User(user); // Matches Mongoose model
+        // stonybrook.edu accounts don't have avatars.
         if (account.provider === 'microsoft')
-          storedUser.image = 'https://i.imgur.com/4FhvzzY.jpg';
+          user.image = 'https://i.imgur.com/4FhvzzY.jpg';
+
+        let storedUser = new User(user); // Matches Mongoose model
         storedUser.save(err => {
           if (err) {
             if (err.name === 'MongoServerError') {

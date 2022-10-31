@@ -20,7 +20,7 @@ export default async function takeSnapshot(req, res) {
   const token = await getToken({ req });
   if (token && req.method === 'POST') {
     auth.setCredentials({
-      access_token: req.body.accessToken
+      access_token: token.accessToken
     });
 
     console.time('Snapshot time')

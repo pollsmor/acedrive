@@ -20,9 +20,7 @@ export default function HomePage(props) {
 
   async function takeSnapshot() {
     setLoading(true);
-    let res = await axios.post('/api/takeSnapshot', {
-      accessToken: props.accessToken
-    });
+    let res = await axios.post('/api/takeSnapshot');
     
     // Retrieve ID of new snapshot instead of querying getUser again
     let new_array = [res.data.id, ...snapshotIDs];
