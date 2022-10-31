@@ -1,6 +1,7 @@
 import axios from 'axios';
 import NextAuth from 'next-auth';
 import GoogleProvider from 'next-auth/providers/google';
+import AzureADProvider from 'next-auth/providers/azure-ad';
 import mongoose from 'mongoose';
 import User from '../../../lib/models/User';
 
@@ -10,15 +11,8 @@ const options = {
 }
 mongoose.connect(process.env.MONGODB_URI), options; // Options to handles dupes
 const googleScopes = ['openid', 'email', 'profile', 'https://www.googleapis.com/auth/drive'];
-const GOOGLE_AUTHORIZATION_URL = 
-  'https://accounts.google.com/o/oauth2/v2/auth?' +
-  new URLSearchParams({
-    prompt: 'consent',
-    access_type: 'offline',
-    response_type: 'code',
-    scope: googleScopes.join(' ')
-  });
 const microsoftScopes = ['openid', 'email', 'profile', 'offline_access', 'files.readwrite.all'];
+
 
 // Takes a token, and returns a new, updated token
 async function refreshAccessToken(token) {
@@ -29,8 +23,8 @@ async function refreshAccessToken(token) {
     params.client_id = process.env.GOOGLE_ID,
     params.client_secret = process.env.GOOGLE_SECRET
   } else if (token.provider === 'microsoft') {
-    endpoint = 'https://login.microsoftonline.com/f729dc92-7f20-4c3a-a702-208d6bb1299c/oauth2/v2.0/token';
-    params.client_id = process.env.MICROSOFT_ID,
+    endpoint = `https://login.microsoftonline.com/${process.env.MICROSOFT_TENANT_ID}/oauth2/v2.0/token`;
+    params.client_id = process.env.MICROSOFT_CLIENT_ID,
     params.client_secret = process.env.MICROSOFT_SECRET
   }
 
@@ -49,35 +43,35 @@ export default NextAuth({
     GoogleProvider({
       clientId: process.env.GOOGLE_ID,
       clientSecret: process.env.GOOGLE_SECRET,
-      authorization: GOOGLE_AUTHORIZATION_URL
+      authorization: {
+        params: {
+          prompt: 'consent',
+          access_type: 'offline',
+          response_type: 'code',
+          scope: googleScopes.join(' ')
+        }
+      }
     }),
-    // A custom provider for signing in with Microsoft.
-    {
+    AzureADProvider({
       id: 'microsoft',
       name: 'Microsoft',
-      type: 'oauth',
-      wellKnown: 'https://login.microsoftonline.com/f729dc92-7f20-4c3a-a702-208d6bb1299c/v2.0/.well-known/openid-configuration',
-      authorization: { params: { scope: microsoftScopes.join(' ') }},
-      idToken: true,
-      checks: ['pkce', 'state'],
-      clientId: process.env.MICROSOFT_ID,
+      clientId: process.env.MICROSOFT_CLIENT_ID,
       clientSecret: process.env.MICROSOFT_SECRET,
-      profile(profile) {
-        return {
-          id: profile.sub,
-          name: profile.name,
-          email: profile.email,
-          // Blank avatar - stonybrook.edu accounts cannot set avatars.
-          image: 'https://i.imgur.com/4FhvzzY.jpg'
-        };
+      tenantId: process.env.MICROSOFT_TENANT_ID,
+      authorization: {
+        params: {
+          scope: microsoftScopes.join(' ')
+        }
       }
-    }
+    })
   ],
   callbacks: {
     async jwt({ token, user, account }) {
       // Initial sign in, user/account are undefined in the future
       if (account && user) {
         let storedUser = new User(user); // Matches Mongoose model
+        if (account.provider === 'microsoft')
+          storedUser.image = 'https://i.imgur.com/4FhvzzY.jpg';
         storedUser.save(err => {
           if (err) {
             if (err.name === 'MongoServerError') {

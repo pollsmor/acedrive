@@ -1,5 +1,5 @@
 import Image from 'next/future/image';
-import { Container, Nav, Navbar, NavDropdown } from 'react-bootstrap';
+import { Container, Nav, Navbar, NavDropdown, Button } from 'react-bootstrap';
 import { useSession, signOut } from 'next-auth/react';
 import Logo from '../public/favicon.ico'
 
@@ -33,7 +33,8 @@ export default function Banner() {
               alt='Avatar' 
             />
               <NavDropdown.Item >
-                <Nav.Link onClick={() => signOut({ callbackUrl: '/' }) } variant="dark" style={{color:"red"}}>Sign out</Nav.Link>
+                {/* Using <Nav.Link> here causes a warning. */}
+                <Button onClick={() => signOut({ callbackUrl: '/' }) } variant="dark" style={{color:"red"}}>Sign out</Button>
               </NavDropdown.Item>
             </NavDropdown>
             {/*
