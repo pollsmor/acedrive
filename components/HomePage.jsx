@@ -32,7 +32,7 @@ export default function HomePage(props) {
 
   return (
     <>
-      <div class="pagebox">
+      <div className="pagebox">
       <Banner />
       <Container fluid className='mt-2'>
         <Button onClick={takeSnapshot} className="button-type1">Take snapshot</Button> 
