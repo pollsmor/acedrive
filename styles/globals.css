@@ -25,3 +25,26 @@ html, body {
   border-width: 2px;
   margin: 5px;
 }
+
+.loading-modal .modal-content{
+  background-color: rgb(26, 24, 24);
+} 
+
+.loading-modal-title{
+  color: lightgreen;
+} 
+
+.loading-modal-text{
+  color: white;
+  margin: 10px;
+}
+
+.loading-spinner{
+  color: lightblue;
+}
+
+.homepage-text{
+  margin-top: 20px;
+  text-align: left;
+  color: gray;
+}

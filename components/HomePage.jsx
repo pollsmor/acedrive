@@ -47,7 +47,7 @@ export default function HomePage(props) {
             />
           })}
         </>
-      ) : <h5 style={{textAlign: "left", color:"gray"}}>You do not have any snapshots. Take one to begin!</h5> }
+      ) : <h5 className='homepage-text'>You do not have any snapshots. Take one to begin!</h5> }
       </Container>
     </>
   );
