@@ -28,12 +28,25 @@ export default function HomePage(props) {
     setLoading(false);
   }
 
+  const [hovering, setHovering] = useState(false);
+  const handleMouseEnter = () => {
+    setHovering(true);
+  };
+
+  const handleMouseLeave = () => {
+    setHovering(false);
+  };
+
   return (
     <>
       <div className="pagebox">
       <Banner />
       <Container fluid className='mt-2'>
-        <Button onClick={takeSnapshot} className="button-type1">Take snapshot</Button> 
+        <Button onClick={takeSnapshot} style={{marginLeft:"5px", marginTop:"20px", boxShadow:'inset',
+                color:"whitesmoke", borderColor:"#212529", backgroundColor: hovering? 'darkgray' : 'rgb(82,82,82)'}} 
+                onMouseEnter={handleMouseEnter}
+                onMouseLeave={handleMouseLeave}>
+          Take snapshot</Button> 
         <LoadingModal show={loading}></LoadingModal>
         { snapshotIDs.length > 0 ? (
         <>
@@ -46,7 +59,10 @@ export default function HomePage(props) {
             />
           })}
         </>
-      ) : <h5 className='homepage-text'>You do not have any snapshots. Take one to begin!</h5> }
+      ) : <h5 style={{marginTop: '20px',textAlign: 'left',color: "lightgray",marginLeft: "5px"}}>
+            You do not have any snapshots. Take one to begin!
+          </h5> 
+        }
       </Container>
       </div>
     </>
