@@ -17,6 +17,7 @@
     "mongoose": "^6.6.5",
     "next": "12.3.1",
     "next-auth": "^4.13.0",
+    "onedrive-api": "^1.0.4",
     "react": "18.2.0",
     "react-bootstrap": "^2.5.0",
     "react-bootstrap-range-slider": "^3.0.8",

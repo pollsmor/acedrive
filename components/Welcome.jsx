@@ -31,6 +31,8 @@ export default function Welcome() {
 
       <br />
       <Button size='lg' onClick={() => signIn('google')}>Sign in with Google</Button>
+      <br /><br />
+      <Button size='lg' onClick={() => signIn('microsoft')}>Sign in with Microsoft</Button>
     </Container>
   );
 }
