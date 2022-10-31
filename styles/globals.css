@@ -46,5 +46,28 @@ html, body {
 .homepage-text{
   margin-top: 20px;
   text-align: left;
-  color: gray;
+  color: lightgray;
+  margin-left: 5px;
+}
+
+.pagebox{
+  background-color: #212529;
+  height: 100vh;
+}
+
+.banner-navbar{
+  border-bottom: 2px solid lightgreen;
+}
+
+.button-type1{
+  background-color: rgb(82, 82, 82) !important;
+  border-color: #212529 !important;
+  color: whitesmoke !important;
+  box-shadow: inset !important;
+  margin-top: 20px !important;
+  margin-left: 5px !important;
+}
+
+.button-type1:hover{
+  background-color: darkgray !important;
 }

@@ -32,9 +32,10 @@ export default function HomePage(props) {
 
   return (
     <>
+      <div class="pagebox">
       <Banner />
       <Container fluid className='mt-2'>
-        <Button onClick={takeSnapshot}>Take snapshot</Button> 
+        <Button onClick={takeSnapshot} className="button-type1">Take snapshot</Button> 
         <LoadingModal show={loading}></LoadingModal>
         { snapshotIDs.length > 0 ? (
         <>
@@ -49,6 +50,7 @@ export default function HomePage(props) {
         </>
       ) : <h5 className='homepage-text'>You do not have any snapshots. Take one to begin!</h5> }
       </Container>
+      </div>
     </>
   );
 }

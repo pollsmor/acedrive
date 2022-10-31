@@ -8,7 +8,7 @@ export default function Banner() {
 
   if (session) {
     return (
-      <Navbar bg='dark' variant='dark' sticky='top'>
+      <Navbar bg='dark' variant='dark' sticky='top' className='banner-navbar'>
         <Container fluid>
           <Nav>
             <Image
