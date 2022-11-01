@@ -22,7 +22,7 @@ export default function OneDriveTest() {
       { files.map(f => {
         return (
           <ListGroup.Item key={f.id}>
-            { JSON.stringify(f) }
+            <pre>{ JSON.stringify(f, null, 2) }</pre>
           </ListGroup.Item>
         );
       }) }
