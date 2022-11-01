@@ -30,6 +30,7 @@ async function refreshAccessToken(token) {
 
   let res = await axios.post(endpoint, new URLSearchParams(params));
   return {
+    provider: token.provider,
     accessToken: res.data.access_token,
     // Google returns an expires_in attribute set to 3600 seconds. For Microsoft, it varies.
     accessTokenExpires: Date.now() + res.data.expires_in * 1000,
