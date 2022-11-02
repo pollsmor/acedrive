@@ -7,6 +7,7 @@ import Banner from '../../components/Banner';
 import FileCard from '../../components/FileCard';
 import FolderCard from '../../components/FolderCard';
 import AnalysisForm from '../../components/AnalysisForm';
+import FileTable from '../../components/FileTable';
 
 import { Container, ListGroup, Form, FormControl, Pagination } from 'react-bootstrap';
 
@@ -105,15 +106,13 @@ export default function Snapshot() {
       
       <AnalysisForm snapshotID={snapshotID} />
       
-      {pageFiles.length > 0 ? <ListGroup>
-        {
-          pageFiles.map((f) =>{
+        {pageFiles.length > 0 && query && filteredFiles.length > 0 ? 
+        <FileTable pageFiles={pageFiles} /> : <ListGroup>
+          {pageFiles.map((f) =>{
             return (<ListGroup.Item key={f.id}>
               { f.isFolder ? <FolderCard file={f} /> : <FileCard file={f} /> }
             </ListGroup.Item>)}
-            )
-        }
-      </ListGroup> : <p>Nothing Matched Query!</p>
+            )}</ListGroup>
       }
       
       <br />
