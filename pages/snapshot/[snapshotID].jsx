@@ -17,25 +17,9 @@ export default function Snapshot() {
 
   const [query, setQuery] = useState('');
   const [snapshot, setSnapshot] = useState([]);
-  const [filteredFiles, setFilteredFiles] = useState([]);
+  const [pageFiles,setPageFiles] = useState([])
   const [activePage, setActivePage] = useState(1);
-
-  useEffect(() => {
-    async function fetchSnapshot() {
-      try {
-        let snapshot = await axios.get('/api/getSnapshot', { 
-          params: { id: snapshotID }
-        });
-        setSnapshot(snapshot.data);
-        setFilteredFiles(snapshot.data.files);
-      } catch (err) {
-        alert('This is not a valid snapshot ID.');
-        window.location.href = '/';
-      }
-    }
-
-    if (snapshotID) fetchSnapshot();
-  }, [snapshotID]);
+  const [filteredFiles, setFilteredFiles] = useState([]);
 
   const searchSnapshot = async (e) => {
     e.preventDefault();  
@@ -50,12 +34,12 @@ export default function Snapshot() {
         alert('Invalid snapshot ID searched.');
       }
     }
-
+    
     const searchedFiles = await fetchSnapshotSearch(snapshotID, query);
     setFilteredFiles(searchedFiles);
   }
-
-  // Set up pagination =================================
+  
+    // Set up pagination =================================
   let items = [];
   const filesPerPage = 10;
   let amtPages = Math.ceil(filteredFiles.length / filesPerPage);
@@ -71,11 +55,34 @@ export default function Snapshot() {
     );
   }
 
-  // Only get files present on a specific page
+    // Only get files present on a specific page
   let startFileIdx = filesPerPage * (activePage - 1);
   let endFileIdx = startFileIdx + filesPerPage;
-  let pageFiles = filteredFiles.slice(startFileIdx, endFileIdx);
+
   // ====================================================
+
+  useEffect(() => {
+    async function fetchSnapshot() {
+      try {
+        let snapshot = await axios.get('/api/getSnapshot', { 
+          params: { id: snapshotID }
+        });
+        setSnapshot(snapshot.data);
+        setFilteredFiles(snapshot.data.files);
+      } catch (err) {
+        alert('This is not a valid snapshot ID.');
+        window.location.href = '/';
+      }
+    }
+    
+    if (snapshotID) fetchSnapshot();
+  }, [snapshotID]);
+  
+  useEffect(()=>{
+    setPageFiles(filteredFiles.slice(startFileIdx, endFileIdx))
+  },[filteredFiles,startFileIdx,endFileIdx])
+
+
 
   return (
     <Container fluid className='p-0'>
@@ -97,16 +104,18 @@ export default function Snapshot() {
       </Form>
       
       <AnalysisForm snapshotID={snapshotID} />
-
-      <ListGroup>
+      
+      {pageFiles.length > 0 ? <ListGroup>
         {
-          pageFiles.map(f =>
-            <ListGroup.Item key={f.id}>
+          pageFiles.map((f) =>{
+            return (<ListGroup.Item key={f.id}>
               { f.isFolder ? <FolderCard file={f} /> : <FileCard file={f} /> }
-            </ListGroup.Item>
+            </ListGroup.Item>)}
             )
         }
-      </ListGroup>
+      </ListGroup> : <p>Nothing Matched Query!</p>
+      }
+      
       <br />
       <Pagination className='justify-content-center'>
         <Pagination.Prev
