@@ -4,10 +4,12 @@ import { Container, Button } from 'react-bootstrap';
 import Banner from './Banner';
 import SnapshotCard from './SnapshotCard';
 import LoadingModal from './LoadingModal';
+import UploadFileModal from './UploadFIleModal';
 
 export default function HomePage(props) {
   const [snapshotIDs, setSnapshotIDs] = useState([]);
   const [loading, setLoading] = useState(false);
+  const [uploading, setUploading] = useState(false);
 
   useEffect(() => {
     async function fetchUser() {
@@ -37,6 +39,23 @@ export default function HomePage(props) {
     setHovering(false);
   };
 
+  const [groupHovering, setGroupHovering] = useState(false);
+  const handleGroupMouseEnter = () => {
+    setGroupHovering(true);
+  };
+
+  const handleGroupMouseLeave = () => {
+    setGroupHovering(false);
+  };
+
+  const handleUpload = () => {
+    setUploading(true);
+  }
+
+  const hideUpload = () => {
+    setUploading(false)
+  }
+
   return (
     <>
       <div className="pagebox">
@@ -47,6 +66,12 @@ export default function HomePage(props) {
                 onMouseEnter={handleMouseEnter}
                 onMouseLeave={handleMouseLeave}>
           Take snapshot</Button> 
+        <Button onClick={handleUpload} style={{marginLeft:"5px", marginTop:"20px", boxShadow:'inset',
+                color:"whitesmoke", borderColor:"#212529", backgroundColor: groupHovering? 'darkgray' : 'rgb(82,82,82)'}} 
+                onMouseEnter={handleGroupMouseEnter}
+                onMouseLeave={handleGroupMouseLeave}>
+          Upload Group Snapshot</Button> 
+        <UploadFileModal show={uploading} closeCallback={hideUpload}></UploadFileModal>
         <LoadingModal show={loading}></LoadingModal>
         { snapshotIDs.length > 0 ? (
         <>

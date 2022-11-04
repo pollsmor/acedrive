@@ -13,6 +13,7 @@
     "bootstrap": "^5.2.2",
     "google-auth-library": "^8.5.2",
     "googleapis": "^108.0.0",
+    "htmlparser2": "^8.0.1",
     "lodash": "^4.17.21",
     "mongoose": "^6.6.5",
     "next": "12.3.1",
@@ -21,6 +22,7 @@
     "react-bootstrap": "^2.5.0",
     "react-bootstrap-range-slider": "^3.0.8",
     "react-dom": "18.2.0",
+    "react-dropzone": "^14.2.3",
     "sharp": "^0.31.1"
   },
   "devDependencies": {
