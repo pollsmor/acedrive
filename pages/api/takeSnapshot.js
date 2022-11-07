@@ -105,13 +105,20 @@ async function populateMissingFields(all_files, root_id) {
       if (driveIdToName.has(file.driveId)) 
         file.driveName = driveIdToName.get(file.driveId);
       else {
-        let driveRes = await drive.drives.get({
-          driveId: file.driveId, 
-          fields: 'name', 
-          supportsAllDrives: true 
-        });
-        file.driveName = driveRes.data.name;
-        driveIdToName.set(file.driveId, file.driveName);
+        try {
+          let driveRes = await drive.drives.get({
+            driveId: file.driveId, 
+            fields: 'name', 
+            supportsAllDrives: true 
+          });
+          file.driveName = driveRes.data.name;
+          driveIdToName.set(file.driveId, file.driveName);
+        }
+        catch(err){
+          // if we can't find this driveID, then its a drive we don't have access to
+          file.driveName = "Unknown Drive"
+          driveIdToName.set(file.driveId, "Unknown Drive")
+        }
       }
 
       // Get permmissions
