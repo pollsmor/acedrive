@@ -25,7 +25,6 @@ export default function Snapshot() {
 
   const searchHandler = async (e) => {  
     e.preventDefault();  
-    console.log("searching")
 
     if (query === "") { 
       setFilteredFiles(snapshot.files)
@@ -33,8 +32,6 @@ export default function Snapshot() {
     }
 
     let searchedFiles = searchSnapshot(snapshot.files, query)
-    console.log(searchedFiles)
-    return
     setFilteredFiles(searchedFiles);
   }
   

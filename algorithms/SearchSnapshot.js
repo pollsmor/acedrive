@@ -60,7 +60,6 @@ const queryOperations = {
 };
 
 function evaluateOperation(files, operator, groups) {
-    return [operator]
     let indexOfColon = operator.indexOf(":")
     if (indexOfColon < 0) {
         return {status: "error", msg: "Invalid Operator"} 
