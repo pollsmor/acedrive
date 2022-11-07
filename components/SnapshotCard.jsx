@@ -11,11 +11,11 @@ export default function SnapshotCard(props) {
       className='my-3'
     >
       <Card.Body>
-          <Card.Title>
+          <Card.Text>
             <Link href={`/${type}/${id}`}>
               {`${props.position + 1}. ${id}`}
             </Link>
-          </Card.Title>
+          </Card.Text>
       </Card.Body>
     </Card>
   );

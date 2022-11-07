@@ -1,6 +1,6 @@
 import axios from 'axios';
 import { useState, useEffect} from 'react';
-import { Container, Button, Row, Col } from 'react-bootstrap';
+import { Container, Button, Row, Col, ListGroup } from 'react-bootstrap';
 import Banner from './Banner';
 import SnapshotCard from './SnapshotCard';
 import LoadingModal from './LoadingModal';
@@ -65,36 +65,65 @@ export default function HomePage(props) {
       <div className="pagebox">
       <Banner />
       <Container fluid className='mt-2' style={{ color: 'white' }}>
-        <Button onClick={takeSnapshot} style={{marginLeft:"5px", marginTop:"20px", boxShadow:'inset',
-                color:"whitesmoke", borderColor:"#212529", backgroundColor: hovering? 'darkgray' : 'rgb(82,82,82)'}} 
-                onMouseEnter={handleMouseEnter}
-                onMouseLeave={handleMouseLeave}>
-          Take snapshot</Button> 
-        <Button onClick={handleUpload} style={{marginLeft:"5px", marginTop:"20px", boxShadow:'inset',
-                color:"whitesmoke", borderColor:"#212529", backgroundColor: groupHovering? 'darkgray' : 'rgb(82,82,82)'}} 
-                onMouseEnter={handleGroupMouseEnter}
-                onMouseLeave={handleGroupMouseLeave}>
-          Upload Group Snapshot</Button> 
-        <UploadFileModal show={uploading} closeCallback={hideUpload}></UploadFileModal>
-        <LoadingModal show={loading}></LoadingModal>
+        <Button 
+          onClick={takeSnapshot} 
+          style={{
+            marginLeft:"5px", 
+            marginTop:"20px", 
+            boxShadow:'inset',
+            color:"whitesmoke", 
+            borderColor:"#212529", 
+            backgroundColor: hovering? 'darkgray' : 'rgb(82,82,82)'
+          }} 
+          onMouseEnter={handleMouseEnter}
+          onMouseLeave={handleMouseLeave}
+        >
+          Take snapshot
+        </Button> 
+        { props.session.provider === 'google' ? (
+          <>
+            <Button 
+              onClick={handleUpload} 
+              style={{
+                marginLeft:"5px", 
+                marginTop:"20px", 
+                boxShadow:'inset',
+                color:"whitesmoke", borderColor:"#212529", 
+                backgroundColor: groupHovering? 'darkgray' : 'rgb(82,82,82)'
+              }} 
+              onMouseEnter={handleGroupMouseEnter}
+              onMouseLeave={handleGroupMouseLeave}
+            >
+              Upload Group Snapshot
+            </Button> 
+            <UploadFileModal show={uploading} closeCallback={hideUpload} />
+          </>
+        ) : null }
 
-        <h3>Previous search queries</h3>
-        { queries.slice(0, 5).map((q, idx) => {
-          // Only have the first 5 search queries to avoid clogging up the page
-          return (
-            <h4 key={idx}>
-              {idx + 1}. {q}
-            </h4>
-          );
-        }) }
+        <LoadingModal show={loading} />
+
+        { queries.length > 0 ? (
+          <Container fluid className='px-0 py-2'>
+            <h4>Previous search queries:</h4>
+            <ListGroup as='ol' numbered>
+              { queries.slice(0, 5).map((query, idx) => {
+                return (
+                  <ListGroup.Item key={idx}>
+                    {query}
+                  </ListGroup.Item>
+                );
+              }) }
+            </ListGroup>
+          </Container>
+        ) : null }
         <hr />
 
         { snapshotIDs.length > 0 ? (
         <>
-          <h3>Snapshots are sorted by recency from top to bottom.</h3>
+          <h4>Snapshots are sorted by recency from top to bottom.</h4>
           <Row>
           <Col>
-            <h3>File sharing snapshots</h3>
+            <h5>File sharing snapshots</h5>
             { snapshotIDs.map((id, index) => {
               return (
                 <SnapshotCard 

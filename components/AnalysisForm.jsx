@@ -1,7 +1,7 @@
 import axios from 'axios';
 import { useState, useEffect } from 'react';
 import { useSession } from 'next-auth/react';
-import { Accordion, Container, Form, Button } from 'react-bootstrap';
+import { Accordion, Form, Button } from 'react-bootstrap';
 import RangeSlider from 'react-bootstrap-range-slider';
 import AnalyzeDeviant from '../algorithms/AnalyzeDeviant.js';
 import AnalyzeFileFolderDifferences from '../algorithms/FileFolderDifferences.js';
@@ -54,14 +54,14 @@ export default function AnalysisForm(props) {
   function handleClose() { setResults(null) };
 
   return (
-    <Container fluid className='pb-2'>
+    <>
       <AnalysisResultsModal 
         show={results !== null} 
         onHide={handleClose} 
         analysisType={analysisType} 
         results={results}
       />
-      <Accordion defaultActiveKey='lol-idc'>
+      <Accordion defaultActiveKey='lol-idc' className='my-2'>
         <Accordion.Item>
           <Accordion.Header>
             <h4>Analyze Snapshot</h4>
@@ -145,6 +145,6 @@ export default function AnalysisForm(props) {
           </Accordion.Body>
         </Accordion.Item>
       </Accordion>
-    </Container>
+    </>
   );
 }

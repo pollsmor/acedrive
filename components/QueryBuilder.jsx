@@ -64,53 +64,51 @@ export default function QueryBuilder(props) {
   }
 
   return (
-    <Container fluid className='pb-2'>
-      <Accordion defaultActiveKey='hello-world'>
-        <Accordion.Item>
-          <Accordion.Header>
-            <h4>Query Builder</h4>
-          </Accordion.Header>
-          <Accordion.Body>
-            <h6>For the fields below, a &quot;user&quot; is synonymous with their email.</h6>
-            <Form onSubmit={builderHandler}>
-              { operatorData.map((op) => {
-                return (
-                  <Form.Group className='mb-1' key={op.label}>
-                    <Form.Label>{op.label}</Form.Label>
-                    <Form.Control
-                      size='sm'
-                      placeholder={op.placeholder}
-                      value={op.value}
-                      onChange={e => { op.setFunction(e.target.value) }}
-                    />
-                    <Form.Text className='text-muted'>{op.description}</Form.Text>
-                  </Form.Group>
-                );
-              }) }
+    <Accordion defaultActiveKey='hello-world' className='my-2'>
+      <Accordion.Item>
+        <Accordion.Header>
+          <h4>Query Builder</h4>
+        </Accordion.Header>
+        <Accordion.Body>
+          <h6>For the fields below, a &quot;user&quot; is synonymous with their email.</h6>
+          <Form onSubmit={builderHandler}>
+            { operatorData.map((op) => {
+              return (
+                <Form.Group className='mb-1' key={op.label}>
+                  <Form.Label>{op.label}</Form.Label>
+                  <Form.Control
+                    size='sm'
+                    placeholder={op.placeholder}
+                    value={op.value}
+                    onChange={e => { op.setFunction(e.target.value) }}
+                  />
+                  <Form.Text className='text-muted'>{op.description}</Form.Text>
+                </Form.Group>
+              );
+            }) }
 
-              <Form.Group className='mb-1'>
-                <Form.Label>Sharing status</Form.Label>
-                <Form.Control
-                  as='select'
-                  value={sharing}
-                  onChange={e => { setSharing(e.target.value) }}
-                >
-                  <option label=' '></option> 
-                  <option label='Unshared files'>none</option>
-                  <option label='Files shared with anyone with the link'>anyone</option>
-                  <option label='Files shared with specific users'>individual</option>
-                  <option label={`Files shared with anyone in the owner's domain`}>domain</option>
-                </Form.Control>
-                <Form.Text className='text-muted'>
-                  Restrict based on sharing status of various files.
-                </Form.Text>
-              </Form.Group>
+            <Form.Group className='mb-1'>
+              <Form.Label>Sharing status</Form.Label>
+              <Form.Control
+                as='select'
+                value={sharing}
+                onChange={e => { setSharing(e.target.value) }}
+              >
+                <option label=' '></option> 
+                <option label='Unshared files'>none</option>
+                <option label='Files shared with anyone with the link'>anyone</option>
+                <option label='Files shared with specific users'>individual</option>
+                <option label={`Files shared with anyone in the owner's domain`}>domain</option>
+              </Form.Control>
+              <Form.Text className='text-muted'>
+                Restrict based on sharing status of various files.
+              </Form.Text>
+            </Form.Group>
 
-              <Button variant='primary' type='submit'>Build query</Button>
-            </Form>
-          </Accordion.Body>
-        </Accordion.Item>
-      </Accordion>
-    </Container>
+            <Button variant='primary' type='submit'>Build query</Button>
+          </Form>
+        </Accordion.Body>
+      </Accordion.Item>
+    </Accordion>
   );
 }

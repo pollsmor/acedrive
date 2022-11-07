@@ -45,10 +45,10 @@ export default function Snapshot() {
       }
     }
 
-    let searchedFiles = searchSnapshot(snapshot.files, query)
+    let searchedFiles = searchSnapshot(snapshot.files, query);
     setFilteredFiles(searchedFiles);
     axios.post('/api/saveSearchQuery', { query });
-    
+    setPreviousQueries([query, ...previousQueries]);
   }
 
   useEffect(() => {
@@ -97,62 +97,66 @@ export default function Snapshot() {
   }, [filteredFiles, startFileIdx, endFileIdx]);
 
   return (
-    <Container fluid className='p-0'>
+    <>
       <Banner />
-      <Container className='text-center my-2'>
+      <Container fluid className='text-center my-2'>
         <h3 className='fw-bold'>Snapshot {snapshotID}</h3>
         <h6>Taken: {snapshot.date}</h6>
       </Container>
 
-      <Form onSubmit={searchHandler} className='m-2'>
-        <FormControl
-          type='search'
-          placeholder='Search...'
-          value={query}
-          onChange={(e) => {
-            setQuery(e.target.value)
-          }}
-        />
-      </Form>
-      <h3>Previous queries:</h3>
-      <ListGroup>
-        { previousQueries.slice(0, 5).map((query, idx) => {
+      <Container fluid>
+        <Form onSubmit={searchHandler}>
+          <FormControl
+            placeholder='Search...'
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
+          />
+        </Form>
+
+        { previousQueries.length > 0 ? (
+          <>
+            <h5 className='my-2'>Previous queries:</h5>
+            <ListGroup as='ol' numbered>
+              { previousQueries.slice(0, 5).map((query, idx) => {
+                return (
+                  <ListGroup.Item action key={idx} onClick={() => setQuery(query)}>
+                    {query}
+                  </ListGroup.Item>
+                );
+              }) }
+            </ListGroup>
+          </>
+        ) : null }
+
+        <QueryBuilder setQuery={setQuery} />
+        <AnalysisForm snapshotID={snapshotID} />
+        
+        <ListGroup>
+        { pageFiles.map((f) => {
           return (
-            <ListGroup.Item action key={idx} onClick={() => setQuery(query)}>
-              {query}
+            <ListGroup.Item key={f.id}>
+              { f.isFolder ? <FolderCard file={f} /> : <FileCard file={f} /> }
             </ListGroup.Item>
           );
         }) }
-      </ListGroup>
-
-      <QueryBuilder setQuery={setQuery} />
+        </ListGroup>
       
-      <AnalysisForm snapshotID={snapshotID} />
-      
-       <ListGroup>
-        {pageFiles.map((f) =>{
-          return (<ListGroup.Item key={f.id}>
-            { f.isFolder ? <FolderCard file={f} /> : <FileCard file={f} /> }
-          </ListGroup.Item>)}
-          )}</ListGroup>
-      
-      <br />
-      <Pagination className='justify-content-center'>
-        <Pagination.Prev
-          disabled={activePage <= 1}
-          onClick={() => setActivePage(activePage - 1)}
-        >
-          prev
-        </Pagination.Prev>
-        { items }
-        <Pagination.Next
-          disabled={activePage >= amtPages}
-          onClick={() => setActivePage(activePage + 1)}
-        >
-          next
-        </Pagination.Next>
-      </Pagination>
-
-    </Container>
+        <Pagination className='justify-content-center m-3'>
+          <Pagination.Prev
+            disabled={activePage <= 1}
+            onClick={() => setActivePage(activePage - 1)}
+          >
+            prev
+          </Pagination.Prev>
+          { items }
+          <Pagination.Next
+            disabled={activePage >= amtPages}
+            onClick={() => setActivePage(activePage + 1)}
+          >
+            next
+          </Pagination.Next>
+        </Pagination>
+      </Container>
+    </>
   );
 }
