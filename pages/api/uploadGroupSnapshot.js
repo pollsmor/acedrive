@@ -5,15 +5,16 @@ import GroupSnapshot from '../../lib/models/GroupSnapshot';
 export default async function takeSnapshot(req, res) {
     const token = await getToken({ req });
     if (token && req.method === 'POST') {
-        let group_members = req.body.members
 
         // Save snapshot to database
         let userId = token.user.id;
         let user = await User.findOne({ id: userId });
         let group_snapshot = new GroupSnapshot({
+            groupName: req.body.groupName,
+            groupEmail: req.body.groupEmail,
             date: new Date().toString(),
             user: user.email,
-            members: group_members
+            members: req.body.members
         })
 
         // Add this snapshot to the user profile

@@ -1,11 +1,19 @@
 import axios from 'axios';
-import { Modal } from 'react-bootstrap'
+import { useState } from 'react';
+import { Modal, Form } from 'react-bootstrap'
 import Dropzone from 'react-dropzone'
 import { Parser } from "htmlparser2";
 
 export default function UploadFileModal(props) {
+    const [groupName, setGroupName] = useState("")
+    const [groupEmail, setGroupEmail] = useState("")
 
-    function onDrop(acceptedFiles) {
+    function onDrop(acceptedFiles) {  
+        // TODO: more robust error messaging for missing groupName and groupEmail
+        if(groupName === "" || groupEmail === "") {
+          return
+        } 
+
         let file = acceptedFiles[0]
         let reader = new FileReader()
         reader.readAsText(file);
@@ -27,7 +35,10 @@ export default function UploadFileModal(props) {
           parser.write(reader.result)
           parser.end()
           
-          await axios.post('/api/uploadGroupSnapshot', {members: members_list});
+          await axios.post('/api/uploadGroupSnapshot', {members: members_list, groupName: groupName, groupEmail: groupEmail});
+
+          // TODO: implement some kind of success message so users know the group snapshot has been saved
+          props.closeCallback()
         }
     }
 
@@ -44,6 +55,31 @@ export default function UploadFileModal(props) {
           </Modal.Title>
         </Modal.Header>
         <Modal.Body>
+    
+            <Form>
+              <Form.Group className='mb-2'>
+                <Form.Label>Group Name</Form.Label>
+                <Form.Control 
+                  type='name' 
+                  placeholder='Enter group name...' 
+                  onChange={e => setGroupName(e.target.value)}
+                />
+                <Form.Text className='text-muted'>
+                  Name of the Google Group.
+                </Form.Text>
+              </Form.Group>
+
+              <Form.Group className='mb-2'>
+                <Form.Label>Group Email</Form.Label>
+                <Form.Control 
+                  placeholder='Enter group email...' 
+                  onChange={e => setGroupEmail(e.target.value)}
+                />
+                <Form.Text className='text-muted'>
+                  Email address of the Google Group.
+                </Form.Text>
+              </Form.Group>
+            </Form>
 
             <Dropzone onDrop={onDrop}>
             {({getRootProps, getInputProps}) => (

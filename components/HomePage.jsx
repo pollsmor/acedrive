@@ -4,7 +4,7 @@ import { Container, Button } from 'react-bootstrap';
 import Banner from './Banner';
 import SnapshotCard from './SnapshotCard';
 import LoadingModal from './LoadingModal';
-import UploadFileModal from './UploadFIleModal';
+import UploadFileModal from './UploadFileModal';
 
 export default function HomePage(props) {
   const [snapshotIDs, setSnapshotIDs] = useState([]);
