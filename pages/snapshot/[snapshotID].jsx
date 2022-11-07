@@ -8,6 +8,7 @@ import FileCard from '../../components/FileCard';
 import FolderCard from '../../components/FolderCard';
 import AnalysisForm from '../../components/AnalysisForm';
 import FileTable from '../../components/FileTable';
+import searchSnapshot from '../../algorithms/SearchSnapshot';
 
 import { Container, ListGroup, Form, FormControl, Pagination } from 'react-bootstrap';
 
@@ -22,21 +23,18 @@ export default function Snapshot() {
   const [activePage, setActivePage] = useState(1);
   const [filteredFiles, setFilteredFiles] = useState([]);
 
-  const searchSnapshot = async (e) => {
+  const searchHandler = async (e) => {  
     e.preventDefault();  
-    
-    const fetchSnapshotSearch = async (snapshotID, query) =>{
-      try {
-        const results = await axios.get('/api/searchSnapshot', { 
-          params: { id: snapshotID , query: query }
-        });
-        return results.data;
-      } catch (err) {
-        alert('Invalid snapshot ID searched.');
-      }
+    console.log("searching")
+
+    if (query === "") { 
+      setFilteredFiles(snapshot.files)
+      return
     }
-    
-    const searchedFiles = await fetchSnapshotSearch(snapshotID, query);
+
+    let searchedFiles = searchSnapshot(snapshot.files, query)
+    console.log(searchedFiles)
+    return
     setFilteredFiles(searchedFiles);
   }
   
@@ -92,28 +90,25 @@ export default function Snapshot() {
         <h3 className='fw-bold'>Snapshot {snapshotID}</h3>
         <h6>Taken: {snapshot.date}</h6>
       </Container>
-      <Form onSubmit={searchSnapshot} className='m-2'>
+      <Form onSubmit={searchHandler} className='m-2'>
         <FormControl
           type='search'
           placeholder='Search...'
           value={query}
           onChange={(e) => {
             setQuery(e.target.value)
-            if (e.target.value === '') searchSnapshot(e);
           }}
         />
       </Form>
       
       <AnalysisForm snapshotID={snapshotID} />
       
-        {pageFiles.length > 0 && query && filteredFiles.length > 0 ? 
-        <FileTable pageFiles={pageFiles} /> : <ListGroup>
-          {pageFiles.map((f) =>{
-            return (<ListGroup.Item key={f.id}>
-              { f.isFolder ? <FolderCard file={f} /> : <FileCard file={f} /> }
-            </ListGroup.Item>)}
-            )}</ListGroup>
-      }
+       <ListGroup>
+        {pageFiles.map((f) =>{
+          return (<ListGroup.Item key={f.id}>
+            { f.isFolder ? <FolderCard file={f} /> : <FileCard file={f} /> }
+          </ListGroup.Item>)}
+          )}</ListGroup>
       
       <br />
       <Pagination className='justify-content-center'>
