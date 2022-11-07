@@ -8,6 +8,7 @@ import FileCard from '../../components/FileCard';
 import FolderCard from '../../components/FolderCard';
 import AnalysisForm from '../../components/AnalysisForm';
 import FileTable from '../../components/FileTable';
+import QueryBuilder from '../../components/QueryBuilder';
 import searchSnapshot from '../../algorithms/SearchSnapshot';
 
 import { Container, ListGroup, Form, FormControl, Pagination } from 'react-bootstrap';
@@ -23,39 +24,16 @@ export default function Snapshot() {
   const [activePage, setActivePage] = useState(1);
   const [filteredFiles, setFilteredFiles] = useState([]);
 
-  const searchHandler = async (e) => {  
+  const searchHandler = (e) => {  
     e.preventDefault();  
 
     if (query === "") { 
-      setFilteredFiles(snapshot.files)
-      return
+      return setFilteredFiles(snapshot.files);
     }
 
     let searchedFiles = searchSnapshot(snapshot.files, query)
     setFilteredFiles(searchedFiles);
   }
-  
-    // Set up pagination =================================
-  let items = [];
-  const filesPerPage = 10;
-  let amtPages = Math.ceil(filteredFiles.length / filesPerPage);
-  for (let page = 1; page <= amtPages; page++) {
-    items.push(
-      <Pagination.Item
-        key={page}
-        active={page === activePage}
-        onClick={() => setActivePage(page)}
-      >
-        {page}
-      </Pagination.Item>
-    );
-  }
-
-    // Only get files present on a specific page
-  let startFileIdx = filesPerPage * (activePage - 1);
-  let endFileIdx = startFileIdx + filesPerPage;
-
-  // ====================================================
 
   useEffect(() => {
     async function fetchSnapshot() {
@@ -73,12 +51,31 @@ export default function Snapshot() {
     
     if (snapshotID) fetchSnapshot();
   }, [snapshotID]);
-  
-  useEffect(()=>{
-    setPageFiles(filteredFiles.slice(startFileIdx, endFileIdx))
-  },[filteredFiles,startFileIdx,endFileIdx])
 
+  // Set up pagination =================================
+  let items = [];
+  const filesPerPage = 10;
+  let amtPages = Math.ceil(filteredFiles.length / filesPerPage);
+  for (let page = 1; page <= amtPages; page++) {
+    items.push(
+      <Pagination.Item
+        key={page}
+        active={page === activePage}
+        onClick={() => setActivePage(page)}
+      >
+        {page}
+      </Pagination.Item>
+    );
+  }
 
+  // Only get files present on a specific page
+  let startFileIdx = filesPerPage * (activePage - 1);
+  let endFileIdx = startFileIdx + filesPerPage;
+  // ====================================================
+
+  useEffect(() => {
+    setPageFiles(filteredFiles.slice(startFileIdx, endFileIdx));
+  }, [filteredFiles, startFileIdx, endFileIdx]);
 
   return (
     <Container fluid className='p-0'>
@@ -87,6 +84,7 @@ export default function Snapshot() {
         <h3 className='fw-bold'>Snapshot {snapshotID}</h3>
         <h6>Taken: {snapshot.date}</h6>
       </Container>
+
       <Form onSubmit={searchHandler} className='m-2'>
         <FormControl
           type='search'
@@ -97,6 +95,8 @@ export default function Snapshot() {
           }}
         />
       </Form>
+      
+      <QueryBuilder setQuery={setQuery} />
       
       <AnalysisForm snapshotID={snapshotID} />
       
