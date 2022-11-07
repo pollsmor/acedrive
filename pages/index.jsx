@@ -10,7 +10,7 @@ export default function Home() {
   if (status === 'loading') return;
   return (
     session ? 
-      <HomePage accessToken={session.accessToken} /> : 
+      <HomePage session={session} /> : 
       <Welcome /> 
   );
 };

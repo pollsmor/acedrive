@@ -60,6 +60,7 @@ export default function QueryBuilder(props) {
     }
 
     props.setQuery(query.trim()); // Get rid of empty space on the sides of the query
+    window.scrollTo(0, 0);
   }
 
   return (

@@ -19,11 +19,17 @@ export default function Snapshot() {
   const { snapshotID } = router.query;
 
   const [query, setQuery] = useState('');
-  const [snapshot, setSnapshot] = useState([]);
+  const [previousQueries, setPreviousQueries] = useState([]);
+  const [snapshot, setSnapshot] = useState({});
   const [pageFiles,setPageFiles] = useState([])
   const [activePage, setActivePage] = useState(1);
   const [filteredFiles, setFilteredFiles] = useState([]);
 
+  const validOps = [
+    'drive:', 'owner:', 'creator:', 'from:', 'to:', 'readable:',
+    'writable:', 'sharable:', 'name:', 'inFolder:', 'folder:', 'path:',
+    'sharing:'
+  ];
   const searchHandler = (e) => {  
     e.preventDefault();  
 
@@ -31,8 +37,18 @@ export default function Snapshot() {
       return setFilteredFiles(snapshot.files);
     }
 
+    // Make sure the query is valid.
+    let queryParts = query.split(' ');
+    for (let queryPart of queryParts) {
+      if (!validOps.some((op) => queryPart.includes(op))) {
+        return console.log(`Invalid query: ${query}`);
+      }
+    }
+
     let searchedFiles = searchSnapshot(snapshot.files, query)
     setFilteredFiles(searchedFiles);
+    axios.post('/api/saveSearchQuery', { query });
+    
   }
 
   useEffect(() => {
@@ -43,6 +59,9 @@ export default function Snapshot() {
         });
         setSnapshot(snapshot.data);
         setFilteredFiles(snapshot.data.files);
+
+        let user = await axios.get('/api/getUser');
+        setPreviousQueries(user.data.queries);
       } catch (err) {
         alert('This is not a valid snapshot ID.');
         window.location.href = '/';
@@ -95,7 +114,17 @@ export default function Snapshot() {
           }}
         />
       </Form>
-      
+      <h3>Previous queries:</h3>
+      <ListGroup>
+        { previousQueries.slice(0, 5).map((query, idx) => {
+          return (
+            <ListGroup.Item action key={idx} onClick={() => setQuery(query)}>
+              {query}
+            </ListGroup.Item>
+          );
+        }) }
+      </ListGroup>
+
       <QueryBuilder setQuery={setQuery} />
       
       <AnalysisForm snapshotID={snapshotID} />

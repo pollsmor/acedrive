@@ -1,6 +1,6 @@
 import axios from 'axios';
 import { useState, useEffect} from 'react';
-import { Container, Button } from 'react-bootstrap';
+import { Container, Button, Row, Col } from 'react-bootstrap';
 import Banner from './Banner';
 import SnapshotCard from './SnapshotCard';
 import LoadingModal from './LoadingModal';
@@ -8,6 +8,8 @@ import UploadFileModal from './UploadFileModal';
 
 export default function HomePage(props) {
   const [snapshotIDs, setSnapshotIDs] = useState([]);
+  const [groupSnapshotIDs, setGroupSnapshotIDs] = useState([]);
+  const [queries, setQueries] = useState([]);
   const [loading, setLoading] = useState(false);
   const [uploading, setUploading] = useState(false);
 
@@ -15,6 +17,8 @@ export default function HomePage(props) {
     async function fetchUser() {
       let user = await axios.get('/api/getUser');
       setSnapshotIDs(user.data.snapshotIDs);
+      setGroupSnapshotIDs(user.data.groupSnapshotIDs);
+      setQueries(user.data.queries);
     }
 
     fetchUser();
@@ -60,7 +64,7 @@ export default function HomePage(props) {
     <>
       <div className="pagebox">
       <Banner />
-      <Container fluid className='mt-2'>
+      <Container fluid className='mt-2' style={{ color: 'white' }}>
         <Button onClick={takeSnapshot} style={{marginLeft:"5px", marginTop:"20px", boxShadow:'inset',
                 color:"whitesmoke", borderColor:"#212529", backgroundColor: hovering? 'darkgray' : 'rgb(82,82,82)'}} 
                 onMouseEnter={handleMouseEnter}
@@ -73,16 +77,50 @@ export default function HomePage(props) {
           Upload Group Snapshot</Button> 
         <UploadFileModal show={uploading} closeCallback={hideUpload}></UploadFileModal>
         <LoadingModal show={loading}></LoadingModal>
+
+        <h3>Previous search queries</h3>
+        { queries.slice(0, 5).map((q, idx) => {
+          // Only have the first 5 search queries to avoid clogging up the page
+          return (
+            <h4 key={idx}>
+              {idx + 1}. {q}
+            </h4>
+          );
+        }) }
+        <hr />
+
         { snapshotIDs.length > 0 ? (
         <>
           <h3>Snapshots are sorted by recency from top to bottom.</h3>
-          { snapshotIDs.map((snapshotID, index) => {
-            return <SnapshotCard 
-              key={index} 
-              position={index}
-              id={snapshotID} 
-            />
-          })}
+          <Row>
+          <Col>
+            <h3>File sharing snapshots</h3>
+            { snapshotIDs.map((id, index) => {
+              return (
+                <SnapshotCard 
+                  key={index} 
+                  position={index}
+                  id={id} 
+                />
+              );
+            }) }
+          </Col>
+          { props.session.provider === 'google' ? 
+          <Col style={{ color: 'white' }}>
+            <h3>Group membership snapshots</h3>
+            { groupSnapshotIDs.map((id, index) => {
+              return (
+                <SnapshotCard 
+                  key={index} 
+                  position={index}
+                  id={id}
+                  isGroupSnapshot={true} 
+                />
+              );
+            }) }
+          </Col> : null
+          }
+          </Row>
         </>
       ) : <h5 style={{marginTop: '20px',textAlign: 'left',color: "lightgray",marginLeft: "5px"}}>
             You do not have any snapshots. Take one to begin!
