@@ -27,10 +27,10 @@ function StripedRowExample(props) {
               <td>{file.driveName}</td>
               <td>{file.path}</td>
               <td style={{display:"flex" ,height:"3.5rem"}}> 
-              {file.isFolder ? file.content.map((content)=> {
+              {file.isFolder ? file.content.map((content, index)=> {
                 return (
                   <>
-                    <ListGroup.Item>{content.name}, </ListGroup.Item>
+                    <ListGroup.Item key={index}>{content.name}, </ListGroup.Item>
                   </>
                 );
               }) : "Not a folder"}
