@@ -55,8 +55,12 @@ export default function QueryBuilder(props) {
     e.preventDefault();
     let query = '';
     for (let op of operatorData) {
-      if (op.value !== '') 
-        query += (op.placeholder + op.value + ' ');
+      if (op.value !== '') {
+        if(query !== "") {
+          query += ' and '
+        }
+        query += (op.placeholder + op.value);
+      }
     }
 
     if (sharing !== '') query += `sharing:${sharing}`;
