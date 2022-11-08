@@ -9,22 +9,22 @@
 const matchAllRegExp = new RegExp(".*")
 
 // return all files in a particular drive 
-export function driveSearch (files, searchTerm, not) {
+export function driveSearch (files, searchTerm, negated) {
     let results = []
     for (let file of files) {
         if (file.driveName === searchTerm) {
-            if (not) {continue}
+            if (negated) {continue}
             results.push(file)
             if(file.isFolder) {
-                let content_results = driveSearch(file.content, searchTerm, not)
+                let content_results = driveSearch(file.content, searchTerm, negated)
                 results = results.concat(content_results)
             }
         }
         else {
-            if(!not) {continue}
+            if(!negated) {continue}
             results.push(file)
             if(file.isFolder) {
-                let content_results = driveSearch(file.content, searchTerm, not)
+                let content_results = driveSearch(file.content, searchTerm, negated)
                 results = results.concat(content_results)
             }
         }
@@ -33,7 +33,7 @@ export function driveSearch (files, searchTerm, not) {
 }
 
 // given a role and a user, return all files where that user has that role
-export function permissionSearch (files, searchTerm, not, roles) { 
+export function permissionSearch (files, searchTerm, negated, roles) { 
     let results = []
     for (let file of files) {
         let perm_found = false
@@ -43,22 +43,22 @@ export function permissionSearch (files, searchTerm, not, roles) {
                break
             }
         }
-        // if not is true and perm was not found then add file
-        // if not is false and perm was found then add it
-        if(!not === perm_found) {
+        // if negated is true and perm was negated found then add file
+        // if negated is false and perm was found then add it
+        if(!negated === perm_found) {
             results.push(file)
         }
         if (file.isFolder) { 
-            let content_results = permissionSearch(file.content, searchTerm, not, roles)
+            let content_results = permissionSearch(file.content, searchTerm, negated, roles)
             results = results.concat(content_results)
         }
     }
     return results
 }
 
-// return a list of files shared directly with a user (i.e not through groups or inherited perms)
+// return a list of files shared directly with a user (i.e negated through groups or inherited perms)
 // do we need to pass a list of roles, or is any role acceptable?
-export function sharedToSearch (files, searchTerm, not) {
+export function sharedToSearch (files, searchTerm, negated) {
     let results = []
     for (let file of files) {
         let perm_found = false
@@ -69,13 +69,13 @@ export function sharedToSearch (files, searchTerm, not) {
                 break
             }
         }
-        // if not is true and perm was not found then add file
-        // if not is false and perm was found then add it
-        if(!not === perm_found) {
+        // if negated is true and perm was negated found then add file
+        // if negated is false and perm was found then add it
+        if(!negated === perm_found) {
             results.push(file)
         }
         if (file.isFolder) { 
-            let content_results = sharedToSearch(file.content, searchTerm, not)
+            let content_results = sharedToSearch(file.content, searchTerm, negated)
             results = results.concat(content_results)
         }
     }
@@ -84,17 +84,17 @@ export function sharedToSearch (files, searchTerm, not) {
 
 
 // find a list of files shared with the logged in user from the searched user
-export function fromUserSearch (files, searchTerm, not) {
+export function fromUserSearch (files, searchTerm, negated) {
     let results = []
     for (let file of files) {
         if (file.sharingUser?.emailAddress === searchTerm) {
-            if(!not) {results.push(file)}
+            if(!negated) {results.push(file)}
         }
         else {
-            if(not) {results.push(file)}
+            if(negated) {results.push(file)}
         }
         if (file.isFolder) { 
-            let content_results = fromUserSearch(file.content, searchTerm, not)
+            let content_results = fromUserSearch(file.content, searchTerm, negated)
             results = results.concat(content_results)
         }
     }
@@ -102,17 +102,17 @@ export function fromUserSearch (files, searchTerm, not) {
 }
 
 // find a list of files who's name match the passed in regex
-export function nameSearch (files, searchTerm, not) {
+export function nameSearch (files, searchTerm, negated) {
     let results = []
     for (let file of files) {
         if (searchTerm.test(file.name)) {
-            if(!not) { results.push(file) }
+            if(!negated) { results.push(file) }
         }
         else {
-            if(not) { results.push(file)}
+            if(negated) { results.push(file)}
         }
         if (file.isFolder) { 
-            let content_results = nameSearch(file.content, searchTerm, not)
+            let content_results = nameSearch(file.content, searchTerm, negated)
             results = results.concat(content_results)
         }
     }
@@ -120,7 +120,7 @@ export function nameSearch (files, searchTerm, not) {
 }
 
 // find a list of files within folders who name match the given regex
-export function inFolderSearch (files, searchTerm, not) {
+export function inFolderSearch (files, searchTerm, negated) {
     let results = []
     for (let file of files) {
         if (file.isFolder) {
@@ -129,11 +129,11 @@ export function inFolderSearch (files, searchTerm, not) {
             }
 
             // recursively search subfiles with actual searchTerm
-            let content_results = inFolderSearch(file.content, searchTerm, not)
+            let content_results = inFolderSearch(file.content, searchTerm, negated)
             results = results.concat(content_results)
         }
     }
-    if(not) {
+    if(negated) {
         let all_files = getAllFiles(files)
         // return all files that aren't in the results
         let filtered_files = all_files.filter(x => !results.includes(x))
@@ -142,7 +142,7 @@ export function inFolderSearch (files, searchTerm, not) {
     return results
 }
 
-export function underFolderSearch (files, searchTerm, not) {
+export function underFolderSearch (files, searchTerm, negated) {
     let results = []
     for (let file of files) {
         if (file.isFolder) {
@@ -150,17 +150,17 @@ export function underFolderSearch (files, searchTerm, not) {
             if (searchTerm.test(file.name)) {
                 for (let subfile of file.content) {results.push(subfile)}
                 // get ALL subfiles
-                content_results = underFolderSearch(file.content, matchAllRegExp, not)
+                content_results = underFolderSearch(file.content, matchAllRegExp, negated)
                 results = results.concat(content_results) 
             }
             else {
                 // otherwise search for matches as normal
-                content_results = underFolderSearch(file.content, searchTerm, not)
+                content_results = underFolderSearch(file.content, searchTerm, negated)
                 results = results.concat(content_results) 
             }
         }
     }
-    if(not) {
+    if(negated) {
         let all_files = getAllFiles(files)
         // return all files that aren't in the results
         let filtered_files = all_files.filter(x => !results.includes(x))
@@ -169,18 +169,18 @@ export function underFolderSearch (files, searchTerm, not) {
     return results
 }
 
-export function pathSearch (files, searchTerm, not) {
+export function pathSearch (files, searchTerm, negated) {
     let results = []
     if (!searchTerm.startsWith("/")) searchTerm = "/" + searchTerm
     for (let file of files) {
         if (file.path.startsWith(searchTerm)) {
-            if(!not) {results.push(file)}
+            if(!negated) {results.push(file)}
         }
         else {
-            if(not) {results.push(file)}
+            if(negated) {results.push(file)}
         }
         if (file.isFolder) { 
-            let content_results = pathSearch(file.content, searchTerm, not)
+            let content_results = pathSearch(file.content, searchTerm, negated)
             results = results.concat(content_results)
         }
     }

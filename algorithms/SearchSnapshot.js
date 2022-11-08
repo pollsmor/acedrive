@@ -49,9 +49,9 @@ function evaluateOperation(files, operator) {
     }
 
     let splitOperator = [operator.substring(0, indexOfColon), operator.substring(indexOfColon+1)]
-    let not = false
+    let negated = false
     if (splitOperator[0].startsWith("-")) {
-        not = true
+        negated = true
         splitOperator[0] = splitOperator[0].substring(1)
     }
 
@@ -76,7 +76,7 @@ function evaluateOperation(files, operator) {
     }
     
     const searchedFiles =  searchMethods[queryObject.method](
-        files, searchTerm, not, rolesToSearchFor);
+        files, searchTerm, negated, rolesToSearchFor);
 
     return searchedFiles;
 }
