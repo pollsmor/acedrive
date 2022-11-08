@@ -23,7 +23,6 @@ export default async function takeSnapshot(req, res) {
       access_token: token.accessToken
     });
 
-    console.time('Snapshot time')
     let googleRes = await drive.files.list({
       //fields: '*', // Retrieve all fields - useful for testing
       fields: `files(${fields.join(',')}), nextPageToken`,
@@ -54,10 +53,8 @@ export default async function takeSnapshot(req, res) {
     let rootRes = await drive.files.get({ fileId: 'root' });
     let root_id = rootRes.data.id;
     
-    // Many fields aren't populated, so we will go through and populate many of them
-    console.time('populateMissingFields call');
+    // Many fields aren't populated, so we will go through and populate them
     await populateMissingFields(files, root_id);
-    console.timeEnd('populateMissingFields call');
 
     // Files are currently just a list of everything, we want to 
     // parse that into a data structure to allow for easier analysis/search
@@ -78,7 +75,6 @@ export default async function takeSnapshot(req, res) {
     user.snapshotIDs.unshift(snapshot_id);
     await user.save();
 
-    console.timeEnd('Snapshot time');
     res.json({ id: snapshot_id });
   } else {
     res.end('Not signed in or not a POST request.');
@@ -167,7 +163,8 @@ function parseFiles(all_files) {
           role: p.role,
           type: p.type,
           domain: p.domain,
-          permissionDetails: p.permissionDetails ? p.permissionDetails : undefined 
+          permissionDetails: p.permissionDetails ? p.permissionDetails : undefined,
+          isInherited: false // top level file so shouldn't be inheriting perms from anywhere
         });
       });
 
@@ -212,14 +209,22 @@ function populateSubfolders(files_to_populate, all_files, current_path) {
         let file = all_files[k];
 
         if (file.parents && file.parents.includes(parent_file.id)) {
+          let parent_perms_strings = []
+          for (let perm of parent_file.permissions) {
+            parent_perms_strings.push(JSON.stringify(perm, ['email', 'type', 'role', 'domain']));
+          }
           // Create a list of permission objects
           let permissions = !file.permissions ? [] : file.permissions.map(p => {
+            p.email = p.emailAddress
+            let stringified_p = JSON.stringify(p, ['email', 'type', 'role', 'domain'])
+            
             return new Permission({
               email: p.emailAddress,
               role: p.role,
               type: p.type,
               domain: p.domain,
-              permissionDetails: p.permissionDetails ? p.permissionDetails : undefined 
+              permissionDetails: p.permissionDetails ? p.permissionDetails : undefined,
+              isInherited: parent_perms_strings.includes(stringified_p) ? true : false
             });
           });
 
