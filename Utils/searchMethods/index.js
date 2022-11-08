@@ -5,6 +5,8 @@
 //                  -> let emails = [searchTerm].concat(list of group emails that user is part of)
 //                  -> THEN INSTEAD OF PERMISSION.EMAIL === SEARCH TERM, DO emails.include(permission.email)
 
+// used in folder: operator to match everything
+const matchAllRegExp = new RegExp(".*")
 
 // return all files in a particular drive 
 export function driveSearch (files, searchTerm, not) {
@@ -148,12 +150,12 @@ export function underFolderSearch (files, searchTerm, not) {
             if (searchTerm.test(file.name)) {
                 for (let subfile of file.content) {results.push(subfile)}
                 // get ALL subfiles
-                content_results = fromUserSearch(file.content, "*", not)
+                content_results = underFolderSearch(file.content, matchAllRegExp, not)
                 results = results.concat(content_results) 
             }
             else {
                 // otherwise search for matches as normal
-                content_results = fromUserSearch(file.content, searchTerm, not)
+                content_results = underFolderSearch(file.content, searchTerm, not)
                 results = results.concat(content_results) 
             }
         }
