@@ -136,7 +136,7 @@ export default function HomePage(props) {
           </Col>
           { props.session.provider === 'google' ? 
           <Col style={{ color: 'white' }}>
-            <h3>Group membership snapshots</h3>
+            <h5>Group membership snapshots</h5>
             { groupSnapshotIDs.map((id, index) => {
               return (
                 <SnapshotCard 

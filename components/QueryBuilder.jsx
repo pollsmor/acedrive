@@ -59,6 +59,8 @@ export default function QueryBuilder(props) {
         query += (op.placeholder + op.value + ' ');
     }
 
+    if (sharing !== '') query += `sharing:${sharing}`;
+
     props.setQuery(query.trim()); // Get rid of empty space on the sides of the query
     window.scrollTo(0, 0);
   }
