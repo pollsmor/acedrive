@@ -1,62 +1,45 @@
 import {
-    defaultMethod,
-    methodForSharing,
-    methodForOwnerFrom,
-    methodToCheckFolder,
-    methodForPermissions,
-    methodForRegex,
-} from "../Utils/searchMethods";
+    driveSearch,
+    permissionSearch,
+    sharedToSearch,
+    fromUserSearch,
+    nameSearch,
+    inFolderSearch,
+    underFolderSearch,
+    pathSearch
+} from "../Utils/searchMethods/index.js";
 
-const queryOperator = {
-    drive: { key: "driveName", method: "defaultMethod" },
-    owner: { key: "owners", method: "methodForOwnerFrom" },
-    creator: "user", //TODO:Check Where We can get this key
-    from: { key: "sharingUser", method: "methodForOwnerFrom" },
-    to: "user",
-    readable: {
-        key: "permissions",
-        method: "methodForPermissions",
-        role: "reader",
-    },
-    writable: {
-        key: "permissions",
-        method: "methodForPermissions",
-        role: "writer",
-    },
-    sharable: {
-        key: "permissions",
-        method: "methodForPermissions",
-        role: "owner",
-    },
-    name: {
-        key: "name",
-        method: "methodForRegex",
-    },
-    //TODO:Work on Content Files
-    inFolder: {
-        key: "permissions",
-        method: "methodForRegex",
-    },
-    //TODO:Work on Content Files
-    folder: {
-        key: "permissions",
-        method: "methodForRegex",
-    },
-    path: { key: "path", method: "defaultMethod" },
-    sharing: {
-        key: ["none", "anyone"],
-        method: "methodForSharing",
-    }, //TODO: Work on Domain
-    foldersonly: { key: "isFolder", method: "methodToCheckFolder" },
+const operatorsList = {
+    drive: { method: "driveSearch" },
+    owner: { method: "permissionSearch", roles: ["owner"] },
+    creator: { method: "permissionSearch", roles: ["owner"] },
+    from: { method: "fromUserSearch" },
+    to: { method: "sharedToSearch"},
+
+    readable: { method: "permissionSearch", roles: ["owner", "organizer", "writer", "reader"] },
+    writable: { method: "permissionSearch", roles: ["owner", "writer"] },
+    sharable: { method: "permissionSearch", roles: ["owner", "organizer"] },
+  
+    name: { method: "nameSearch" },
+    inFolder: { method: "inFolderSearch" },
+    folder: { method: "underFolderSearch" },
+    path: { method: "pathSearch" },
+
+    // TODO: WORK ON SHARING
+    sharing: { method: "none"}
 };
 
-const queryOperations = {
-    defaultMethod: defaultMethod,
-    methodForOwnerFrom: methodForOwnerFrom,
-    methodForPermissions: methodForPermissions,
-    methodForSharing: methodForSharing,
-    methodToCheckFolder: methodToCheckFolder,
-    methodForRegex: methodForRegex,
+const regexOperations = ["name", "inFolder", "folder"]
+
+const searchMethods = {
+    driveSearch: driveSearch,
+    permissionSearch: permissionSearch,
+    fromUserSearch: fromUserSearch,
+    sharedToSearch: sharedToSearch,
+    nameSearch: nameSearch,
+    inFolderSearch: inFolderSearch,
+    underFolderSearch: underFolderSearch,
+    pathSearch: pathSearch
 };
 
 function evaluateOperation(files, operator, groups) {
@@ -67,29 +50,28 @@ function evaluateOperation(files, operator, groups) {
 
     let splitOperator = [operator.substring(0, indexOfColon), operator.substring(indexOfColon+1)]
 
-    if (!Object.keys(queryOperator).includes(splitOperator[0])) {
+    // if this operator is not in our list of valid operators
+    if (!Object.keys(operatorsList).includes(splitOperator[0])) {
         return {status: "error", msg: "Invalid Operator"} 
     }
 
-    let searchForKeywords
-    let fieldTofetch
+    const queryObject = operatorsList[splitOperator[0]];
+    let searchTerm = splitOperator[1];
+    let rolesToSearchFor = queryObject?.roles;
 
-    const queryObject = queryOperator[splitOperator[0]];
-    let roleToSearchFor = queryObject?.role;
-    if (splitOperator[0] !== "sharing") {
-        fieldTofetch = queryOperator[splitOperator[0]].key;
-        searchForKeywords = splitOperator[1];
+    // check for regex if necessary
+    if (regexOperations.includes(splitOperator[0])) {
+        try {
+            let regex = new RegExp(searchTerm)
+            searchTerm = regex
+        }
+        catch(e){
+            return {status: "error", msg: "Invalid RegExp"}
+        }
     }
-    else {
-        fieldTofetch = "permissions";
-        searchForKeywords = splitOperator[1];
-        if (queryObject.key.includes(searchForKeywords)) {
-            roleToSearchFor = searchForKeywords;
-        } else roleToSearchFor = "individual";
-    }
-    const searchedFiles =  queryOperations[
-        queryObject?.method ? queryObject.method : "defaultMethod"
-    ](files, fieldTofetch, searchForKeywords, roleToSearchFor);
+    
+    const searchedFiles =  searchMethods[queryObject.method](
+        files, searchTerm, rolesToSearchFor);
 
     return searchedFiles;
 }
@@ -181,15 +163,19 @@ export default function searchSnapshot(files, query, prev_groups) {
                 operator = operator.substring(0, operator.length-1)
                 operator = operator.trim()
                 single_operator_results = searchSnapshot(files, operator)
+                if (single_operator_results.status === "error") {
+                    return {status: "error", operator: operator, msg: "Invalid Operator"} 
+                }
+                single_operator_results = single_operator_results.files
             }
             else {
                 operator = operator.trim()
                 single_operator_results = evaluateOperation(files, operator, groups)
+                if (single_operator_results.status === "error") {
+                    return single_operator_results
+                }
             }
 
-            if (single_operator_results.status === "error") {
-                return {status: "error", operator: operator, msg: "Invalid Operator"} 
-            }
             all_operator_results.push(single_operator_results)
         }        
     }
@@ -212,5 +198,5 @@ export default function searchSnapshot(files, query, prev_groups) {
         }
     }
 
-    return results
+    return {status: "ok", files: results}
 };

@@ -25,11 +25,6 @@ export default function Snapshot() {
   const [activePage, setActivePage] = useState(1);
   const [filteredFiles, setFilteredFiles] = useState([]);
 
-  const validOps = [
-    'drive:', 'owner:', 'creator:', 'from:', 'to:', 'readable:',
-    'writable:', 'sharable:', 'name:', 'inFolder:', 'folder:', 'path:',
-    'sharing:'
-  ];
   const searchHandler = (e) => {  
     e.preventDefault();  
 
@@ -37,16 +32,14 @@ export default function Snapshot() {
       return setFilteredFiles(snapshot.files);
     }
 
-    // Make sure the query is valid.
-    let queryParts = query.split(' ');
-    for (let queryPart of queryParts) {
-      if (!validOps.some((op) => queryPart.includes(op))) {
-        return console.log(`Invalid query: ${query}`);
-      }
+    let searchResults = searchSnapshot(snapshot.files, query);
+    
+    console.log(searchResults)
+    if(searchResults.status !== "ok") {
+      return
     }
 
-    let searchedFiles = searchSnapshot(snapshot.files, query);
-    setFilteredFiles(searchedFiles);
+    setFilteredFiles(searchResults.files);
     axios.post('/api/saveSearchQuery', { query });
     setPreviousQueries([query, ...previousQueries]);
   }
