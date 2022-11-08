@@ -56,14 +56,15 @@ export default function QueryBuilder(props) {
     let query = '';
     for (let op of operatorData) {
       if (op.value !== '') {
-        if(query !== "") {
-          query += ' and '
-        }
+        if (query !== '') query += ' and ';
         query += (op.placeholder + op.value);
       }
     }
 
-    if (sharing !== '') query += `sharing:${sharing}`;
+    if (sharing !== '') {
+      if (query !== '') query += ' and ';
+      query += `sharing:${sharing}`;
+    }
 
     props.setQuery(query.trim()); // Get rid of empty space on the sides of the query
     window.scrollTo(0, 0);
