@@ -5,13 +5,14 @@ import Image from 'next/image';
 const imgUrl = 'https://uas.edu.kw/wp-content/uploads/2018/12/folder-icon.png';
 
 function StripedRowExample(props) {
-  const filteredData = props.pageFiles
+  const filteredData = props.files
   return (
     <Table striped>
       <thead>
         <tr>
           <th>#</th>
           <th>File Name</th>
+          <th>Drive</th>
           <th>Path</th>
           <th>Content</th>
         </tr>
@@ -23,15 +24,16 @@ function StripedRowExample(props) {
             <tr>
               <td>{index+1}</td>
               <td>{file.isFolder && <Image src={imgUrl} alt="folder icon" width={20} height={20} />} {file.name}</td>
+              <td>{file.driveName}</td>
               <td>{file.path}</td>
               <td style={{display:"flex" ,height:"3.5rem"}}> 
               {file.isFolder ? file.content.map((content)=> {
                 return (
                   <>
-                    <ListGroup.Item>{content.name}</ListGroup.Item>
+                    <ListGroup.Item>{content.name}, </ListGroup.Item>
                   </>
                 );
-              }) : "None"}
+              }) : "Not a folder"}
               </td>
         </tr></>)} )  : <p>Query Not Found</p>
         }

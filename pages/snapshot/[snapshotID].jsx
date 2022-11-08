@@ -24,11 +24,13 @@ export default function Snapshot() {
   const [pageFiles,setPageFiles] = useState([])
   const [activePage, setActivePage] = useState(1);
   const [filteredFiles, setFilteredFiles] = useState([]);
+  const [showingResults, setShowingResults] = useState(false);
 
   const searchHandler = (e) => {  
     e.preventDefault();  
 
     if (query === "") { 
+      setShowingResults(false)
       return setFilteredFiles(snapshot.files);
     }
 
@@ -40,6 +42,7 @@ export default function Snapshot() {
     }
 
     setFilteredFiles(searchResults.files);
+    setShowingResults(true)
     axios.post('/api/saveSearchQuery', { query });
     setPreviousQueries([query, ...previousQueries]);
   }
@@ -124,31 +127,35 @@ export default function Snapshot() {
         <QueryBuilder setQuery={setQuery} />
         <AnalysisForm snapshotID={snapshotID} />
         
-        <ListGroup>
-        { pageFiles.map((f) => {
-          return (
-            <ListGroup.Item key={f.id}>
-              { f.isFolder ? <FolderCard file={f} /> : <FileCard file={f} /> }
-            </ListGroup.Item>
-          );
-        }) }
-        </ListGroup>
-      
-        <Pagination className='justify-content-center m-3'>
-          <Pagination.Prev
-            disabled={activePage <= 1}
-            onClick={() => setActivePage(activePage - 1)}
-          >
-            prev
-          </Pagination.Prev>
-          { items }
-          <Pagination.Next
-            disabled={activePage >= amtPages}
-            onClick={() => setActivePage(activePage + 1)}
-          >
-            next
-          </Pagination.Next>
-        </Pagination>
+        {showingResults ? <FileTable files={filteredFiles} /> :
+          <>
+          <ListGroup>
+          { pageFiles.map((f) => {
+            return (
+              <ListGroup.Item key={f.id}>
+                { f.isFolder ? <FolderCard file={f} /> : <FileCard file={f} /> }
+              </ListGroup.Item>
+            );
+          }) }
+          </ListGroup>
+        
+          <Pagination className='justify-content-center m-3'>
+            <Pagination.Prev
+              disabled={activePage <= 1}
+              onClick={() => setActivePage(activePage - 1)}
+            >
+              prev
+            </Pagination.Prev>
+            { items }
+            <Pagination.Next
+              disabled={activePage >= amtPages}
+              onClick={() => setActivePage(activePage + 1)}
+            >
+              next
+            </Pagination.Next>
+          </Pagination>
+          </>
+        }
       </Container>
     </>
   );
