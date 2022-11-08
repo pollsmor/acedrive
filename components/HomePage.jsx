@@ -118,7 +118,7 @@ export default function HomePage(props) {
         ) : null }
         <hr />
 
-        { snapshotIDs.length > 0 ? (
+        { snapshotIDs.length > 0 || groupSnapshotIDs.length > 0 ? (
         <>
           <h4>Snapshots are sorted by recency from top to bottom.</h4>
           <Row>
