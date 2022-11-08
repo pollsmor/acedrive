@@ -192,7 +192,10 @@ function parseFiles(all_files) {
       // We've added it to one of its parents,
       // so check if we can remove it from all files
       file.parents_length -= 1;
-      if (file.parents_length == 0) all_files.splice(i, 1);
+      if (file.parents_length == 0) {
+        all_files.splice(i, 1);
+        i--
+      } 
     } 
   }
 
@@ -251,7 +254,10 @@ function populateSubfolders(files_to_populate, all_files, current_path) {
           // We've added it to one of its parents,
           // so check if we can remove it from all files
           file.parents_length -= 1;
-          if (file.parents_length == 0) all_files.splice(k, 1);
+          if (file.parents_length == 0) {
+            all_files.splice(k, 1);
+            k--
+          }
         }
       }
 
