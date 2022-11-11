@@ -26,7 +26,7 @@ export default function Snapshot() {
   const [filteredFiles, setFilteredFiles] = useState([]);
   const [showingResults, setShowingResults] = useState(false);
 
-  const searchHandler = (e) => {  
+  const searchHandler = async(e) => {  
     e.preventDefault();  
 
     if (query === "") { 
@@ -34,7 +34,7 @@ export default function Snapshot() {
       return setFilteredFiles(snapshot.files);
     }
 
-    let searchResults = searchSnapshot(snapshot.files, query);
+    let searchResults = await searchSnapshot(snapshot.files, query);
     
     console.log(searchResults)
     if(searchResults.status !== "ok") {
@@ -43,8 +43,10 @@ export default function Snapshot() {
 
     setFilteredFiles(searchResults.files);
     setShowingResults(true)
-    axios.post('/api/saveSearchQuery', { query });
-    setPreviousQueries([query, ...previousQueries]);
+    const userQueries = await axios.post('/api/saveSearchQuery', { query });
+    
+    //Set Queries from users updated listed after saving
+    setPreviousQueries(userQueries.data.queries);
   }
 
   useEffect(() => {

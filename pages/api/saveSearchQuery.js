@@ -1,17 +1,21 @@
-import { getToken } from 'next-auth/jwt';
-import User from '../../lib/models/User';
+import { getToken } from "next-auth/jwt";
+import User from "../../lib/models/User";
 
 export default async function saveSearchQuery(req, res) {
-  const token = await getToken({ req });
-  if (token && req.method === 'POST') {
-    let userId = token.user.id;
-    let user = await User.findOne({ id: userId });
+    const token = await getToken({ req });
+    if (token && req.method === "POST") {
+        let userId = token.user.id;
+        let user = await User.findOne({ id: userId });
 
-    // Add the query to the user's profile
-    user.queries.unshift(req.body.query);
-    await user.save();
-    res.end('Successfully saved query.');
-  } else {
-    res.end('Not signed in or not a POST request.');
-  }
+        if (!user.queries.includes(req.body.query)) {
+            // Add the query to the user's profile
+            console.log("Saved");
+            user.queries.unshift(req.body.query);
+            await user.save();
+        }
+        const updatedUser = await User.findOne({ id: userId });
+        res.json({ queries: updatedUser.queries });
+    } else {
+        res.end("Not signed in or not a POST request.");
+    }
 }
