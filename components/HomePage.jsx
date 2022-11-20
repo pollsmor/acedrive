@@ -108,7 +108,11 @@ export default function HomePage(props) {
               <h4>Previous search queries:</h4>
               <ListGroup as="ol" numbered>
                 {queries.slice(0, 5).map((query, idx) => {
-                  return <ListGroup.Item key={idx}>{query}</ListGroup.Item>;
+                  return (
+                    <ListGroup.Item key={idx} className="py-1">
+                      {query}
+                    </ListGroup.Item>
+                  );
                 })}
               </ListGroup>
             </Container>

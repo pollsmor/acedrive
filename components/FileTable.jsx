@@ -1,20 +1,19 @@
-import Table from "react-bootstrap/Table";
-import ListGroup from "react-bootstrap/ListGroup";
+import { Table, ListGroup } from "react-bootstrap";
 import Image from "next/image";
 
 const imgUrl = "https://uas.edu.kw/wp-content/uploads/2018/12/folder-icon.png";
 
-function FileTable(props) {
+export default function FileTable(props) {
   const filteredData = props.files;
   return (
-    <Table striped>
+    <Table responsive striped bordered>
       <thead>
         <tr>
           <th>#</th>
           <th>File Name</th>
           <th>Drive</th>
           <th>Path</th>
-          <th>Content</th>
+          <th>Contents of Folder</th>
         </tr>
       </thead>
       <tbody>
@@ -27,37 +26,42 @@ function FileTable(props) {
                   {file.isFolder && (
                     <Image
                       src={imgUrl}
-                      alt="folder icon"
+                      alt="Folder icon"
                       width={20}
                       height={20}
                     />
-                  )}{" "}
+                  )}
+                  <br />
                   {file.name}
                 </td>
                 <td>{file.driveName}</td>
                 <td>{file.path}</td>
-                <td style={{ display: "flex", height: "3.5rem" }}>
-                  {file.isFolder
-                    ? file.content.map((content, index) => {
+                <td>
+                  {file.isFolder ? (
+                    <ListGroup>
+                      {file.content.map((content, index) => {
                         return (
-                          <>
-                            <ListGroup.Item key={index}>
-                              {content.name},{" "}
-                            </ListGroup.Item>
-                          </>
+                          <ListGroup.Item
+                            variant="primary"
+                            key={index}
+                            className="py-1"
+                          >
+                            {content.name}
+                          </ListGroup.Item>
                         );
-                      })
-                    : "Not a folder"}
+                      })}
+                    </ListGroup>
+                  ) : (
+                    "--"
+                  )}
                 </td>
               </tr>
             );
           })
         ) : (
-          <p>Query Not Found</p>
+          <p>No results found.</p>
         )}
       </tbody>
     </Table>
   );
 }
-
-export default FileTable;

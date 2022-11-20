@@ -123,6 +123,7 @@ export default function Snapshot() {
                     action
                     key={idx}
                     onClick={() => setQuery(query)}
+                    className="py-1"
                   >
                     {query}
                   </ListGroup.Item>
