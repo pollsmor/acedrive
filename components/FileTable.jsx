@@ -9,58 +9,54 @@ export default function FileTable(props) {
     <Table responsive striped bordered>
       <thead>
         <tr>
-          <th>#</th>
-          <th>File Name</th>
+          <th>Type</th>
+          <th>Name</th>
           <th>Drive</th>
           <th>Path</th>
           <th>Contents of Folder</th>
         </tr>
       </thead>
       <tbody>
-        {filteredData.length > 0 ? (
-          filteredData.map((file, index) => {
-            return (
-              <tr key={index}>
-                <td>{index + 1}</td>
-                <td>
-                  {file.isFolder && (
-                    <Image
-                      src={imgUrl}
-                      alt="Folder icon"
-                      width={20}
-                      height={20}
-                    />
-                  )}
-                  <br />
-                  {file.name}
-                </td>
-                <td>{file.driveName}</td>
-                <td>{file.path}</td>
-                <td>
-                  {file.isFolder ? (
-                    <ListGroup>
-                      {file.content.map((content, index) => {
-                        return (
-                          <ListGroup.Item
-                            variant="primary"
-                            key={index}
-                            className="py-1"
-                          >
-                            {content.name}
-                          </ListGroup.Item>
-                        );
-                      })}
-                    </ListGroup>
-                  ) : (
-                    "--"
-                  )}
-                </td>
-              </tr>
-            );
-          })
-        ) : (
-          <p>No results found.</p>
-        )}
+        {filteredData.length > 0
+          ? filteredData.map((file) => {
+              return (
+                <tr key={file.id}>
+                  <td>
+                    {file.isFolder && (
+                      <Image
+                        src={imgUrl}
+                        alt="Folder icon"
+                        width={20}
+                        height={20}
+                      />
+                    )}
+                  </td>
+                  <td>{file.name}</td>
+                  <td>{file.driveName}</td>
+                  <td>{file.path}</td>
+                  <td>
+                    {file.isFolder ? (
+                      <ListGroup>
+                        {file.content.map((content, index) => {
+                          return (
+                            <ListGroup.Item
+                              variant="primary"
+                              key={index}
+                              className="py-1"
+                            >
+                              {content.name}
+                            </ListGroup.Item>
+                          );
+                        })}
+                      </ListGroup>
+                    ) : (
+                      "--"
+                    )}
+                  </td>
+                </tr>
+              );
+            })
+          : null}
       </tbody>
     </Table>
   );
