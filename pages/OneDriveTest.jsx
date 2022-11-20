@@ -1,7 +1,7 @@
-import axios from 'axios';
-import { useSession } from 'next-auth/react';
-import { useState, useEffect } from 'react';
-import { ListGroup } from 'react-bootstrap';
+import axios from "axios";
+import { useSession } from "next-auth/react";
+import { useState, useEffect } from "react";
+import { ListGroup } from "react-bootstrap";
 
 export default function OneDriveTest() {
   const { data: session, status } = useSession();
@@ -9,23 +9,25 @@ export default function OneDriveTest() {
 
   useEffect(() => {
     async function getFiles() {
-      let fileData = await axios.get('/api/getOneDriveFiles');
+      let fileData = await axios.get("/api/getOneDriveFiles");
       console.log(fileData.data);
       setFiles(fileData.data);
     }
 
     if (session) getFiles();
-  }, [session])
+  }, [session]);
 
   return session ? (
     <ListGroup>
-      { files.map(f => {
+      {files.map((f) => {
         return (
           <ListGroup.Item key={f.id}>
-            <pre>{ JSON.stringify(f, null, 2) }</pre>
+            <pre>{JSON.stringify(f, null, 2)}</pre>
           </ListGroup.Item>
         );
-      }) }
+      })}
     </ListGroup>
-   ) : 'Not signed in.';
-};
+  ) : (
+    "Not signed in."
+  );
+}

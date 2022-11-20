@@ -1,5 +1,5 @@
-import { getToken } from 'next-auth/jwt';
-import User from '../../lib/models/User';
+import { getToken } from "next-auth/jwt";
+import User from "../../lib/models/User";
 
 export default async function getUser(req, res) {
   const token = await getToken({ req });
@@ -8,6 +8,6 @@ export default async function getUser(req, res) {
     let user = await User.findOne({ id: userId }).lean();
     res.json(user);
   } else {
-    res.end('Invalid session.');
+    res.end("Invalid session.");
   }
 }

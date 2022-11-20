@@ -1,16 +1,12 @@
-import { useSession, signIn } from 'next-auth/react';
-import { useState } from 'react';
-import Welcome from '../components/Welcome';
-import HomePage from '../components/HomePage';
+import { useSession, signIn } from "next-auth/react";
+import { useState } from "react";
+import Welcome from "../components/Welcome";
+import HomePage from "../components/HomePage";
 
 export default function Home() {
   const { data: session, status } = useSession();
-  const [viewing, setViewing] = useState('');
+  const [viewing, setViewing] = useState("");
 
-  if (status === 'loading') return;
-  return (
-    session ? 
-      <HomePage session={session} /> : 
-      <Welcome /> 
-  );
-};
+  if (status === "loading") return;
+  return session ? <HomePage session={session} /> : <Welcome />;
+}
