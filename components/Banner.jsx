@@ -40,9 +40,6 @@ export default function Banner() {
                 >
                   Sign out
                 </NavDropdown.Item>
-                <NavDropdown.Item href="/OneDriveTest">
-                  OneDrive Test
-                </NavDropdown.Item>
               </NavDropdown>
               {/*
             <Nav.Link onClick={() => signOut({ callbackUrl: '/' })}>Sign out</Nav.Link> 

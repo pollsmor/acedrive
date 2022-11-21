@@ -24,7 +24,7 @@ const fields = [
 ];
 // Note: there doesn't seem to be a way to see who created a file, only its current owner.
 
-export default async function takeSnapshot(req, res) {
+export default async function takeGDriveSnapshot(req, res) {
   const token = await getToken({ req });
   if (token && req.method === "POST") {
     auth.setCredentials({
@@ -75,6 +75,7 @@ export default async function takeSnapshot(req, res) {
       date: new Date().toString(),
       user: user.email,
       files: file_data_structure,
+      provider: 'google',
     });
 
     // Add this snapshot to the user profile

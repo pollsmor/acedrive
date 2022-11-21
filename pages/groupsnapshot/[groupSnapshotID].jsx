@@ -13,8 +13,11 @@ export default function GroupSnapshot() {
   useEffect(() => {
     async function fetchGroupSnapshot() {
       try {
-        let groupSnapshot = await axios.get("/api/getGroupSnapshot", {
-          params: { id: groupSnapshotID },
+        let groupSnapshot = await axios.get("/api/getSnapshot", {
+          params: {
+            id: groupSnapshotID,
+            isGroupSnapshot: true,
+          },
         });
         setGroupSnapshot(groupSnapshot.data);
       } catch (err) {

@@ -2,7 +2,7 @@ import { getToken } from "next-auth/jwt";
 import User from "../../lib/models/User";
 import GroupSnapshot from "../../lib/models/GroupSnapshot";
 
-export default async function takeSnapshot(req, res) {
+export default async function takeGroupSnapshot(req, res) {
   const token = await getToken({ req });
   if (token && req.method === "POST") {
     // Save snapshot to database

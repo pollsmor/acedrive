@@ -7,6 +7,7 @@ import LoadingModal from "./LoadingModal";
 import UploadFileModal from "./UploadFileModal";
 
 export default function HomePage(props) {
+  const session = props.session;
   const [snapshotIDs, setSnapshotIDs] = useState([]);
   const [groupSnapshotIDs, setGroupSnapshotIDs] = useState([]);
   const [queries, setQueries] = useState([]);
@@ -26,7 +27,14 @@ export default function HomePage(props) {
 
   async function takeSnapshot() {
     setLoading(true);
-    let res = await axios.post("/api/takeSnapshot");
+    let snapshotRoute;
+    if (session.provider === "google") {
+      snapshotRoute = "takeGDriveSnapshot";
+    } else if (session.provider === "microsoft") {
+      snapshotRoute = "takeOneDriveSnapshot";
+    }
+
+    let res = await axios.post(`/api/${snapshotRoute}`);
 
     // Retrieve ID of new snapshot instead of querying getUser again
     let new_array = [res.data.id, ...snapshotIDs];
@@ -80,7 +88,7 @@ export default function HomePage(props) {
           >
             Take snapshot
           </Button>
-          {props.session.provider === "google" ? (
+          {session.provider === "google" ? (
             <>
               <Button
                 onClick={handleUpload}
@@ -131,7 +139,7 @@ export default function HomePage(props) {
                     );
                   })}
                 </Col>
-                {props.session.provider === "google" ? (
+                {session.provider === "google" ? (
                   <Col style={{ color: "white" }}>
                     <h5>Group membership snapshots</h5>
                     {groupSnapshotIDs.map((id, index) => {
