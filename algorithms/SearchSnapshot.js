@@ -7,6 +7,7 @@ import {
   inFolderSearch,
   underFolderSearch,
   pathSearch,
+  sharingSearch
 } from "../lib/searchMethods/index.js";
 
 const operatorsList = {
@@ -28,8 +29,15 @@ const operatorsList = {
   folder: { method: "underFolderSearch" },
   path: { method: "pathSearch" },
 
-  // TODO: WORK ON SHARING
-  sharing: { method: "none" },
+  // TODO: WORK ON SHARING WITH DOMAIN
+    /*  MAKE SURE
+      while using link the searchTerm = anyone
+      with specific user searchTerm = email
+      with specific domain searchTerm = domain
+      And add a role key as well while calling the search method in case of specific user, domain
+     */
+  //anyone,none and specific user are working.
+  sharing: { method: "sharingSearch" , roles:["individual","domain"]},
 };
 
 const regexOperations = ["name", "inFolder", "folder"];
@@ -43,6 +51,7 @@ const searchMethods = {
   inFolderSearch: inFolderSearch,
   underFolderSearch: underFolderSearch,
   pathSearch: pathSearch,
+  sharingSearch: sharingSearch
 };
 
 function evaluateOperation(files, operator) {
