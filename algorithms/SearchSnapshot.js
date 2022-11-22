@@ -54,8 +54,7 @@ const searchMethods = {
   sharingSearch: sharingSearch
 };
 
-function evaluateOperation(files, operator) {
-  let indexOfColon = operator.indexOf(":");
+function evaluateOperation(files, operator, indexOfColon, groups) {
   if (indexOfColon < 0) {
     return { status: "error", msg: "Invalid Operator" };
   }
@@ -68,6 +67,9 @@ function evaluateOperation(files, operator) {
   if (splitOperator[0].startsWith("-")) {
     negated = true;
     splitOperator[0] = splitOperator[0].substring(1);
+  }
+  if (splitOperator[1].startsWith("\"") || splitOperator[1].startsWith("\'")){
+    splitOperator[1] = splitOperator[1].substring(1, splitOperator[1].length-1)
   }
 
   // if this operator is not in our list of valid operators
@@ -119,27 +121,36 @@ export default function searchSnapshot(files, query, prev_groups) {
   for (let i = 0; i < operators.length; i++) {
     let operator = operators[i];
 
+    let indexOfColon = operator.indexOf(":")
     // if theres a " or ` we need to re-combine the operator, because there are spaces in the name
-    if (operator.indexOf('"') > -1) {
-      do {
-        i += 1;
-        operator = operator.concat(" ", operators[i]);
-      } while (i < operators.length && operators[i].indexOf(`\"`) < 0);
-
-      if (i == operators.length) {
+    if (operator.charAt(indexOfColon+1) == "\"") {
+      let operator_parts = []
+      while ( (i < operators.length) && (operators[i].charAt(operators[i].length-1) != ("\"")) ) {
+        operator_parts.push(operators[i]);
+        i += 1
+      }
+      if (i < operators.length) {
+        operator_parts.push(operators[i])
+      }
+      else{
         return { status: "error", operator: operator, msg: 'No Closing "' };
       }
+      operator = operator_parts.join(" ")
     }
 
-    if (operator.indexOf(`\'`) > -1) {
-      do {
-        i += 1;
-        operator = operator.concat(" ", operators[i]);
-      } while (i < operators.length && operators[i].indexOf(`\'`) < 0);
-
-      if (i == operators.length) {
-        return { status: "error", operator: operator, msg: "No Closing '" };
+    if (operator.charAt(indexOfColon+1) == "\'") {
+      let operator_parts = []
+      while ( (i < operators.length) && (operators[i].charAt(operators[i].length-1) != ("\'")) ) {
+        operator_parts.push(operators[i]);
+        i += 1
       }
+      if (i < operators.length) {
+        operator_parts.push(operators[i])
+      }
+      else{
+        return { status: "error", operator: operator, msg: 'No Closing "' };
+      }
+      operator = operator_parts.join(" ")
     }
 
     // if its a boolean operator, just save it
@@ -190,7 +201,7 @@ export default function searchSnapshot(files, query, prev_groups) {
         // remove the final parenthesis from the operator, then evaluate it fully before continuing
         operator = operator.substring(0, operator.length - 1);
         operator = operator.trim();
-        single_operator_results = searchSnapshot(files, operator);
+        single_operator_results = searchSnapshot(files, operator, groups);
         if (single_operator_results.status === "error") {
           return {
             status: "error",
@@ -201,7 +212,7 @@ export default function searchSnapshot(files, query, prev_groups) {
         single_operator_results = single_operator_results.files;
       } else {
         operator = operator.trim();
-        single_operator_results = evaluateOperation(files, operator, groups);
+        single_operator_results = evaluateOperation(files, operator, indexOfColon, groups);
         if (single_operator_results.status === "error") {
           return single_operator_results;
         }
