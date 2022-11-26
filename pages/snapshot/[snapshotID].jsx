@@ -7,6 +7,7 @@ import FolderCard from "../../components/FolderCard";
 import AnalysisForm from "../../components/AnalysisForm";
 import FileTable from "../../components/FileTable";
 import QueryBuilder from "../../components/QueryBuilder";
+import ErrorModal from "../../components/ErrorModal"
 import searchSnapshot from "../../algorithms/SearchSnapshot";
 
 import {
@@ -28,6 +29,7 @@ export default function Snapshot() {
   const [activePage, setActivePage] = useState(1);
   const [filteredFiles, setFilteredFiles] = useState([]);
   const [showingResults, setShowingResults] = useState(false);
+  const [error, setError] = useState(null)
 
   const searchHandler = async (e) => {
     e.preventDefault();
@@ -40,7 +42,8 @@ export default function Snapshot() {
     let searchResults = await searchSnapshot(snapshot.files, query);
     //console.log(searchResults);
     if (searchResults.status !== "ok") {
-      return;
+      setError(searchResults);
+      return
     }
 
     setFilteredFiles(searchResults.files);
@@ -70,6 +73,10 @@ export default function Snapshot() {
 
     if (snapshotID) fetchSnapshot();
   }, [snapshotID]);
+
+  function closeError() {
+    setError(null)
+  }
 
   // Set up pagination =================================
   let items = [];
@@ -103,7 +110,7 @@ export default function Snapshot() {
         <h3 className="fw-bold">Snapshot {snapshotID}</h3>
         <h6>Taken: {snapshot.date}</h6>
       </Container>
-
+      <ErrorModal error={error} closeErrorModal={closeError}/>
       <Container fluid>
         <Form onSubmit={searchHandler}>
           <FormControl

@@ -56,7 +56,7 @@ const searchMethods = {
 
 function evaluateOperation(files, operator, indexOfColon, groups) {
   if (indexOfColon < 0) {
-    return { status: "error", msg: "Invalid Operator" };
+    return { status: "error", msg: "Invalid Operator", term: operator };
   }
 
   let splitOperator = [
@@ -74,7 +74,11 @@ function evaluateOperation(files, operator, indexOfColon, groups) {
 
   // if this operator is not in our list of valid operators
   if (!Object.keys(operatorsList).includes(splitOperator[0])) {
-    return { status: "error", msg: "Invalid Operator" };
+    return { status: "error", msg: "Invalid Operator", term: operator };
+  }
+
+  if(splitOperator[1] == "") {
+    return { status: "error", msg: "Cannot have an empty search term", term: operator };
   }
 
   const queryObject = operatorsList[splitOperator[0]];
@@ -87,7 +91,7 @@ function evaluateOperation(files, operator, indexOfColon, groups) {
       let regex = new RegExp(searchTerm);
       searchTerm = regex;
     } catch (e) {
-      return { status: "error", msg: "Invalid RegExp" };
+      return { status: "error", msg: "Invalid RegExp", term: searchTerm};
     }
   }
 
@@ -103,6 +107,8 @@ function evaluateOperation(files, operator, indexOfColon, groups) {
 
 export default function searchSnapshot(files, query, prev_groups) {
   let all_operator_results = [];
+  let path_present = false
+  let drive_present = false
 
   const operators = query.split(" ");
 
@@ -133,7 +139,7 @@ export default function searchSnapshot(files, query, prev_groups) {
         operator_parts.push(operators[i])
       }
       else{
-        return { status: "error", operator: operator, msg: 'No Closing "' };
+        return { status: "error",  msg: "No Closing \"", term: operator };
       }
       operator = operator_parts.join(" ")
     }
@@ -148,7 +154,7 @@ export default function searchSnapshot(files, query, prev_groups) {
         operator_parts.push(operators[i])
       }
       else{
-        return { status: "error", operator: operator, msg: 'No Closing "' };
+        return { status: "error", msg: "No Closing \'", term: operator };
       }
       operator = operator_parts.join(" ")
     }
@@ -193,8 +199,8 @@ export default function searchSnapshot(files, query, prev_groups) {
         if (parensCount !== 0) {
           return {
             status: "error",
-            operator: operator,
             msg: "Invalid Parenthesis",
+            term: "(" + operator.trim()
           };
         }
 
@@ -205,13 +211,19 @@ export default function searchSnapshot(files, query, prev_groups) {
         if (single_operator_results.status === "error") {
           return {
             status: "error",
-            operator: operator,
             msg: "Invalid Operator",
+            term: operator
           };
         }
         single_operator_results = single_operator_results.files;
       } else {
         operator = operator.trim();
+        if (operator.substring(0, indexOfColon) == "path") {
+          path_present = true
+        }
+        if (operator.substring(0, indexOfColon) == "drive") {
+          drive_present = true
+        }
         single_operator_results = evaluateOperation(files, operator, indexOfColon, groups);
         if (single_operator_results.status === "error") {
           return single_operator_results;
@@ -226,7 +238,16 @@ export default function searchSnapshot(files, query, prev_groups) {
     return {
       status: "error",
       msg: "Boolean operators must have valid search operators on either side",
+      term: query
     };
+  }
+
+  if (path_present && !drive_present) {
+    return {
+      status: "error",
+      msg: "The path operator is invalid without the drive operator",
+      term: query
+    }
   }
 
   let results = all_operator_results[0];
