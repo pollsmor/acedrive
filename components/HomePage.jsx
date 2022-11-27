@@ -4,6 +4,7 @@ import { Container, Button, Row, Col, ListGroup } from "react-bootstrap";
 import Banner from "./Banner";
 import SnapshotCard from "./SnapshotCard";
 import LoadingModal from "./LoadingModal";
+import ErrorModal from "./ErrorModal"
 import UploadFileModal from "./UploadFileModal";
 
 export default function HomePage(props) {
@@ -13,6 +14,7 @@ export default function HomePage(props) {
   const [queries, setQueries] = useState([]);
   const [loading, setLoading] = useState(false);
   const [uploading, setUploading] = useState(false);
+  const [error, setError] = useState(null)
 
   useEffect(() => {
     async function fetchUser() {
@@ -35,11 +37,20 @@ export default function HomePage(props) {
     }
 
     let res = await axios.post(`/api/${snapshotRoute}`);
+    if (res.data?.status == "error") {
+      setLoading(false)
+      setError(res.data)
+      return 
+    }
 
     // Retrieve ID of new snapshot instead of querying getUser again
     let new_array = [res.data.id, ...snapshotIDs];
     setSnapshotIDs(new_array);
     setLoading(false);
+  }
+
+  function closeError() {
+    setError(null)
   }
 
   const [hovering, setHovering] = useState(false);
@@ -72,6 +83,7 @@ export default function HomePage(props) {
     <>
       <div className="pagebox">
         <Banner />
+        <ErrorModal error={error} closeErrorModal={closeError}/>
         <Container fluid className="mt-2" style={{ color: "white" }}>
           <Button
             onClick={takeSnapshot}

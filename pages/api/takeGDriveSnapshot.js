@@ -86,7 +86,7 @@ export default async function takeGDriveSnapshot(req, res) {
 
     res.json({ id: snapshot_id });
   } else {
-    res.end("Not signed in or not a POST request.");
+    res.json({status: "error", msg: "Invalid authentication to take a snapshot"});
   }
 }
 
