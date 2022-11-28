@@ -24,7 +24,7 @@ export default async function takeOneDriveSnapshot(req, res) {
     const user = await User.findOne({ id: token.user.id });
     const snapshot = new Snapshot({
       date: new Date().toString(),
-      user: user.email,
+      user: user.email.toLowerCase(),
       files: top_level_files,
       provider: "microsoft",
     });
@@ -77,13 +77,13 @@ async function populateSubfolders(parentContents, folderId, path) {
           owners.push({
             displayName: user.displayName,
             permissionId: perm.id,
-            emailAddress: user.email,
+            emailAddress: user.email.toLowerCase(),
             photoLink: blankAvatarUrl,
           });
         }
 
         parsedPerms.push(new Permission({
-          email: user.email,
+          email: user.email.toLowerCase(),
           type: "user", // Assumption for now
           role: role,
           isInherited: false, // Assumption for now
@@ -94,7 +94,7 @@ async function populateSubfolders(parentContents, folderId, path) {
       if ("grantedToIdentitiesV2" in perm) {
         for (const identity of perm.grantedToIdentitiesV2) {
           parsedPerms.push(new Permission({
-            email: identity.user.email,
+            email: identity.user.email.toLowerCase(),
             type: "user", // Assumption for now
             role: role,
             isInherited: false, // Assumption for now
