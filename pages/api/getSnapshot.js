@@ -13,7 +13,7 @@ export default async function getSnapshot(req, res) {
       let snapshot = await Snapshot.findById(snapshotId).lean();
       if (token.provider === snapshot.provider) {
         res.json(snapshot);
-      } else res.end('Given provider does not match snapshot provider.');
+      } else res.end("Given provider does not match snapshot provider.");
     }
   } else {
     res.end("Invalid session.");

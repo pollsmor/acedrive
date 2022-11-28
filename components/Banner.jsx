@@ -41,9 +41,6 @@ export default function Banner() {
                   Sign out
                 </NavDropdown.Item>
               </NavDropdown>
-              {/*
-            <Nav.Link onClick={() => signOut({ callbackUrl: '/' })}>Sign out</Nav.Link> 
-            */}
             </Container>
           </Nav>
         </Container>

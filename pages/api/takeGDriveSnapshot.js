@@ -75,7 +75,7 @@ export default async function takeGDriveSnapshot(req, res) {
       date: new Date().toString(),
       user: user.email,
       files: file_data_structure,
-      provider: 'google',
+      provider: "google",
     });
 
     // Add this snapshot to the user profile
@@ -86,7 +86,10 @@ export default async function takeGDriveSnapshot(req, res) {
 
     res.json({ id: snapshot_id });
   } else {
-    res.json({status: "error", msg: "Invalid authentication to take a snapshot"});
+    res.json({
+      status: "error",
+      msg: "Invalid authentication to take a snapshot.",
+    });
   }
 }
 
