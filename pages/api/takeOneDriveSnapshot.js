@@ -5,6 +5,7 @@ import File from "../../lib/models/File";
 import Permission from "../../lib/models/Permission";
 import Snapshot from "../../lib/models/Snapshot";
 
+const blankAvatarUrl = "https://i.imgur.com/4FhvzzY.jpg";
 const apiUrl = "https://graph.microsoft.com/v1.0";
 let options;
 
@@ -46,28 +47,61 @@ async function populateSubfolders(parentContents, folderId, path) {
     `${apiUrl}/me/drive/items/${folderId}/children?$expand=thumbnails`,
     options
   );
-  console.log("Thumbnails worked!");
   const rawFiles = res.data.value;
-  console.log(rawFiles);
 
   for (let file of rawFiles) {
     const permsRes = await axios.get(
       `${apiUrl}/me/drive/items/${file.id}/permissions`,
       options
     );
-    const perms = permsRes.data.value;
+    const rawPerms = permsRes.data.value;
 
-    // I believe the last permission is always the owner permission?
-    const ownerPerm = perms.at(-1);
-    const owner = ownerPerm.grantedToV2.user;
-    const owners = [
-      {
-        displayName: owner.displayName,
-        permissionId: ownerPerm.id,
-        emailAddress: owner.email,
-        photoLink: "https://i.imgur.com/4FhvzzY.jpg", // Blank avatar,
-      },
-    ];
+    let owners = []; // Owner is unknown if you do not own the file - keep blank.
+    const parsedPerms = [];
+    for (const perm of rawPerms) {
+      let role = "reader"; // Default
+      switch (perm.roles[0]) {
+        case "owner":
+          role = "owner";
+          break;
+        case "write":
+          break;
+          role = "writer";
+          break;
+      }
+
+      // Not all permissions have this.
+      if ("grantedToV2" in perm) {
+        const user = perm.grantedToV2.user;
+        if (role === "owner") {
+          owners.push({
+            displayName: user.displayName,
+            permissionId: perm.id,
+            emailAddress: user.email,
+            photoLink: blankAvatarUrl,
+          });
+        }
+
+        parsedPerms.push(new Permission({
+          email: user.email,
+          type: "user", // Assumption for now
+          role: role,
+          isInherited: false, // Assumption for now
+        }));
+      } 
+      
+      // In link sharing permissions, a "grantedToIdentities" attribute with a list of users is returned.
+      if ("grantedToIdentitiesV2" in perm) {
+        for (const identity of perm.grantedToIdentitiesV2) {
+          parsedPerms.push(new Permission({
+            email: identity.user.email,
+            type: "user", // Assumption for now
+            role: role,
+            isInherited: false, // Assumption for now
+          }));
+        }
+      }
+    };
 
     const mimeType = file.file ? file.file.mimeType : "folder";
     const newPath = `${path}/${file.name}`;
@@ -82,11 +116,11 @@ async function populateSubfolders(parentContents, folderId, path) {
       thumbnailLink:
         file.thumbnails.length > 0
           ? file.thumbnails[0].medium.url
-          : "https://i.imgur.com/6QSVYLRm.jpg",
-      // owners: owners,
+          : "https://i.imgur.com/6QSVYLRm.jpg", // Generic file thumbnail
+      owners: owners,
       // driveId: doesn't apply?,
       driveName: "MyDrive",
-      // permissions: perms,
+      permissions: parsedPerms,
       content:
         mimeType === "folder"
           ? await populateSubfolders([], file.id, newPath)

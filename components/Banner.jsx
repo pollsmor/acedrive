@@ -23,6 +23,9 @@ export default function Banner() {
             </Navbar.Brand>
           </Nav>
           <Nav>
+            <Nav.Link>
+              {session.provider === "google" ? "Google Drive" : "OneDrive"}
+            </Nav.Link>
             <Nav.Link>{session.user.email}</Nav.Link>
             <Container>
               <NavDropdown drop={"start"} menuVariant="dark">
