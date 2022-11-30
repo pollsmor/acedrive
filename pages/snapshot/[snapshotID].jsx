@@ -33,6 +33,7 @@ export default function Snapshot() {
   const [pageFiles, setPageFiles] = useState([]);
   const [activePage, setActivePage] = useState(1);
   
+  const [searchResults, setSearchResults] = useState([]);
   const [filteredFiles, setFilteredFiles] = useState([]);
   const [showingResults, setShowingResults] = useState(false);
   const [openFile, setOpenFile] = useState(null)
@@ -44,6 +45,7 @@ export default function Snapshot() {
 
     if (query === "") {
       setShowingResults(false);
+      setSearchResults([]);
       return setFilteredFiles(snapshot.files);
     }
 
@@ -54,6 +56,7 @@ export default function Snapshot() {
       return
     }
 
+    setSearchResults(searchResults.files);
     setFilteredFiles(searchResults.files);
     setShowingResults(true);
     const userQueries = await axios.post("/api/saveSearchQuery", { query });
@@ -93,26 +96,21 @@ export default function Snapshot() {
   function sortFiles(e) {
     e.preventDefault()
     let sortType = e.target[0].value
-    let sortedFiles = [...filteredFiles]
+    let sortedFiles = [...searchResults]
 
-    if(sortType === "Default (Last Modified)") {
-      console.log("Default")
-      sortedFiles.sort( (a, b) => { (a.modifiedTime > b.modifiedTime) ? 1 : ((b.modifiedTime > a.modifiedTime) ? -1 : 0)} )
+    if(sortType === "Last Modified") {
+      sortedFiles.sort( (a, b) => (new Date(b.modifiedTime).getTime() - new Date(a.modifiedTime).getTime()))
       setFilteredFiles(sortedFiles)
     }
     else if (sortType === "Alphabetical") {
-      console.log("alphabetical")
-      sortedFiles.sort( (a, b) => { (a.name > b.name) ? 1 : ((b.name > a.name) ? -1 : 0)} )
+      sortedFiles.sort( (a, b) => (a.name > b.name) ? 1 : ((b.name < a.name) ? -1 : 0) )
       setFilteredFiles(sortedFiles)
     }
-    else if (sortType === "Path") {
-      console.log("path")
-      sortedFiles.sort( (a, b) => { (a.path > b.path) ? 1 : ((b.path > a.path) ? -1 : 0)} )
+    else if (sortType == "Drive") {
+      sortedFiles.sort( (a, b) => (a.driveName.toLowerCase() > b.driveName.toLowerCase()) ? 1 : ((b.driveName.toLowerCase() > a.driveName.toLowerCase()) ? -1 : 0))
       setFilteredFiles(sortedFiles)
-    } 
+    }
     else {
-      console.log("drive")
-      sortedFiles.sort( (a, b) => { (a.driveName > b.driveName) ? 1 : ((b.driveName > a.driveName) ? -1 : 0)} )
       setFilteredFiles(sortedFiles)
     }
   }
@@ -191,10 +189,10 @@ export default function Snapshot() {
                     Sort By: 
                 </Form.Label>
                 <Col sm="2">
-                    <Form.Select>
-                        <option>Default {"(Last Modified)"}</option>
+                    <Form.Select defaultValue="Default">
+                        <option>Default</option>
+                        <option>Last Modified</option>
                         <option>Alphabetical</option>
-                        <option>Path</option>
                         <option>Drive</option>
                     </Form.Select>
                 </Col>
