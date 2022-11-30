@@ -17,6 +17,9 @@ import {
   Form,
   FormControl,
   Pagination,
+  Row,
+  Col,
+  Button
 } from "react-bootstrap";
 
 export default function Snapshot() {
@@ -25,13 +28,16 @@ export default function Snapshot() {
 
   const [query, setQuery] = useState("");
   const [previousQueries, setPreviousQueries] = useState([]);
+  
   const [snapshot, setSnapshot] = useState({});
   const [pageFiles, setPageFiles] = useState([]);
   const [activePage, setActivePage] = useState(1);
+  
   const [filteredFiles, setFilteredFiles] = useState([]);
   const [showingResults, setShowingResults] = useState(false);
-  const [error, setError] = useState(null)
   const [openFile, setOpenFile] = useState(null)
+
+  const [error, setError] = useState(null)
 
   const searchHandler = async (e) => {
     e.preventDefault();
@@ -82,6 +88,33 @@ export default function Snapshot() {
 
   function closeDetail() {
     setOpenFile(null)
+  }
+  
+  function sortFiles(e) {
+    e.preventDefault()
+    let sortType = e.target[0].value
+    let sortedFiles = [...filteredFiles]
+
+    if(sortType === "Default (Last Modified)") {
+      console.log("Default")
+      sortedFiles.sort( (a, b) => { (a.modifiedTime > b.modifiedTime) ? 1 : ((b.modifiedTime > a.modifiedTime) ? -1 : 0)} )
+      setFilteredFiles(sortedFiles)
+    }
+    else if (sortType === "Alphabetical") {
+      console.log("alphabetical")
+      sortedFiles.sort( (a, b) => { (a.name > b.name) ? 1 : ((b.name > a.name) ? -1 : 0)} )
+      setFilteredFiles(sortedFiles)
+    }
+    else if (sortType === "Path") {
+      console.log("path")
+      sortedFiles.sort( (a, b) => { (a.path > b.path) ? 1 : ((b.path > a.path) ? -1 : 0)} )
+      setFilteredFiles(sortedFiles)
+    } 
+    else {
+      console.log("drive")
+      sortedFiles.sort( (a, b) => { (a.driveName > b.driveName) ? 1 : ((b.driveName > a.driveName) ? -1 : 0)} )
+      setFilteredFiles(sortedFiles)
+    }
   }
 
   // Set up pagination =================================
@@ -151,7 +184,29 @@ export default function Snapshot() {
         <AnalysisForm snapshotID={snapshotID} />
 
         {showingResults ? (
-          <FileTable files={filteredFiles} openFileDetails={setOpenFile} />
+          <>
+            <Form onSubmit={sortFiles}>
+              <Form.Group as={Row} className="mb-3">
+                <Form.Label column sm="1">
+                    Sort By: 
+                </Form.Label>
+                <Col sm="2">
+                    <Form.Select>
+                        <option>Default {"(Last Modified)"}</option>
+                        <option>Alphabetical</option>
+                        <option>Path</option>
+                        <option>Drive</option>
+                    </Form.Select>
+                </Col>
+                <Col sm="2">
+                  <Button type="submit">
+                    Submit
+                  </Button>
+                </Col>
+              </Form.Group>
+            </Form>
+            <FileTable files={filteredFiles} openFileDetails={setOpenFile} />
+          </>
         ) : (
           <>
             <ListGroup>

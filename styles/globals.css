@@ -95,3 +95,10 @@ html, body {
   border: 1px solid rgb(82, 82, 82) !important;
   text-align: center;
 }
+
+.permissions-container {
+	border: 1px solid #ccc !important;
+  padding-top: 16px;
+  border-radius: 16px;
+  margin-bottom: 10px;
+}
