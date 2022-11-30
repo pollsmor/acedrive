@@ -32,33 +32,11 @@ export default async function takeOneDriveSnapshot(req, res) {
     for (const file of remoteFiles) {
       const remoteDriveId = file.remoteItem.parentReference.driveId;
       const remoteItemId = file.remoteItem.id;
-      const mimeType = file.file ? file.file.mimeType : "folder";
+      if (remoteItemId === "01ARVPJVBTOTUUPAAANNBKJZIJEC5NW4SF")
+        continue; // Bugged "Documents" folder in shared files section
 
       shared_files.push(
-        new File({
-          id: file.id,
-          name: file.name,
-          mimeType: mimeType,
-          isFolder: mimeType === "folder",
-          modifiedTime: file.lastModifiedDateTime,
-          path: "/",
-          // parents: undefined, // Not sure "parents" attribute is necessary.
-          thumbnailLink: "https://i.imgur.com/6QSVYLRm.jpg", // Generic file thumbnail
-          owners: [], // Can't confirm for shared item, I believe
-          creator: file.createdBy.user.email,
-          driveId: remoteDriveId,
-          driveName: "Shared", // Can't find in OneDrive API
-          permissions: [],
-          content:
-            mimeType === "folder"
-              ? await populateSubfoldersRemote(
-                  [],
-                  remoteDriveId,
-                  remoteItemId,
-                  `/${file.name}`
-                )
-              : [],
-        })
+        await parseRemoteItem(remoteDriveId, remoteItemId, `/${file.name}`)
       );
     }
 
@@ -179,50 +157,46 @@ async function populateSubfolders(parentContents, folderId, path) {
   return parentContents;
 }
 
-// Parse files to have the same fields as Google Drive for simplification
-async function populateSubfoldersRemote(
-  parentContents,
-  remoteDriveId,
-  remoteItemId,
-  path
-) {
-  let res;
-  try {
-    res = await axios.get(
-      `${apiUrl}/drives/${remoteDriveId}/items/${remoteItemId}/children?$expand=thumbnails`,
+// Slower to request every file one by one, but eliminates code repetition
+async function parseRemoteItem(driveId, itemId, path) {
+  const itemRes = await axios.get(
+    `${apiUrl}/drives/${driveId}/items/${itemId}`,
+    options
+  );
+  const file = itemRes.data;
+
+  const content = [];
+  if (file.folder) {
+    const childrenRes = await axios.get(
+      `${apiUrl}/drives/${driveId}/items/${itemId}/children`,
       options
     );
-  } catch (err) {
-    // The "Documents" folder that is shared is bugged?
-    return parentContents;
+
+    const children = childrenRes.data.value;
+    for (let child of children) {
+      const newPath = `${path}/${child.name}`;
+      content.push(
+        await parseRemoteItem(driveId, child.id, newPath)
+      );
+    }
   }
 
-  const rawFiles = res.data.value;
-  for (let file of rawFiles) {
-    const mimeType = file.file ? file.file.mimeType : "folder";
-    const newPath = `${path}/${file.name}`;
-    const file_obj = new File({
-      id: file.id,
-      name: file.name,
-      mimeType: mimeType,
-      isFolder: mimeType === "folder",
-      modifiedTime: file.lastModifiedDateTime,
-      path: newPath,
-      // parents: undefined, // Not sure "parents" attribute is necessary.
-      thumbnailLink: "https://i.imgur.com/6QSVYLRm.jpg", // Generic file thumbnail
-      owners: [], // Can't confirm for shared item, I believe
-      creator: file.createdBy.user.email,
-      driveId: remoteDriveId,
-      driveName: "Shared", // Can't find in OneDrive API
-      permissions: [],
-      content:
-        mimeType === "folder"
-          ? await populateSubfoldersRemote([], file.id, remoteDriveId, newPath)
-          : [],
-    });
+  const mimeType = file.file ? file.file.mimeType : "folder";
 
-    parentContents.push(file_obj);
-  }
-
-  return parentContents;
+  return new File({
+    id: file.id,
+    name: file.name,
+    mimeType: mimeType,
+    isFolder: mimeType === "folder",
+    modifiedTime: file.lastModifiedDateTime,
+    path: path,
+    // parents: undefined, // Not sure "parents" attribute is necessary.
+    thumbnailLink: "https://i.imgur.com/6QSVYLRm.jpg", // Generic file thumbnail
+    owners: [], // Can't confirm for shared item, I believe
+    creator: file.createdBy.user.email,
+    driveId: driveId,
+    driveName: "Shared", // Can't find in OneDrive API
+    permissions: [],
+    content: content,
+  });
 }
