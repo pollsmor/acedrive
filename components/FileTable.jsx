@@ -1,7 +1,8 @@
 import { Table } from "react-bootstrap";
 import Image from "next/image";
 
-const imgUrl = "https://uas.edu.kw/wp-content/uploads/2018/12/folder-icon.png";
+const folderUrl = "https://uas.edu.kw/wp-content/uploads/2018/12/folder-icon.png";
+const fileUrl = "https://www.iconpacks.net/icons/2/free-file-icon-1453-thumb.png";
 
 export default function FileTable(props) {
   const filteredData = props.files;
@@ -27,10 +28,17 @@ export default function FileTable(props) {
               return (
                 <tr key={file.id} onClick={openDetails}>
                   <td id={index}>
-                    {file.isFolder && (
+                    {file.isFolder ? (
                       <Image
-                        src={imgUrl}
+                        src={folderUrl}
                         alt="Folder icon"
+                        width={20}
+                        height={20}
+                      />
+                    ) : (
+                      <Image
+                        src={fileUrl}
+                        alt="File icon"
                         width={20}
                         height={20}
                       />
