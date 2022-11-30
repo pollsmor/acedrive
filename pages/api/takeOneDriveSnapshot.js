@@ -18,14 +18,56 @@ export default async function takeOneDriveSnapshot(req, res) {
       },
     };
 
-    const top_level_files = [];
-    await populateSubfolders(top_level_files, "root", "");
+    // Handle normal files in your drive
+    const personal_files = [];
+    await populateSubfolders(personal_files, "root", "");
+
+    // Handle shared files
+    const shared_files = [];
+    const remoteRes = await axios.get(
+      `${apiUrl}/me/drive/sharedWithMe`,
+      options
+    );
+    const remoteFiles = remoteRes.data.value;
+    for (const file of remoteFiles) {
+      const remoteDriveId = file.remoteItem.parentReference.driveId;
+      const remoteItemId = file.remoteItem.id;
+      const mimeType = file.file ? file.file.mimeType : "folder";
+
+      shared_files.push(
+        new File({
+          id: file.id,
+          name: file.name,
+          mimeType: mimeType,
+          isFolder: mimeType === "folder",
+          modifiedTime: file.lastModifiedDateTime,
+          path: "/",
+          // parents: undefined, // Not sure "parents" attribute is necessary.
+          thumbnailLink: "https://i.imgur.com/6QSVYLRm.jpg", // Generic file thumbnail
+          owners: [], // Can't confirm for shared item, I believe
+          creator: file.createdBy.user.email,
+          driveId: remoteDriveId,
+          driveName: "Shared", // Can't find in OneDrive API
+          permissions: [],
+          content:
+            mimeType === "folder"
+              ? await populateSubfoldersRemote(
+                  [],
+                  remoteDriveId,
+                  remoteItemId,
+                  `/${file.name}`
+                )
+              : [],
+        })
+      );
+    }
+
     // Save snapshot to database
     const user = await User.findOne({ id: token.user.id });
     const snapshot = new Snapshot({
       date: new Date().toString(),
-      user: user.email.toLowerCase(),
-      files: top_level_files,
+      user: user.email,
+      files: personal_files.concat(shared_files),
       provider: "microsoft",
     });
 
@@ -77,31 +119,35 @@ async function populateSubfolders(parentContents, folderId, path) {
           owners.push({
             displayName: user.displayName,
             permissionId: perm.id,
-            emailAddress: user.email.toLowerCase(),
+            emailAddress: user.email,
             photoLink: blankAvatarUrl,
           });
         }
 
-        parsedPerms.push(new Permission({
-          email: user.email.toLowerCase(),
-          type: "user", // Assumption for now
-          role: role,
-          isInherited: false, // Assumption for now
-        }));
-      } 
-      
-      // In link sharing permissions, a "grantedToIdentities" attribute with a list of users is returned.
-      if ("grantedToIdentitiesV2" in perm) {
-        for (const identity of perm.grantedToIdentitiesV2) {
-          parsedPerms.push(new Permission({
-            email: identity.user.email.toLowerCase(),
+        parsedPerms.push(
+          new Permission({
+            email: user.email,
             type: "user", // Assumption for now
             role: role,
             isInherited: false, // Assumption for now
-          }));
+          })
+        );
+      }
+
+      // In link sharing permissions, a "grantedToIdentities" attribute with a list of users is returned.
+      if ("grantedToIdentitiesV2" in perm) {
+        for (const identity of perm.grantedToIdentitiesV2) {
+          parsedPerms.push(
+            new Permission({
+              email: identity.user.email,
+              type: "user", // Assumption for now
+              role: role,
+              isInherited: false, // Assumption for now
+            })
+          );
         }
       }
-    };
+    }
 
     const mimeType = file.file ? file.file.mimeType : "folder";
     const newPath = `${path}/${file.name}`;
@@ -118,6 +164,7 @@ async function populateSubfolders(parentContents, folderId, path) {
           ? file.thumbnails[0].medium.url
           : "https://i.imgur.com/6QSVYLRm.jpg", // Generic file thumbnail
       owners: owners,
+      creator: file.createdBy.user.email,
       // driveId: doesn't apply?,
       driveName: "MyDrive",
       permissions: parsedPerms,
@@ -126,6 +173,54 @@ async function populateSubfolders(parentContents, folderId, path) {
           ? await populateSubfolders([], file.id, newPath)
           : [],
     });
+    parentContents.push(file_obj);
+  }
+
+  return parentContents;
+}
+
+// Parse files to have the same fields as Google Drive for simplification
+async function populateSubfoldersRemote(
+  parentContents,
+  remoteDriveId,
+  remoteItemId,
+  path
+) {
+  let res;
+  try {
+    res = await axios.get(
+      `${apiUrl}/drives/${remoteDriveId}/items/${remoteItemId}/children?$expand=thumbnails`,
+      options
+    );
+  } catch (err) {
+    // The "Documents" folder that is shared is bugged?
+    return parentContents;
+  }
+
+  const rawFiles = res.data.value;
+  for (let file of rawFiles) {
+    const mimeType = file.file ? file.file.mimeType : "folder";
+    const newPath = `${path}/${file.name}`;
+    const file_obj = new File({
+      id: file.id,
+      name: file.name,
+      mimeType: mimeType,
+      isFolder: mimeType === "folder",
+      modifiedTime: file.lastModifiedDateTime,
+      path: newPath,
+      // parents: undefined, // Not sure "parents" attribute is necessary.
+      thumbnailLink: "https://i.imgur.com/6QSVYLRm.jpg", // Generic file thumbnail
+      owners: [], // Can't confirm for shared item, I believe
+      creator: file.createdBy.user.email,
+      driveId: remoteDriveId,
+      driveName: "Shared", // Can't find in OneDrive API
+      permissions: [],
+      content:
+        mimeType === "folder"
+          ? await populateSubfoldersRemote([], file.id, remoteDriveId, newPath)
+          : [],
+    });
+
     parentContents.push(file_obj);
   }
 

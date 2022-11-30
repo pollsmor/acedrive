@@ -6,12 +6,12 @@ export default function ErrorModal(props) {
         props.closeErrorModal()
     }
 
-    console.log(error)
+    // console.log(error)
     return (
         <>
           <Modal show={error != null} onHide={handleClose}>
             <Modal.Header closeButton>
-              <Modal.Title>Modal heading</Modal.Title>
+              <Modal.Title>Search Error</Modal.Title>
             </Modal.Header>
             <Modal.Body>Error: <span style={{fontWeight:'bold'}}> {error?.msg} </span> </Modal.Body>
             {error?.term ? 
