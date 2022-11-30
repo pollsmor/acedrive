@@ -3,18 +3,26 @@ import { useState } from "react";
 import { Modal, Form } from "react-bootstrap";
 import Dropzone from "react-dropzone";
 import { Parser } from "htmlparser2";
+import ErrorModal from "./ErrorModal"
 
 export default function UploadFileModal(props) {
   const [groupName, setGroupName] = useState("");
   const [groupEmail, setGroupEmail] = useState("");
+  const [error, setError] = useState(null);
+
+  function closeError () {
+    setError(null)
+  }
 
   function onDrop(acceptedFiles) {
     // TODO: more robust error messaging for missing groupName and groupEmail
     if (groupName === "" || groupEmail === "") {
-      return;
+      setError({msg: "Cannot have empty Group name or Group email"})
+      return
     }
 
     let file = acceptedFiles[0];
+    let timestamp = file.lastModified
     let reader = new FileReader();
     reader.readAsText(file);
 
@@ -39,6 +47,7 @@ export default function UploadFileModal(props) {
         members: members_list,
         groupName: groupName,
         groupEmail: groupEmail,
+        timestamp: timestamp
       });
 
       // TODO: implement some kind of success message so users know the group snapshot has been saved
@@ -48,6 +57,8 @@ export default function UploadFileModal(props) {
   }
 
   return (
+    <>
+    <ErrorModal error={error} closeErrorModal={closeError}/>
     <Modal
       size="lg"
       show={props.show}
@@ -95,5 +106,5 @@ export default function UploadFileModal(props) {
         </Dropzone>
       </Modal.Body>
     </Modal>
-  );
+  </>);
 }

@@ -11,7 +11,7 @@ export default async function takeGroupSnapshot(req, res) {
     let group_snapshot = new GroupSnapshot({
       groupName: req.body.groupName,
       groupEmail: req.body.groupEmail,
-      date: new Date().toString(),
+      date: req.body.timestamp,
       user: user.email,
       members: req.body.members,
     });

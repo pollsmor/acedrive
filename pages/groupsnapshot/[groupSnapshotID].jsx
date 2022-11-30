@@ -34,7 +34,7 @@ export default function GroupSnapshot() {
       <Banner />
       <Container className="my-2">
         <h3 className="fw-bold">Group Snapshot {groupSnapshotID}</h3>
-        <h6>Taken: {groupSnapshot.date}</h6>
+        <h6>Taken: {new Date(parseInt(groupSnapshot.date)).toString()}</h6>
         <h3>Name: {groupSnapshot.groupName}</h3>
         <h3>Email: {groupSnapshot.groupEmail}</h3>
         <hr />
