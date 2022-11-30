@@ -17,6 +17,9 @@ import {
   Form,
   FormControl,
   Pagination,
+  Row,
+  Col,
+  Button
 } from "react-bootstrap";
 
 export default function Snapshot() {
@@ -25,19 +28,24 @@ export default function Snapshot() {
 
   const [query, setQuery] = useState("");
   const [previousQueries, setPreviousQueries] = useState([]);
+  
   const [snapshot, setSnapshot] = useState({});
   const [pageFiles, setPageFiles] = useState([]);
   const [activePage, setActivePage] = useState(1);
+  
+  const [searchResults, setSearchResults] = useState([]);
   const [filteredFiles, setFilteredFiles] = useState([]);
   const [showingResults, setShowingResults] = useState(false);
-  const [error, setError] = useState(null)
   const [openFile, setOpenFile] = useState(null)
+
+  const [error, setError] = useState(null)
 
   const searchHandler = async (e) => {
     e.preventDefault();
 
     if (query === "") {
       setShowingResults(false);
+      setSearchResults([]);
       return setFilteredFiles(snapshot.files);
     }
 
@@ -48,6 +56,7 @@ export default function Snapshot() {
       return
     }
 
+    setSearchResults(searchResults.files);
     setFilteredFiles(searchResults.files);
     setShowingResults(true);
     const userQueries = await axios.post("/api/saveSearchQuery", { query });
@@ -82,6 +91,28 @@ export default function Snapshot() {
 
   function closeDetail() {
     setOpenFile(null)
+  }
+  
+  function sortFiles(e) {
+    e.preventDefault()
+    let sortType = e.target[0].value
+    let sortedFiles = [...searchResults]
+
+    if(sortType === "Last Modified") {
+      sortedFiles.sort( (a, b) => (new Date(b.modifiedTime).getTime() - new Date(a.modifiedTime).getTime()))
+      setFilteredFiles(sortedFiles)
+    }
+    else if (sortType === "Alphabetical") {
+      sortedFiles.sort( (a, b) => (a.name > b.name) ? 1 : ((b.name < a.name) ? -1 : 0) )
+      setFilteredFiles(sortedFiles)
+    }
+    else if (sortType == "Drive") {
+      sortedFiles.sort( (a, b) => (a.driveName.toLowerCase() > b.driveName.toLowerCase()) ? 1 : ((b.driveName.toLowerCase() > a.driveName.toLowerCase()) ? -1 : 0))
+      setFilteredFiles(sortedFiles)
+    }
+    else {
+      setFilteredFiles(sortedFiles)
+    }
   }
 
   // Set up pagination =================================
@@ -151,7 +182,29 @@ export default function Snapshot() {
         <AnalysisForm snapshotID={snapshotID} />
 
         {showingResults ? (
-          <FileTable files={filteredFiles} openFileDetails={setOpenFile} />
+          <>
+            <Form onSubmit={sortFiles}>
+              <Form.Group as={Row} className="mb-3">
+                <Form.Label column sm="1">
+                    Sort By: 
+                </Form.Label>
+                <Col sm="2">
+                    <Form.Select defaultValue="Default">
+                        <option>Default</option>
+                        <option>Last Modified</option>
+                        <option>Alphabetical</option>
+                        <option>Drive</option>
+                    </Form.Select>
+                </Col>
+                <Col sm="2">
+                  <Button type="submit">
+                    Submit
+                  </Button>
+                </Col>
+              </Form.Group>
+            </Form>
+            <FileTable files={filteredFiles} openFileDetails={setOpenFile} />
+          </>
         ) : (
           <>
             <ListGroup>
