@@ -160,7 +160,7 @@ async function populateSubfolders(parentContents, folderId, path) {
 // Slower to request every file one by one, but eliminates code repetition
 async function parseRemoteItem(driveId, itemId, path) {
   const itemRes = await axios.get(
-    `${apiUrl}/drives/${driveId}/items/${itemId}`,
+    `${apiUrl}/drives/${driveId}/items/${itemId}?$expand=permissions`,
     options
   );
   const file = itemRes.data;
@@ -181,8 +181,59 @@ async function parseRemoteItem(driveId, itemId, path) {
     }
   }
 
-  const mimeType = file.file ? file.file.mimeType : "folder";
+  const rawPerms = file.permissions;
+  let owners = []; // Owner is unknown if you do not own the file - keep blank.
+  const parsedPerms = [];
+  for (const perm of rawPerms) {
+    let role = "reader"; // Default
+    switch (perm.roles[0]) {
+      case "owner":
+        role = "owner";
+        break;
+      case "write":
+        break;
+        role = "writer";
+        break;
+    }
 
+    // Not all permissions have this.
+    if ("grantedTo" in perm) {
+      const user = perm.grantedTo.user;
+      if (role === "owner") {
+        owners.push({
+          displayName: user.displayName,
+          permissionId: perm.id,
+          emailAddress: user.email,
+          photoLink: blankAvatarUrl,
+        });
+      }
+
+      parsedPerms.push(
+        new Permission({
+          email: user.email,
+          type: "user", // Assumption for now
+          role: role,
+          isInherited: false, // Assumption for now
+        })
+      );
+    }
+
+    // In link sharing permissions, a "grantedToIdentities" attribute with a list of users is returned.
+    if ("grantedToIdentities" in perm) {
+      for (const identity of perm.grantedToIdentities) {
+        parsedPerms.push(
+          new Permission({
+            email: identity.user.email,
+            type: "user", // Assumption for now
+            role: role,
+            isInherited: false, // Assumption for now
+          })
+        );
+      }
+    }
+  }
+
+  const mimeType = file.file ? file.file.mimeType : "folder";
   return new File({
     id: file.id,
     name: file.name,
@@ -192,11 +243,11 @@ async function parseRemoteItem(driveId, itemId, path) {
     path: path,
     // parents: undefined, // Not sure "parents" attribute is necessary.
     thumbnailLink: "https://i.imgur.com/6QSVYLRm.jpg", // Generic file thumbnail
-    owners: [], // Can't confirm for shared item, I believe
+    owners: owners,
     creator: file.createdBy.user.email,
     driveId: driveId,
     driveName: "Shared", // Can't find in OneDrive API
-    permissions: [],
+    permissions: parsedPerms,
     content: content,
   });
 }
