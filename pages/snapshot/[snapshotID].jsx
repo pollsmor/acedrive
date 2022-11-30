@@ -8,6 +8,7 @@ import AnalysisForm from "../../components/AnalysisForm";
 import FileTable from "../../components/FileTable";
 import QueryBuilder from "../../components/QueryBuilder";
 import ErrorModal from "../../components/ErrorModal"
+import FileDetailsModal from "../../components/FileDetailsModal"
 import searchSnapshot from "../../algorithms/SearchSnapshot";
 
 import {
@@ -30,6 +31,7 @@ export default function Snapshot() {
   const [filteredFiles, setFilteredFiles] = useState([]);
   const [showingResults, setShowingResults] = useState(false);
   const [error, setError] = useState(null)
+  const [openFile, setOpenFile] = useState(null)
 
   const searchHandler = async (e) => {
     e.preventDefault();
@@ -78,6 +80,10 @@ export default function Snapshot() {
     setError(null)
   }
 
+  function closeDetail() {
+    setOpenFile(null)
+  }
+
   // Set up pagination =================================
   let items = [];
   const filesPerPage = 10;
@@ -111,6 +117,7 @@ export default function Snapshot() {
         <h6>Taken: {snapshot.date}</h6>
       </Container>
       <ErrorModal error={error} closeErrorModal={closeError}/>
+      <FileDetailsModal file={openFile} closeFileDetails={closeDetail}/>
       <Container fluid>
         <Form onSubmit={searchHandler}>
           <FormControl
@@ -144,7 +151,7 @@ export default function Snapshot() {
         <AnalysisForm snapshotID={snapshotID} />
 
         {showingResults ? (
-          <FileTable files={filteredFiles} />
+          <FileTable files={filteredFiles} openFileDetails={setOpenFile} />
         ) : (
           <>
             <ListGroup>
