@@ -11,8 +11,10 @@ export default async function saveSearchQuery(req, res) {
       // Add the query to the user's profile
       console.log("Saved");
       user.queries.unshift(req.body.query);
+      user.queries = user.queries.slice(0,5)
       await user.save();
     }
+    
     const updatedUser = await User.findOne({ id: userId });
     res.json({ queries: updatedUser.queries });
   } else {
