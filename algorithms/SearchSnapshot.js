@@ -41,6 +41,7 @@ const operatorsList = {
 };
 
 const regexOperations = ["name", "inFolder", "folder"];
+const userOperations = ["owner", "creator", "from", "readable", "writable", "sharable"];
 const sharingOptions = ["none", "anyone", "domain", "individual"]
 
 const searchMethods = {
@@ -55,7 +56,7 @@ const searchMethods = {
   sharingSearch: sharingSearch
 };
 
-function evaluateOperation(files, operator, indexOfColon, groups) {
+function evaluateOperation(files, operator, indexOfColon, groups, group_snapshots, userEmail) {
   if (indexOfColon < 0) {
     return { status: "error", msg: "Invalid Operator", term: operator };
   }
@@ -100,6 +101,26 @@ function evaluateOperation(files, operator, indexOfColon, groups) {
     return { status: "error", msg: "Invalid sharing operator use", term: operator};
   }
 
+  if(userOperations.includes(splitOperator[0]) || splitOperator[0] === "to") {
+    if(splitOperator[1] === "me") {
+      searchTerm = userEmail
+    }
+  }
+
+  if(userOperations.includes(splitOperator[0])) {
+    let list_of_searchTerms = [searchTerm.toLowerCase()]
+    if (groups) {
+      for (let snapshot of group_snapshots) {
+        if (snapshot.members.includes(searchTerm)) {
+          list_of_searchTerms.push(snapshot.groupEmail.toLowerCase())
+        }
+      }      
+    }
+    searchTerm = list_of_searchTerms
+  }
+  
+  console.log(searchTerm)
+
   const searchedFiles = searchMethods[queryObject.method](
     files,
     searchTerm,
@@ -110,7 +131,7 @@ function evaluateOperation(files, operator, indexOfColon, groups) {
   return searchedFiles;
 }
 
-export default function searchSnapshot(files, query, prev_groups) {
+export default function searchSnapshot(files, query, prev_groups, group_snapshots, userEmail) {
   let all_operator_results = [];
   let path_present = false
   let drive_present = false
@@ -212,7 +233,7 @@ export default function searchSnapshot(files, query, prev_groups) {
         // remove the final parenthesis from the operator, then evaluate it fully before continuing
         operator = operator.substring(0, operator.length - 1);
         operator = operator.trim();
-        single_operator_results = searchSnapshot(files, operator, groups);
+        single_operator_results = searchSnapshot(files, operator, groups, group_snapshots, userEmail);
         if (single_operator_results.status === "error") {
           return {
             status: "error",
@@ -229,7 +250,7 @@ export default function searchSnapshot(files, query, prev_groups) {
         if (operator.substring(0, indexOfColon) == "drive") {
           drive_present = true
         }
-        single_operator_results = evaluateOperation(files, operator, indexOfColon, groups);
+        single_operator_results = evaluateOperation(files, operator, indexOfColon, groups, group_snapshots, userEmail);
         if (single_operator_results.status === "error") {
           return single_operator_results;
         }
