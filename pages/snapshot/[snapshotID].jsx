@@ -28,6 +28,8 @@ export default function Snapshot() {
 
   const [query, setQuery] = useState("");
   const [previousQueries, setPreviousQueries] = useState([]);
+  const [groupSnapshots, setGroupSnapshots] = useState([])
+  const [userEmail, setUserEmail] = useState("")
   
   const [snapshot, setSnapshot] = useState({});
   const [pageFiles, setPageFiles] = useState([]);
@@ -40,6 +42,55 @@ export default function Snapshot() {
 
   const [error, setError] = useState(null)
 
+  useEffect(() => {
+    async function fetchSnapshot() {
+      try {
+        let snapshot = await axios.get("/api/getSnapshot", {
+          params: { id: snapshotID },
+        });
+        setSnapshot(snapshot.data);
+        setFilteredFiles(snapshot.data.files);
+
+        let user = await axios.get("/api/getUser");
+        setPreviousQueries(user.data.queries);
+        setUserEmail(user.data.email)
+      
+        let groupSnapshotMap = new Map() 
+        let file_snapshot_time = new Date(snapshot.data.date).getTime()
+
+        for (let group_snapshot of user.data.groupSnapshotInfo) {
+          if (groupSnapshotMap.has(group_snapshot.email)) {
+            let current_diff = Math.abs(groupSnapshotMap.get(group_snapshot.email).timestamp - file_snapshot_time)
+            let new_diff = Math.abs(group_snapshot.timestamp - file_snapshot_time)
+            if (new_diff < current_diff) {
+              groupSnapshotMap.set(group_snapshot.email, group_snapshot)
+            }
+          }
+          else {
+            groupSnapshotMap.set(group_snapshot.email, group_snapshot)
+          }
+        }
+        
+        let group_snapshot_ids = []
+        for (let group_snapshot of groupSnapshotMap.values()) {
+          group_snapshot_ids.push(group_snapshot.id)
+        }
+
+        let list_of_group_snapshot = await axios.post("/api/getListOfGroupMemberships", {
+            id_list: group_snapshot_ids
+        });
+        setGroupSnapshots(list_of_group_snapshot.data)
+
+      } catch (err) {
+        console.log(err)
+        alert("This is not a valid snapshot ID.");
+        window.location.href = "/";
+      }
+    }
+
+    if (snapshotID) fetchSnapshot();
+  }, [snapshotID]);
+
   const searchHandler = async (e) => {
     e.preventDefault();
 
@@ -49,7 +100,7 @@ export default function Snapshot() {
       return setFilteredFiles(snapshot.files);
     }
 
-    let searchResults = await searchSnapshot(snapshot.files, query);
+    let searchResults = await searchSnapshot(snapshot.files, query, null, groupSnapshots, userEmail);
     //console.log(searchResults);
     if (searchResults.status !== "ok") {
       setError(searchResults);
@@ -64,26 +115,6 @@ export default function Snapshot() {
     //Set Queries from users updated listed after saving
     setPreviousQueries(userQueries.data.queries);
   };
-
-  useEffect(() => {
-    async function fetchSnapshot() {
-      try {
-        let snapshot = await axios.get("/api/getSnapshot", {
-          params: { id: snapshotID },
-        });
-        setSnapshot(snapshot.data);
-        setFilteredFiles(snapshot.data.files);
-
-        let user = await axios.get("/api/getUser");
-        setPreviousQueries(user.data.queries);
-      } catch (err) {
-        alert("This is not a valid snapshot ID.");
-        window.location.href = "/";
-      }
-    }
-
-    if (snapshotID) fetchSnapshot();
-  }, [snapshotID]);
 
   function closeError() {
     setError(null)
