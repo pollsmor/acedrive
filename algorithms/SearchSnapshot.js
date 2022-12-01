@@ -119,8 +119,6 @@ function evaluateOperation(files, operator, indexOfColon, groups, group_snapshot
     searchTerm = list_of_searchTerms
   }
   
-  console.log(searchTerm)
-
   const searchedFiles = searchMethods[queryObject.method](
     files,
     searchTerm,

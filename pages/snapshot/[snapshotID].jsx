@@ -82,7 +82,6 @@ export default function Snapshot() {
         setGroupSnapshots(list_of_group_snapshot.data)
 
       } catch (err) {
-        console.log(err)
         alert("This is not a valid snapshot ID.");
         window.location.href = "/";
       }
