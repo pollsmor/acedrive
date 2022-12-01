@@ -10,7 +10,7 @@ import UploadFileModal from "./UploadFileModal";
 export default function HomePage(props) {
   const session = props.session;
   const [snapshotIDs, setSnapshotIDs] = useState([]);
-  const [groupSnapshotIDs, setGroupSnapshotIDs] = useState([]);
+  const [groupSnapshotInfo, setGroupSnapshotInfo] = useState([]);
   const [queries, setQueries] = useState([]);
   const [loading, setLoading] = useState(false);
   const [uploading, setUploading] = useState(false);
@@ -20,7 +20,7 @@ export default function HomePage(props) {
     async function fetchUser() {
       let user = await axios.get("/api/getUser");
       setSnapshotIDs(user.data.snapshotIDs);
-      setGroupSnapshotIDs(user.data.groupSnapshotIDs);
+      setGroupSnapshotInfo(user.data.groupSnapshotInfo);
       setQueries(user.data.queries);
     }
 
@@ -139,7 +139,7 @@ export default function HomePage(props) {
           ) : null}
           <hr />
 
-          {snapshotIDs.length > 0 || groupSnapshotIDs.length > 0 ? (
+          {snapshotIDs.length > 0 || groupSnapshotInfo.length > 0 ? (
             <>
               <h4>Snapshots are sorted by recency from top to bottom.</h4>
               <Row>
@@ -154,12 +154,12 @@ export default function HomePage(props) {
                 {session.provider === "google" ? (
                   <Col style={{ color: "white" }}>
                     <h5>Group membership snapshots</h5>
-                    {groupSnapshotIDs.map((id, index) => {
+                    {groupSnapshotInfo.map((info, index) => {
                       return (
                         <SnapshotCard
                           key={index}
                           position={index}
-                          id={id}
+                          id={info.id}
                           isGroupSnapshot={true}
                         />
                       );
