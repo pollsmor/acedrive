@@ -60,6 +60,7 @@ export default function FileDetailsModal(props) {
                                   <PermissionListItem 
                                   permission={permission} 
                                   key={index} 
+                                  file={file}
                                   group_membership={permission.type === "group" ? groupsMap.get(permission.email) : null}
                                   />
                                 );
