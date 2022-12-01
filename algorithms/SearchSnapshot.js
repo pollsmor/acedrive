@@ -37,10 +37,11 @@ const operatorsList = {
       And add a role key as well while calling the search method in case of specific user, domain
      */
   //anyone,none and specific user are working.
-  sharing: { method: "sharingSearch" , roles:["individual","domain"]},
+  sharing: { method: "sharingSearch" },
 };
 
 const regexOperations = ["name", "inFolder", "folder"];
+const sharingOptions = ["none", "anyone", "domain", "individual"]
 
 const searchMethods = {
   driveSearch: driveSearch,
@@ -93,6 +94,10 @@ function evaluateOperation(files, operator, indexOfColon, groups) {
     } catch (e) {
       return { status: "error", msg: "Invalid RegExp", term: searchTerm};
     }
+  }
+
+  if(splitOperator[0] === "sharing" && !sharingOptions.includes(splitOperator[1])) {
+    return { status: "error", msg: "Invalid sharing operator use", term: operator};
   }
 
   const searchedFiles = searchMethods[queryObject.method](
