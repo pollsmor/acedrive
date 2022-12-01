@@ -22,6 +22,13 @@ export default function UploadFileModal(props) {
     }
 
     let file = acceptedFiles[0];
+    // error messaging for when the uploaded file is not an html file
+    console.log(file.name.split('.').pop());
+    if(file.name.split('.').pop()!='html' && file.name.split('.').pop()!='htm'){
+      setError({msg: "Please upload a html file"})
+      return
+    }
+
     let timestamp = file.lastModified
     let reader = new FileReader();
     reader.readAsText(file);
