@@ -1,4 +1,4 @@
-import { Form, Container, Row, Col} from "react-bootstrap";
+import { Form, Container, Row, Col, ListGroup, Accordion} from "react-bootstrap";
 
 export default function PermissionListItem(props) {
     const permission = props.permission
@@ -51,6 +51,28 @@ export default function PermissionListItem(props) {
                     </Col>
                 </Form.Group>
             </Form>
+            {props.group_membership ? 
+                <Accordion>
+                    <Accordion.Item eventKey="0">
+                    <Accordion.Header>Show Group Membership</Accordion.Header>
+                    <Accordion.Body>
+                        <ListGroup>
+                            {props.group_membership.map((member, index) => {
+                                return (
+                                <ListGroup.Item
+                                    variant="primary"
+                                    key={index}
+                                    className="py-1"
+                                >
+                                {member}
+                                </ListGroup.Item>
+                                );
+                            })}
+                        </ListGroup> 
+                    </Accordion.Body>
+                    </Accordion.Item>
+                </Accordion>
+                : null}
         </Container>
     )
 }

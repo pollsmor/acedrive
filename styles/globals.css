@@ -99,6 +99,7 @@ html, body {
 .permissions-container {
 	border: 1px solid #ccc !important;
   padding-top: 16px;
+  padding-bottom: 16px;
   border-radius: 16px;
   margin-bottom: 10px;
 }

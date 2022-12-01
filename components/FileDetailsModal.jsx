@@ -3,6 +3,10 @@ import PermissionListItem from "./PermissionListItem"
 
 export default function FileDetailsModal(props) {
     const file = props.file
+    const groupsMap = new Map()
+    for (let snapshot of props.group_snapshots) {
+      groupsMap.set(snapshot.groupEmail, snapshot.members)
+    }
 
     function handleClose() {
         props.closeFileDetails()
@@ -53,7 +57,11 @@ export default function FileDetailsModal(props) {
                             <ListGroup>
                               {file.permissions.map((permission, index) => {
                                 return (
-                                  <PermissionListItem permission={permission}/>
+                                  <PermissionListItem 
+                                  permission={permission} 
+                                  key={index} 
+                                  group_membership={permission.type === "group" ? groupsMap.get(permission.email) : null}
+                                  />
                                 );
                               })}
                             </ListGroup>

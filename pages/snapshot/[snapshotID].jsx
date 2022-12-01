@@ -179,7 +179,7 @@ export default function Snapshot() {
         <h6>Taken: {snapshot.date}</h6>
       </Container>
       <ErrorModal error={error} closeErrorModal={closeError}/>
-      <FileDetailsModal file={openFile} closeFileDetails={closeDetail}/>
+      <FileDetailsModal file={openFile} closeFileDetails={closeDetail} group_snapshots={groupSnapshots}/>
       <Container fluid>
         <Form onSubmit={searchHandler}>
           <FormControl
