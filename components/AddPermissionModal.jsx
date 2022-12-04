@@ -17,7 +17,7 @@ export default function AddPermissionModal(props) {
         <>
         <Modal show={true} onClose={handleClose} size='lg' >
             <Modal.Header closeButton onClick={handleClose}>
-                <Modal.Title>Modal Title</Modal.Title>
+                <Modal.Title>Adding a Permission</Modal.Title>
             </Modal.Header>
             <Modal.Body>
              <Form>
