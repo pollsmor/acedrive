@@ -18,6 +18,7 @@ export default async function saveSearchQuery(req, res) {
       domain: req.body.domain,
       permissionDetails: req.body.permissionDetails,
       isInherited: req.body.isInherited,
+      //do we add permissionId here?
     });
 
     let permissions = file.permissions;

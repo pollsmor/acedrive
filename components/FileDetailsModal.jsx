@@ -1,8 +1,11 @@
 import { Modal, Button, ListGroup } from "react-bootstrap";
+import { useState } from "react";
 import PermissionListItem from "./PermissionListItem"
+import AddPermissionModal from "./AddPermissionModal"
 
 export default function FileDetailsModal(props) {
     const file = props.file
+    const [addingPerm, setAddingPerm] = useState(false);
     const groupsMap = new Map()
     for (let snapshot of props.group_snapshots) {
       groupsMap.set(snapshot.groupEmail, snapshot.members)
@@ -12,8 +15,21 @@ export default function FileDetailsModal(props) {
         props.closeFileDetails()
     }
 
+    function handleAddPermission(){
+      //set state
+      setAddingPerm(true);
+    }
+
+    function handlePermClose() {
+      setAddingPerm(false);
+    }
+
     // console.log(error)
     return (
+      <>
+      {addingPerm? 
+        <AddPermissionModal handlePermClose={handlePermClose} file={file}/>
+      :
         <>
           {file ?
             <Modal show={true} onHide={handleClose} size="lg">
@@ -72,6 +88,9 @@ export default function FileDetailsModal(props) {
                     }
               </Modal.Body>
               <Modal.Footer>
+                <Button variant="secondary" onClick={handleAddPermission}>
+                  Add Permission
+                </Button>
                 <Button variant="secondary" onClick={handleClose}>
                   Close
                 </Button>
@@ -79,5 +98,7 @@ export default function FileDetailsModal(props) {
             </Modal>
           : null}
         </>
+        }
+      </>
       );
 }
