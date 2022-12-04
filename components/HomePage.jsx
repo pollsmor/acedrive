@@ -69,7 +69,7 @@ export default function HomePage(props) {
 
   const handleGroupMouseLeave = () => {
     setGroupHovering(false);
-  };
+  }; 
 
   const handleUpload = () => {
     setUploading(true);
@@ -154,7 +154,7 @@ export default function HomePage(props) {
                 {session.provider === "google" ? (
                   <Col style={{ color: "white" }}>
                     <h5>Group membership snapshots</h5>
-                    {groupSnapshotInfo.map((info, index) => {
+                    {groupSnapshotInfo && groupSnapshotInfo.map((info, index) => {
                       return (
                         <SnapshotCard
                           key={index}
