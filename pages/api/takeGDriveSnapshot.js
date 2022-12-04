@@ -131,7 +131,7 @@ async function populateMissingFields(all_files, root_id) {
       // Get permmissions
       let permRes = await drive.permissions.list({
         fileId: file.id,
-        fields: "permissions(role,emailAddress,type,domain)",
+        fields: "permissions(role,emailAddress,type,domain,id)",//id added here so we can retrieve permissionId
         supportsAllDrives: true,
       });
       file.permissions = permRes.data.permissions;
@@ -179,6 +179,8 @@ function parseFiles(all_files) {
                 ? p.permissionDetails
                 : undefined,
               isInherited: false, // top level file so shouldn't be inheriting perms from anywhere
+              permissionId: p.id,// permissionId is set to p.id which we get in 
+              //permRes which is the response we get earlier
             });
           });
 
@@ -237,11 +239,13 @@ function populateSubfolders(files_to_populate, all_files, current_path) {
             ? []
             : file.permissions.map((p) => {
                 p.email = p.emailAddress;
+                p.permissionId = p.id;//Setting permissionIds for subfolders and files
                 let stringified_p = JSON.stringify(p, [
                   "email",
                   "type",
                   "role",
                   "domain",
+                  "permissionId",//permissionId added for permission model
                 ]);
 
                 return new Permission({
@@ -249,6 +253,7 @@ function populateSubfolders(files_to_populate, all_files, current_path) {
                   role: p.role,
                   type: p.type,
                   domain: p.domain,
+                  permissionId: p.id,//permissionId being set
                   permissionDetails: p.permissionDetails
                     ? p.permissionDetails
                     : undefined,
