@@ -3,7 +3,7 @@ import { Form, Container, Row, Col, ListGroup, Accordion} from "react-bootstrap"
 export default function PermissionListItem(props) {
     const permission = props.permission
     const file = props.file
-    console.log(file.permissions);// just a line to check wheter we can see permissionId of permission objects
+    //console.log(file.permissions);// just a line to check wheter we can see permissionId of permission objects
     return (
         <Container className="permissions-container">
             <Form>
