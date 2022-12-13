@@ -28,18 +28,6 @@ export default async function saveFilePermissions(req, res) {
 
     //req.body.permission looks like -> [add permission, email, type, role, fileId]
 
-    const permission = new Permission({
-      email: req.body.permission[1],
-      type: req.body.permission[2], // Who this applies to (user, group, domain, etc)
-      role: req.body.permission[3], // Is "reader", "writer", or "owner"
-
-      //Further examination for below fields is necessary
-      //domain: req.body.domain,
-      //permissionDetails: req.body.permissionDetails,
-      //isInherited: req.body.isInherited,
-      //do we add permissionId here?
-    });
-
     //console.log(permission);
 
     let flag = false;// This flag is to manipulate error and non error res.json statements
@@ -49,6 +37,17 @@ export default async function saveFilePermissions(req, res) {
     //%%%%%%%%%%%%%%%%%%%%%%%
 
     if(req.body.permission[0] =="add permission"){
+      const permission = new Permission({
+        email: req.body.permission[1],
+        type: req.body.permission[2], // Who this applies to (user, group, domain, etc)
+        role: req.body.permission[3], // Is "reader", "writer", or "owner"
+  
+        //Further examination for below fields is necessary
+        //domain: req.body.domain,
+        //permissionDetails: req.body.permissionDetails,
+        //isInherited: req.body.isInherited,
+        //do we add permissionId here?
+      });
       var fileId = req.body.file.id;
       let email = req.body.permission[1];
       let role = req.body.permission[3];
@@ -69,6 +68,35 @@ export default async function saveFilePermissions(req, res) {
           flag = true;
           res.json("Bad Request");
         }
+        if(flag == false){
+          res.json({ permission: permission });
+        }
+    }
+
+    //%%%%%%%%%%%%%%%%%%%%%%%
+    //Removing a Permission
+    //%%%%%%%%%%%%%%%%%%%%%%%
+
+    if(req.body.permission[0] =="delete permission"){
+      //we need fileId and permissionId to delete a permission
+      var fileId = req.body.file.id;
+      let permissionId = req.body.permission[2];
+
+      //Deleting permission in drive
+
+      try{
+          const result = await drive.permissions.delete({
+            fileId: fileId,
+            permissionId: permissionId,
+          });
+        }
+        catch(err){
+          flag = true;
+          res.json("Bad Request");
+        }
+        if(flag == false){
+          res.json({ permissionId: permissionId });
+        }
     }
 
     //let permissions = file.permissions;
@@ -80,9 +108,7 @@ export default async function saveFilePermissions(req, res) {
     //let saved_file = await file.save();
     //console.log(saved_file);
     //console.log(req.body.permission);
-    if(flag == false){
-      res.json({ permission: permission });
-    }
+  
   } else {
     res.end("Not signed in or not a POST request.");
   }
