@@ -33,6 +33,28 @@ export default async function saveFilePermissions(req, res) {
     let flag = false;// This flag is to manipulate error and non error res.json statements
 
     //%%%%%%%%%%%%%%%%%%%%%%%
+    //Copying web Link
+    //%%%%%%%%%%%%%%%%%%%%%%%
+
+    if(req.body.permission[0] =="get link"){
+      var fileId = req.body.file.id;
+      let webViewLink = "";
+      try{
+          webViewLink = await drive.files.get({
+          fileId: fileId,
+          fields: 'webViewLink'
+        });
+      }
+      catch(err){
+        flag = true;
+        res.json("Bad Request");
+      }
+      if(flag == false){
+        res.json({ webViewLink: webViewLink });
+      }
+    }
+
+    //%%%%%%%%%%%%%%%%%%%%%%%
     //Adding a new permission
     //%%%%%%%%%%%%%%%%%%%%%%%
 

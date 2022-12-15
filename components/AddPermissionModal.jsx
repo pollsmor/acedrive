@@ -12,6 +12,30 @@ export default function AddPermissionModal(props) {
         props.handlePermClose();
     }
 
+    //copy view link for anyone function defined below
+    function copyLink(){
+        //async function called below
+        getViewLink();
+    }
+
+    async function getViewLink(){
+        let permission = ["get link"] 
+        const result = await axios.post("/api/saveFilePermissions", { permission, file });
+        if(result.data === "Bad Request"){
+            alert("Could not acquire a view link");
+        }
+        else{
+            //console.log("link: "+result.data.webViewLink.data.webViewLink);
+
+            let link = result.data.webViewLink.data.webViewLink;
+            
+            // The link here gives access based on what kind of options
+            // for link sharing are chosen on google drive.
+
+            window.prompt("Link here: ", link);
+        }
+    }
+
     async function postPermission(){
         //edit the request underneath
         //getting values from the frontend fields
@@ -77,9 +101,14 @@ export default function AddPermissionModal(props) {
                     </Col>
                 </Form.Group>
              </Form>
+                <Modal.Footer>
                 <Button onClick={handleConfirm}>
                     Confirm
-                </Button>  
+                </Button>
+                <Button onClick={copyLink}>
+                    Sharable link
+                </Button> 
+                </Modal.Footer>
              </Modal.Body>
         </Modal>
         </>
