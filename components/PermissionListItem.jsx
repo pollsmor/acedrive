@@ -30,7 +30,7 @@ export default function PermissionListItem(props) {
                                 Email: 
                             </Form.Label>
                             <Col sm="10">
-                                <Form.Control type="email" defaultValue={permission.email} />
+                                <Form.Control plaintext readOnly type="email" defaultValue={permission.email} />
                             </Col>
                         </Form.Group>
                         <Form.Group as={Row} className="mb-3">
@@ -38,12 +38,8 @@ export default function PermissionListItem(props) {
                                 Type: 
                             </Form.Label>
                             <Col sm="10">
-                                <Form.Select defaultValue={permission.type}>
-                                    <option>user</option>
-                                    <option>group</option>
-                                    <option>domain</option>
-                                    <option>anyone</option>
-                                </Form.Select>
+                                <Form.Control  plaintext readOnly defaultValue={permission.type}>
+                                </Form.Control>
                             </Col>
                         </Form.Group>
                         <Form.Group as={Row} className="mb-3">
