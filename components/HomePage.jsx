@@ -6,6 +6,7 @@ import SnapshotCard from "./SnapshotCard";
 import LoadingModal from "./LoadingModal";
 import ErrorModal from "./ErrorModal"
 import UploadFileModal from "./UploadFileModal";
+import Link from "next/link";
 
 export default function HomePage(props) {
   const session = props.session;
@@ -120,6 +121,19 @@ export default function HomePage(props) {
               <UploadFileModal show={uploading} closeCallback={hideUpload} />
             </>
           ) : null}
+          
+          <Button
+            style={{
+              marginLeft: "5px",
+              marginTop: "20px",
+              boxShadow: "inset",
+              color: "whitesmoke",
+              borderColor: "#212529",
+              backgroundColor: hovering ? "darkgray" : "rgb(82,82,82)",
+            }}
+          >
+            <Link href={`/accessControl`}>Access Controls</Link> 
+          </Button>
 
           <LoadingModal show={loading} />
 

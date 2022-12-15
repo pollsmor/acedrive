@@ -8,7 +8,8 @@ export default function FileTable(props) {
   const filteredData = props.files;
 
   async function openDetails(event) {
-    props.openFileDetails(filteredData[event.target.id])
+    if(props.openFileDetails)
+      props.openFileDetails(filteredData[event.target.id])
   }
 
   return (
