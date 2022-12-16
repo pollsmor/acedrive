@@ -231,7 +231,7 @@ function populateSubfolders(files_to_populate, all_files, current_path) {
           let parent_perms_strings = [];
           for (let perm of parent_file.permissions) {
             parent_perms_strings.push(
-              JSON.stringify(perm, ["email", "type", "role", "domain"])
+              JSON.stringify(perm, ["email", "type", "role", "domain", "permissionId"])//permissionId added
             );
           }
           // Create a list of permission objects
