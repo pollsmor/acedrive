@@ -54,9 +54,9 @@ export default async function saveFilePermissions(req, res) {
       }
     }
 
-    //%%%%%%%%%%%%%%%%%%%%%%%
-    //Adding a new permission
-    //%%%%%%%%%%%%%%%%%%%%%%%
+    //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+    //Adding a new permission for 'user'/'group'
+    //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
     if(req.body.permission[0] =="add permission"){
       const permission = new Permission({
@@ -83,6 +83,85 @@ export default async function saveFilePermissions(req, res) {
               role: role, //String
               type: type, //String
               emailAddress: email,
+            }
+          });
+        }
+        catch(err){
+          flag = true;
+          res.json("Bad Request");
+        }
+        if(flag == false){
+          res.json({ permission: permission });
+        }
+    }
+
+    //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+    //Adding a new permission for type anyone
+    //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+    if(req.body.permission[0] =="add permission anyone"){
+      const permission = new Permission({
+        type: req.body.permission[2], // Who this applies to (user, group, domain, etc)
+        role: req.body.permission[3], // Is "reader", "writer", or "owner"
+  
+        //Further examination for below fields is necessary
+        //domain: req.body.domain,
+        //permissionDetails: req.body.permissionDetails,
+        //isInherited: req.body.isInherited,
+        //do we add permissionId here?
+      });
+      var fileId = req.body.file.id;
+      let role = req.body.permission[3];
+      let type = req.body.permission[2];
+
+      //creating new permission in drive
+      try{
+          const result = await drive.permissions.create({
+            fileId: fileId,
+            resource: {
+              role: role, //String
+              type: type, //String
+            }
+          });
+        }
+        catch(err){
+          flag = true;
+          res.json("Bad Request");
+        }
+        if(flag == false){
+          res.json({ permission: permission });
+        }
+    }
+
+    //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+    //Adding a new permission for type domain
+    //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+    if(req.body.permission[0] =="add permission domain"){
+      const permission = new Permission({
+        domain: req.body.permission[1],
+        type: req.body.permission[2], // Who this applies to (user, group, domain, etc)
+        role: req.body.permission[3], // Is "reader", "writer", or "owner"
+  
+        //Further examination for below fields is necessary
+        //domain: req.body.domain,
+        //permissionDetails: req.body.permissionDetails,
+        //isInherited: req.body.isInherited,
+        //do we add permissionId here?
+      });
+      var fileId = req.body.file.id;
+      let domain = req.body.permission[1];
+      let role = req.body.permission[3];
+      let type = req.body.permission[2];
+
+      //creating new permission in drive
+      try{
+          const result = await drive.permissions.create({
+            fileId: fileId,
+            resource: {
+              role: role, //String
+              type: type, //String
+              domain: domain, // domain is required for adding a permission of type 'domain'
             }
           });
         }

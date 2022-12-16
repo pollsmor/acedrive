@@ -12,43 +12,66 @@ export default function AddPermissionModal(props) {
         props.handlePermClose();
     }
 
-    //copy view link for anyone function defined below
-    function copyLink(){
-        //async function called below
-        getViewLink();
-    }
-
-    async function getViewLink(){
-        let permission = ["get link"] 
-        const result = await axios.post("/api/saveFilePermissions", { permission, file });
-        if(result.data === "Bad Request"){
-            alert("Could not acquire a view link");
-        }
-        else{
-            //console.log("link: "+result.data.webViewLink.data.webViewLink);
-
-            let link = result.data.webViewLink.data.webViewLink;
-            
-            // The link here gives access based on what kind of options
-            // for link sharing are chosen on google drive.
-
-            window.prompt("Link here: ", link);
-        }
-    }
-
     async function postPermission(){
-        //edit the request underneath
         //getting values from the frontend fields
         var email = document.getElementsByClassName("emailBox")[0].value;
         var type = document.getElementsByClassName("typeDropdown")[0].value;
         var role = document.getElementsByClassName("roleDropdown")[0].value;
-        var requestType = "add permission";
-        //pushing the new permission fields into the permission array
-        const permission = [requestType, email, type, role, file.id];
-        //console.log("request: "+permission);
-        const result = await axios.post("/api/saveFilePermissions", { permission , file });
-        if(result.data === "Bad Request"){
-            alert("Options selected were unexpected, Permission was not added");
+        //below add permission is separate for type 'anyone' as there is no email necessary for this
+        //add permission if type is anyone
+        if(type === "anyone"){
+            var requestType = "add permission anyone";
+            const permission = [requestType, email, type, role, file.id];
+            const result = await axios.post("/api/saveFilePermissions", { permission , file });
+            if(result.data === "Bad Request"){
+                alert("Options selected were unexpected, General access unchanged");
+            }
+            else{
+                let access = result.data.permission.role;
+                //console.log(type+" "+access);
+                alert("Anyone with a link can now be a "+access+" for : "+file.name);
+            }
+        }
+        else if(type === "domain"){
+            //add permission if type is domain. Domain typre requires a domain which is separate from email address
+            //the email field here will represent domain here
+            var requestType = "add permission domain";
+            var domain = email;// retrieving domain from the email box
+            const permission = [requestType, domain, type, role, file.id];
+            const result = await axios.post("/api/saveFilePermissions", { permission , file });
+            if(result.data === "Bad Request"){
+                alert("Options selected were unexpected, Permission for domain was not added");
+            }
+            else{
+                alert(role+" permission for domain: "+domain+" added");
+            }
+        }
+        else{
+            //add permission if type is user/group
+            var requestType = "add permission";
+            //pushing the new permission fields into the permission array
+            const permission = [requestType, email, type, role, file.id];
+            //console.log("request: "+permission);
+
+            //api call is successful even if the permission for 'group' already exists
+            //so let us have a check to make sure an appropriate error message is displayed
+            if(type === "group"){
+                let permissions = file.permissions;
+                let permissionsEmails = permissions.map((e)=>{return e.email});
+                console.log(email);
+                if(permissionsEmails.includes(email)){
+                    alert("A permission for: "+email+" group already exists."+
+                    " Please edit the permission if you want to change it");
+                    return;
+                }
+            }
+            const result = await axios.post("/api/saveFilePermissions", { permission , file });
+            if(result.data === "Bad Request"){
+                alert("Options selected were unexpected, Permission was not added");
+            }
+            else{
+                alert("Permission for "+email+" added successfully");
+            }
         }
     }
 
@@ -66,10 +89,10 @@ export default function AddPermissionModal(props) {
              <Form>
                 <Form.Group as={Row} className="mb-3">
                     <Form.Label column sm="2" >
-                        Email: 
+                        Email/Domain: 
                     </Form.Label>
                     <Col sm="10">
-                        <Form.Control type="email" defaultValue={"enter email"} className="emailBox" />
+                        <Form.Control type="email" defaultValue={""} className="emailBox" />
                     </Col>
                 </Form.Group>
                 <Form.Group as={Row} className="mb-3">
@@ -105,9 +128,6 @@ export default function AddPermissionModal(props) {
                 <Button onClick={handleConfirm}>
                     Confirm
                 </Button>
-                <Button onClick={copyLink}>
-                    Sharable link
-                </Button> 
                 </Modal.Footer>
              </Modal.Body>
         </Modal>

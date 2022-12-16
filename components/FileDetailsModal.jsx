@@ -2,6 +2,8 @@ import { Modal, Button, ListGroup } from "react-bootstrap";
 import { useState } from "react";
 import PermissionListItem from "./PermissionListItem"
 import AddPermissionModal from "./AddPermissionModal"
+import axios from "axios";
+
 
 export default function FileDetailsModal(props) {
     const file = props.file
@@ -23,6 +25,30 @@ export default function FileDetailsModal(props) {
     function handlePermClose() {
       setAddingPerm(false);
     }
+
+    //copy view link for anyone function defined below
+    function copyLink(){
+      //async function called below
+      getViewLink();
+  }
+
+  async function getViewLink(){
+      let permission = ["get link"] 
+      const result = await axios.post("/api/saveFilePermissions", { permission, file });
+      if(result.data === "Bad Request"){
+          alert("Could not acquire a view link");
+      }
+      else{
+          //console.log("link: "+result.data.webViewLink.data.webViewLink);
+
+          let link = result.data.webViewLink.data.webViewLink;
+
+          // The link here gives access based on what kind of options
+          // for link sharing are chosen on google drive.
+
+          window.prompt("Sharable Link here: ", link);
+      }
+  }
 
     // console.log(error)
     return (
@@ -88,6 +114,9 @@ export default function FileDetailsModal(props) {
                     }
               </Modal.Body>
               <Modal.Footer>
+                <Button variant="secondary" onClick={copyLink}>
+                    Sharable link
+                </Button> 
                 <Button variant="secondary" onClick={handleAddPermission}>
                   Add Permission
                 </Button>
