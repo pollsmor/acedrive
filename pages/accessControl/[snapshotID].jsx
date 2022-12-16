@@ -75,6 +75,10 @@ export default function Snapshot() {
   // Set up pagination =================================
   let items = [];
   const filesPerPage = 10;
+
+  if(!filteredFiles){
+    filteredFiles = [];
+  }
   let amtPages = Math.ceil(filteredFiles.length / filesPerPage);
   for (let page = 1; page <= amtPages; page++) {
     items.push(
@@ -94,7 +98,10 @@ export default function Snapshot() {
   // ====================================================
 
   useEffect(() => {
-    setPageFiles(filteredFiles.slice(startFileIdx, endFileIdx));
+    if(filteredFiles){
+      setPageFiles(filteredFiles.slice(startFileIdx, endFileIdx));
+
+    }
   }, [filteredFiles, startFileIdx, endFileIdx]);
 
   return (

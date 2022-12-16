@@ -24,7 +24,7 @@ export default function FileTable(props) {
         </tr>
       </thead>
       <tbody>
-        {filteredData.length > 0
+        {filteredData && filteredData.length > 0
           ? filteredData.map((file, index) => {
               return (
                 <tr key={file.id} onClick={openDetails}>
