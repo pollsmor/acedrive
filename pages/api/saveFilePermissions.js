@@ -26,6 +26,64 @@ export default async function saveFilePermissions(req, res) {
     let user = await User.findOne({ id: userId });
     let file = req.body.file;
 
+
+    //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+    //Editing permissions
+    //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+    if(req.body.permission[0] =="permission edits"){
+      var successList = [];//To record which permissions were updated successfully
+      var failureList = [];//To record which permissions had unsuccessful updation
+      const editedPermissionsList = req.body.editedPermissionsList;
+      //Start of loop going through editedPermissionsList
+      editedPermissionsList.map(async (e)=>{
+        let successFlag = true;
+        const permission = e[0];//permission object
+        const role = e[1];//desired role
+        const permissionId = permission.permissionId;//permissionId
+        var fileId = req.body.file.id;//file id
+        //now we need a special case for type 'owner'
+        if(role === "owner" && permission.type ==="user"/*&& check for if owner here is not previous owner*/ ){
+          try{
+            const result =  await drive.permissions.update({
+              fileId: file,
+              permissionId: permissionId,
+              transferOwnership: true,
+              supportsAllDrives: true,
+              resource: {
+                role: role, //String
+              }
+            });
+          }
+          catch(err){
+            successFlag = false;
+            failureList.push(permission);
+          }
+        }//end of ownership transfer special case
+        else{
+          try{
+            const result =  drive.permissions.update({
+              fileId: fileId,
+              permissionId: permissionId,
+              supportsAllDrives: true,
+              resource: {
+                role: role, //String
+              }
+            });
+          }
+          catch(err){
+            successFlag = false;
+            failureList.push(permission);
+          }
+        }
+        if(successFlag){
+          permission.role = role;// setting this value to role so alert later can display right values for success
+          successList.push(permission);
+        }
+      });//end of loop going through editedPermissionsList
+      res.json({successList: successList, failureList: failureList});
+    }
+
     //req.body.permission looks like -> [add permission, email, type, role, fileId]
 
     //console.log(permission);
@@ -42,7 +100,8 @@ export default async function saveFilePermissions(req, res) {
       try{
           webViewLink = await drive.files.get({
           fileId: fileId,
-          fields: 'webViewLink'
+          fields: 'webViewLink',
+          supportsAllDrives: true
         });
       }
       catch(err){
@@ -79,6 +138,7 @@ export default async function saveFilePermissions(req, res) {
       try{
           const result = await drive.permissions.create({
             fileId: fileId,
+            supportsAllDrives: true,
             resource: {
               role: role, //String
               type: type, //String
@@ -118,6 +178,7 @@ export default async function saveFilePermissions(req, res) {
       try{
           const result = await drive.permissions.create({
             fileId: fileId,
+            supportsAllDrives: true,
             resource: {
               role: role, //String
               type: type, //String
@@ -158,6 +219,7 @@ export default async function saveFilePermissions(req, res) {
       try{
           const result = await drive.permissions.create({
             fileId: fileId,
+            supportsAllDrives: true,
             resource: {
               role: role, //String
               type: type, //String
@@ -189,6 +251,7 @@ export default async function saveFilePermissions(req, res) {
           const result = await drive.permissions.delete({
             fileId: fileId,
             permissionId: permissionId,
+            supportsAllDrives: true,
           });
         }
         catch(err){

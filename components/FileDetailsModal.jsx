@@ -8,12 +8,15 @@ import axios from "axios";
 export default function FileDetailsModal(props) {
     const file = props.file
     const [addingPerm, setAddingPerm] = useState(false);
+    //this list must have edited info and respective permission ids
+    const [editedPermissionsList, setEditedPermissionsList] = useState([]);
     const groupsMap = new Map()
     for (let snapshot of props.group_snapshots) {
       groupsMap.set(snapshot.groupEmail, snapshot.members)
     }
 
     function handleClose() {
+        setEditedPermissionsList([]);
         props.closeFileDetails()
     }
 
@@ -24,6 +27,32 @@ export default function FileDetailsModal(props) {
 
     function handlePermClose() {
       setAddingPerm(false);
+    }
+
+    async function postEditPermissions(){
+      //edit this method to work for remove through dropdown as well
+      const permission = ["permission edits","","","", file.id];//formatted for convenience in saveFilePermissions
+      const result = await axios.post("/api/saveFilePermissions", { permission, file , editedPermissionsList });
+      const success = result.data.successList;
+      const failure = result.data.failureList;
+      //display results of the api call
+      let forPrintSuccess = success.map((e)=>{
+        return [e.email +"->"+ e.role];
+      });
+      let forPrintFailure = failure.map((e)=>{
+        return [e.email +"->"+ e.role];
+      });
+      //here we need to check if there are common elements between successList and failureLists
+      alert("success: "+forPrintSuccess+" \n"+"failure: "+forPrintFailure);
+    }
+
+    function handleConfirmEdits(){
+      if(editedPermissionsList.length >0){
+        //async function for api call in saveFilePermissions
+        postEditPermissions()
+        //close modal
+        handleClose();
+      }
     }
 
     //copy view link for anyone function defined below
@@ -103,6 +132,8 @@ export default function FileDetailsModal(props) {
                                   permission={permission} 
                                   key={index} 
                                   file={file}
+                                  editedPermissionsList={editedPermissionsList}//to get edited perms
+                                  setEditedPermissionsList={setEditedPermissionsList}//to set edited perms
                                   group_membership={permission.type === "group" ? groupsMap.get(permission.email) : null}
                                   />
                                 );
@@ -114,12 +145,20 @@ export default function FileDetailsModal(props) {
                     }
               </Modal.Body>
               <Modal.Footer>
-                <Button variant="secondary" onClick={copyLink}>
-                    Sharable link
-                </Button> 
-                <Button variant="secondary" onClick={handleAddPermission}>
-                  Add Permission
-                </Button>
+                {file.permissions.length > 0?
+                <>
+                  <Button variant="secondary" onClick={handleConfirmEdits}>
+                    Confirm edits</Button>
+                  <Button variant="secondary" onClick={copyLink}>
+                      Sharable link
+                  </Button> 
+                  <Button variant="secondary" onClick={handleAddPermission}>
+                    Add Permission
+                  </Button>
+                </>
+                  :
+                  <></>
+                }
                 <Button variant="secondary" onClick={handleClose}>
                   Close
                 </Button>
