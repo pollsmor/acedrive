@@ -34,11 +34,14 @@ const searchMethods = {
 };
 
 export default async function getAccessControls(files,query) {
+  try{
+      const splitQuery = query.split(":");
+      const accessCheckFor = operatorsList[splitQuery[0].toUpperCase()];
+      const searchUsing = searchMethods[accessCheckFor.method];
+      const results = await searchUsing(files,splitQuery[1],accessCheckFor?.role);
 
-  const splitQuery = query.split(":");
-  const accessCheckFor = operatorsList[splitQuery[0].toUpperCase()];
-  const searchUsing = searchMethods[accessCheckFor.method];
-  const results = await searchUsing(files,splitQuery[1],accessCheckFor?.role)
-
-  return {status:"200", files: results };
+      return {status:"200", files: results.files, filesInViolation: results.violated };
+  }catch(error){
+    return {status:"400",msg:"Please Provide A Valid Query"}
+  }
 }

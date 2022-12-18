@@ -5,9 +5,11 @@ import { useState, useEffect } from "react";
 import Banner from "../../components/Banner";
 import FileTable from "../../components/FileTable";
 import ErrorModal from "../../components/ErrorModal"
+import HelpModal from "../../components/HelpModal"
 import accessControl from "../../algorithms/AccessControl";
 
 import {
+  Button,
   Container,
   Form,
   FormControl,
@@ -25,9 +27,13 @@ export default function Snapshot() {
   const [activePage, setActivePage] = useState(1);
   
   const [filteredFiles, setFilteredFiles] = useState([]);
+  const [filesInViolation, setFilesInViolation] = useState([]);
   const [showingResults, setShowingResults] = useState(false);
 
   const [error, setError] = useState(null)
+  const [help, setHelp] = useState(null);
+  const [hovering,setHovering] = useState(false);
+
 
   useEffect(() => {
     async function fetchSnapshot() {
@@ -65,6 +71,7 @@ export default function Snapshot() {
     }
 
     setFilteredFiles(searchResults.files);
+    setFilesInViolation(searchResults.filesInViolation)
     setShowingResults(true);
   };
 
@@ -72,14 +79,15 @@ export default function Snapshot() {
     setError(null)
   }
 
+  function closeHelp() {
+    setHelp(false)
+  }
+
   // Set up pagination =================================
   let items = [];
   const filesPerPage = 10;
 
-  if(!filteredFiles){
-    filteredFiles = [];
-  }
-  let amtPages = Math.ceil(filteredFiles.length / filesPerPage);
+  let amtPages =filteredFiles && Math.ceil(filteredFiles.length / filesPerPage);
   for (let page = 1; page <= amtPages; page++) {
     items.push(
       <Pagination.Item
@@ -111,8 +119,16 @@ export default function Snapshot() {
         <h3 className="fw-bold">Snapshot {snapshotID}</h3>
         <h6>Taken: {snapshot.date}</h6>
       </Container>
+
+      {help && <HelpModal closeErrorModal={closeHelp}/>}
       <ErrorModal error={error} closeErrorModal={closeError}/>
+
       <Container fluid>
+        
+      <Button onClick={()=>{setHelp(true)}} variant="info" className="mb-3 ">
+            Instructions
+      </Button>
+
         <Form onSubmit={searchHandler} className="mb-3">
           <FormControl
             placeholder="Check Access Controls"
@@ -122,7 +138,11 @@ export default function Snapshot() {
         </Form>
         {showingResults ? (
           <>
+            <p style={{fontWeight:'bold'}}>Valid Files:  </p>
             <FileTable files={filteredFiles} />
+
+            <p style={{fontWeight:'bold'}}>Files In Violations:  </p>
+            <FileTable files={filesInViolation} />
           </>
         ) : (
           <>

@@ -30,7 +30,12 @@ export function allowedAccessControlCheck(files, searchTerm, role) {
             }
         }
     });
-    return searchedFiles;
+    const deniedFiles = files.filter((file) => {
+        if (!searchedFiles.includes(files)) {
+            return file;
+        }
+    });
+    return { files: searchedFiles, violated: deniedFiles };
 }
 
 export function deniedAccessControlCheck(files, searchTerm, role) {
@@ -68,13 +73,12 @@ export function deniedAccessControlCheck(files, searchTerm, role) {
             return file;
         }
     });
-    return deniedFiles;
+    return { files: deniedFiles, violated: searchedFiles };
 }
 
 export function groupAccessControlCheck(files, searchTerm) {
     const updatedSearchTerm = searchTerm.replace(/}|{/g, "");
     const boolean = updatedSearchTerm.toLowerCase() === "true";
-    console.log(boolean);
     const searchedFiles = files.filter((file) => {
         const fileDetails = file["permissions"];
         let matchedDetails = [];
@@ -90,14 +94,16 @@ export function groupAccessControlCheck(files, searchTerm) {
         }
     });
 
-    let notGroupFiles = false;
-    if (!boolean) {
-        notGroupFiles = files.filter((file) => {
-            if (!searchedFiles.includes(file)) {
-                return file;
-            }
-        });
-    }
+    const notGroupFiles = files.filter((file) => {
+        if (!searchedFiles.includes(file)) {
+            return file;
+        }
+    });
 
-    return notGroupFiles ? notGroupFiles : searchedFiles;
+    const response = {
+        files: boolean ? searchedFiles : notGroupFiles,
+        violated: boolean ? notGroupFiles : searchedFiles,
+    };
+
+    return response;
 }

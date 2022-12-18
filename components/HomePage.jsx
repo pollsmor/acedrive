@@ -15,7 +15,8 @@ export default function HomePage(props) {
   const [queries, setQueries] = useState([]);
   const [loading, setLoading] = useState(false);
   const [uploading, setUploading] = useState(false);
-  const [error, setError] = useState(null)
+  const [error, setError] = useState(null);
+  const [hoveringAccess,setHoveringAccess] = useState(false);
 
   useEffect(() => {
     async function fetchUser() {
@@ -61,6 +62,14 @@ export default function HomePage(props) {
 
   const handleMouseLeave = () => {
     setHovering(false);
+  };
+
+  const handleAccessMouseEnter = () => {
+    setHoveringAccess(true);
+  };
+
+  const handleAccessMouseLeave = () => {
+    setHoveringAccess(false);
   };
 
   const [groupHovering, setGroupHovering] = useState(false);
@@ -129,8 +138,10 @@ export default function HomePage(props) {
               boxShadow: "inset",
               color: "whitesmoke",
               borderColor: "#212529",
-              backgroundColor: hovering ? "darkgray" : "rgb(82,82,82)",
+              backgroundColor: hoveringAccess ? "darkgray" : "rgb(82,82,82)",
             }}
+            onMouseEnter={handleAccessMouseEnter}
+            onMouseLeave={handleAccessMouseLeave}
           >
             <Link href={`/accessControl`}>Access Controls</Link> 
           </Button>
