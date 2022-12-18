@@ -30,20 +30,12 @@ export default function FileDetailsModal(props) {
     }
 
     async function postEditPermissions(){
-      //edit this method to work for remove through dropdown as well
       const permission = ["permission edits","","","", file.id];//formatted for convenience in saveFilePermissions
       const result = await axios.post("/api/saveFilePermissions", { permission, file , editedPermissionsList });
-      const success = result.data.successList;
-      const failure = result.data.failureList;
-      //display results of the api call
-      let forPrintSuccess = success.map((e)=>{
-        return [e.email +"->"+ e.role];
-      });
-      let forPrintFailure = failure.map((e)=>{
-        return [e.email +"->"+ e.role];
-      });
-      //here we need to check if there are common elements between successList and failureLists
-      alert("success: "+forPrintSuccess+" \n"+"failure: "+forPrintFailure);
+      window.alert("Updating Snapshot");
+      var currentSnapshotId = result.data.currentSnapshotId;//retrieve the id here for the current snapshot
+      var address = '/snapshot/'+currentSnapshotId;
+      window.location.href = address;
     }
 
     function handleConfirmEdits(){

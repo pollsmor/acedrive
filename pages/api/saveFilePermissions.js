@@ -98,7 +98,56 @@ export default async function saveFilePermissions(req, res) {
           successList.push(permission);
         }
       });//end of loop going through editedPermissionsList
-      res.json({successList: successList, failureList: failureList});
+      //from takeGDriveSnapshot.js********* This is to list files 
+        //
+        let googleRes = await drive.files.list({
+          //fields: '*', // Retrieve all fields - useful for testing
+          fields: `files(${fields.join(",")}), nextPageToken`,
+          includeItemsFromAllDrives: true,
+          supportsAllDrives: true,
+        });
+    
+        let nextpage = googleRes.data.nextPageToken;
+        let files = googleRes.data.files;
+
+        // Continue pagination as long as next page token exists
+        while (nextpage) {
+          googleRes = await drive.files.list({
+            //fields: '*', // Retrieve all fields - useful for testing
+            fields: `files(${fields.join(",")}), nextPageToken`,
+            pageToken: nextpage,
+            includeItemsFromAllDrives: true,
+            supportsAllDrives: true,
+          });
+
+          nextpage = googleRes.data.nextPageToken;
+          // Append to list of files from previous pages
+          files = files.concat(googleRes.data.files);
+        }
+        // Root will always alias to the root of the drive, but we want to know its actual id
+        // so that we can identify top level folders for easier parsing
+        let rootRes = await drive.files.get({ fileId: "root" });
+        let root_id = rootRes.data.id;
+
+        // Many fields aren't populated, so we will go through and populate them
+        await populateMissingFields(files, root_id);
+
+        // Files are currently just a list of everything, we want to
+        // parse that into a data structure to allow for easier analysis/search
+        let file_data_structure = parseFiles(files);
+
+        //above from takeGDriveSnapshot.js********* This is to list files 
+        //
+        
+        let userId = token.user.id;
+        let user = await User.findOne({ id: userId });
+        let currentSnapshotId = user.snapshotIDs.shift();//current snapshotId
+        let currentSnapshot = await Snapshot.findById(currentSnapshotId);
+        await Snapshot.updateOne(currentSnapshot, { $set: { files: file_data_structure } });
+        user.snapshotIDs.unshift(currentSnapshotId);//re enter the snapshotid into snapshot ids
+        await user.save();
+        res.json({currentSnapshotId : currentSnapshotId});
+      //res.json({successList: successList, failureList: failureList});
     }
 
     //req.body.permission looks like -> [add permission, email, type, role, fileId]
