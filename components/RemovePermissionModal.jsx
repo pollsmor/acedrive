@@ -27,7 +27,7 @@ export default function RemovePermissionModal(props) {
             alert("Permission not found. Please use a new snapshot");
         }
         else{
-            alert(props.permission.email+" no longer has access. Please take a new snapshot to view changes");
+            //alert(props.permission.email+" no longer has access. Please take a new snapshot to view changes");
             setUpdatingSnapshot(true);//this might be unnecessary
             
             var currentSnapshotId = result.data.currentSnapshotId;//retrieve the id here for the current snapshot

@@ -5,7 +5,7 @@ import axios from "axios";
 export default function AddPermissionModal(props) {
     const file = props.file
     let show = props.addingPerm
- 
+
     //const permission = [];
 
     function handleClose() {
@@ -27,9 +27,13 @@ export default function AddPermissionModal(props) {
                 alert("Options selected were unexpected, General access unchanged");
             }
             else{
-                let access = result.data.permission.role;
+                window.alert("Updating Snapshot");
+                var currentSnapshotId = result.data.currentSnapshotId;//retrieve the id here for the current snapshot
+                var address = '/snapshot/'+currentSnapshotId;
+                window.location.href = address;
+                //let access = result.data.permission.role;
                 //console.log(type+" "+access);
-                alert("Anyone with a link can now be a "+access+" for : "+file.name);
+                //alert("Anyone with a link can now be a "+access+" for : "+file.name);
             }
         }
         else if(type === "domain"){
@@ -43,7 +47,11 @@ export default function AddPermissionModal(props) {
                 alert("Options selected were unexpected, Permission for domain was not added");
             }
             else{
-                alert(role+" permission for domain: "+domain+" added");
+                window.alert("Updating Snapshot");
+                var currentSnapshotId = result.data.currentSnapshotId;//retrieve the id here for the current snapshot
+                var address = '/snapshot/'+currentSnapshotId;
+                window.location.href = address;
+                //alert(role+" permission for domain: "+domain+" added");
             }
         }
         else{
@@ -70,7 +78,11 @@ export default function AddPermissionModal(props) {
                 alert("Options selected were unexpected, Permission was not added");
             }
             else{
-                alert("Permission for "+email+" added successfully");
+                window.alert("Updating Snapshot");
+                var currentSnapshotId = result.data.currentSnapshotId;//retrieve the id here for the current snapshot
+                var address = '/snapshot/'+currentSnapshotId;
+                window.location.href = address;
+                //alert("Permission for "+email+" added successfully");
             }
         }
     }
