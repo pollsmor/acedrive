@@ -24,7 +24,7 @@ export default function RemovePermissionModal(props) {
         const result = await axios.post("/api/saveFilePermissions", { permission , file });
         //console.log(result.data);
         if(result.data === "Bad Request"){
-            alert("Permission not found. Please use a new snapshot");
+            alert("Permission could not be deleted");
         }
         else{
             //alert(props.permission.email+" no longer has access. Please take a new snapshot to view changes");

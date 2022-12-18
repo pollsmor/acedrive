@@ -91,7 +91,7 @@ export default function PermissionListItem(props) {
                                             <></>
                                         }
                                         <option>organizer</option>
-                                        {file.id===file.driveId?
+                                        {(file.id===file.driveId)||(permission.role ==="fileOrganizer")?
                                             <option>fileOrganizer</option>
                                             :
                                             <></>
