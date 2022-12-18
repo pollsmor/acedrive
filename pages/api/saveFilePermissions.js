@@ -4,12 +4,16 @@ import Permission from "../../lib/models/Permission";
 import File from "../../lib/models/File";
 import { drive, drive_v3 } from "googleapis/build/src/apis/drive";
 import { google } from "googleapis";
+import Snapshot from "../../lib/models/Snapshot";
+
 
 
 const auth = new google.auth.OAuth2({
   client_id: process.env.GOOGLE_ID,
   client_secret: process.env.GOOGLE_SECRET,
 });
+
+let successfulChanges=[];//this list will hold permissions for a file that were changed. 
 
 
 export default async function saveFilePermissions(req, res) {
@@ -259,7 +263,18 @@ export default async function saveFilePermissions(req, res) {
           res.json("Bad Request");
         }
         if(flag == false){
-          res.json({ permissionId: permissionId });
+          successfulChanges.push(permissionId);//inserting removed permId
+          let userId = token.user.id;
+          let user = await User.findOne({ id: userId });
+          let currentSnapshotId = user.snapshotIDs.shift();//current snapshotId
+          updateSnapshot(currentSnapshotId, file);
+          ///res.json({ permissionId: permissionId });
+          //response for redirection below
+          
+          //currentSnapshot.files = newFiles;//changing the file permissions for the snapshot
+          user.snapshotIDs.unshift(currentSnapshotId);//re enter the snapshotid into snapshot ids
+          await user.save();
+          res.json({currentSnapshotId : currentSnapshotId});
         }
     }
 
@@ -275,5 +290,98 @@ export default async function saveFilePermissions(req, res) {
   
   } else {
     res.end("Not signed in or not a POST request.");
+  }
+
+  //%%%%%%%%%%%%%%%%%%%%%%%%%
+  //Updating Current Snapshot
+  //%%%%%%%%%%%%%%%%%%%%%%%%%
+
+  //we can add a function here to update current snapshot with our successful permissions
+  async function updateSnapshot(currentSnapshotId, file){
+    //we need to get the current snapshot here. iterate till we find the file that we changed permissions for
+    //then make changes to the file structure's files for permisions of the file and its children if they inherit the 
+    //permission. Then we need to save current snapshot to the database again.
+    let currentSnapshot = await Snapshot.findById(currentSnapshotId);
+    //finding the file in the currentSnapshot
+    let snapshotFiles = currentSnapshot.files;
+    let foundFileFolder = null;
+
+    //if its a file and not a folder then we just need to change the perms of this file then save in snapshot
+    //iterating through successfulChanges
+    successfulChanges.forEach(permId=>{
+      let fileFolderPermissions = file.permissions;
+      let modifiedFileFolderPermissions = [];
+      fileFolderPermissions.map((permission)=>{
+        if(permission.permissionId == permId){
+          //we don't add this permission
+        }
+        else{
+          //we add this permission
+          modifiedFileFolderPermissions.push(permission);
+        }
+      });
+      // fileFolderPermissions = fileFolderPermissions.filter(permission =>{
+      //   return (permission.permissionId!=permId && (permission.isInherited==true));
+      // });
+      fileFolderPermissions = modifiedFileFolderPermissions;
+      //now fileFolderPermissions doesn't have the perm with permId that was in successfulChanges.
+      //so we can change this fileFolder's permission objects list.
+      file.permissions = fileFolderPermissions;
+    });
+    if(file.isFolder){
+      //recursion for folder and its children
+      updateFolderPyramid(file);
+    }
+
+    //now we need to save the changes to files in current snapshot
+    //console.log(file);
+    let updatedSnapshotFiles = snapshotFiles.map((f)=>{
+      if(f.id === file.id){
+        return file;
+      }
+      else{
+        return f;
+      }
+    });
+    await Snapshot.updateOne(currentSnapshot, { $set: { files: updatedSnapshotFiles } })
+  }
+
+  async function updateFolderPyramid(fileFolder){
+
+    //first we remove the permission from fileFolder if the permission is there.
+   
+    successfulChanges.forEach(permId=>{
+      let fileFolderPermissions = fileFolder.permissions;
+      let modifiedFileFolderPermissions = [];
+      fileFolderPermissions.map((permission)=>{
+        if(permission.permissionId == permId && permission.isInherited){
+          //we don't add this permission
+        }
+        else{
+          //we add this permission
+          modifiedFileFolderPermissions.push(permission);
+        }
+      });
+      // fileFolderPermissions = fileFolderPermissions.filter(permission =>{
+      //   return (permission.permissionId!=permId && (permission.isInherited==true));
+      // });
+      fileFolderPermissions = modifiedFileFolderPermissions;
+      //console.log("Permisisons for file/folder: "+fileFolder+" are: "+fileFolderPermissions);
+      //now fileFolderPermissions doesn't have the perm with permId that was in successfulChanges.
+      //so we can change this fileFolder's permission objects list.
+      fileFolder.permissions = fileFolderPermissions;
+    });
+
+    //now we need to recurse on every child that is not a file
+    if(!fileFolder.isFolder){
+      return;
+    }
+    else{
+      //is folder
+      fileFolder.content.forEach(f=>{
+        updateFolderPyramid(f);//recurse for folders
+        return;
+      });
+    }
   }
 }

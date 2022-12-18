@@ -1,11 +1,14 @@
 import { Form, Container, Row, Col, ListGroup, Accordion, Modal, Button} from "react-bootstrap";
 import axios from "axios";
+import { useState } from "react";
+import SnapshotCard from "./SnapshotCard";
 
 export default function RemovePermissionModal(props) {
     const file = props.file
     let show = props.removingPerm
     const permission = props.permission
     //console.log(permission);
+    const [updatingSnapshot, setUpdatingSnapshot] = useState(false);
  
     function handleClose() {
         props.handlePermClose();
@@ -25,6 +28,11 @@ export default function RemovePermissionModal(props) {
         }
         else{
             alert(props.permission.email+" no longer has access. Please take a new snapshot to view changes");
+            setUpdatingSnapshot(true);//this might be unnecessary
+            
+            var currentSnapshotId = result.data.currentSnapshotId;//retrieve the id here for the current snapshot
+            var address = '/snapshot/'+currentSnapshotId;
+            window.location.href = address;
         }
 
     }
