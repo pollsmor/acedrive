@@ -6,8 +6,6 @@ export default function AddPermissionModal(props) {
     const file = props.file
     let show = props.addingPerm
 
-    //const permission = [];
-
     function handleClose() {
         props.handlePermClose();
     }
@@ -30,10 +28,7 @@ export default function AddPermissionModal(props) {
                 window.alert("Updating Snapshot");
                 var currentSnapshotId = result.data.currentSnapshotId;//retrieve the id here for the current snapshot
                 var address = '/snapshot/'+currentSnapshotId;
-                window.location.href = address;
-                //let access = result.data.permission.role;
-                //console.log(type+" "+access);
-                //alert("Anyone with a link can now be a "+access+" for : "+file.name);
+                window.location.href = address;//redirecting to current snapshot
             }
         }
         else if(type === "domain"){
@@ -51,7 +46,7 @@ export default function AddPermissionModal(props) {
                 var currentSnapshotId = result.data.currentSnapshotId;//retrieve the id here for the current snapshot
                 var address = '/snapshot/'+currentSnapshotId;
                 window.location.href = address;
-                //alert(role+" permission for domain: "+domain+" added");
+                //the above redirects to current snapshot id page. So [snapshotID.jsx] for current snap is shown
             }
         }
         else{
@@ -59,14 +54,14 @@ export default function AddPermissionModal(props) {
             var requestType = "add permission";
             //pushing the new permission fields into the permission array
             const permission = [requestType, email, type, role, file.id];
-            //console.log("request: "+permission);
-
             //api call is successful even if the permission for 'group' already exists
             //so let us have a check to make sure an appropriate error message is displayed
             if(type === "group"){
+                //so we get the file's permissions 
                 let permissions = file.permissions;
+                //then we get the emails for the permissions
                 let permissionsEmails = permissions.map((e)=>{return e.email});
-                console.log(email);
+                //if any emails in file permissions matches the email trying to be added then show error
                 if(permissionsEmails.includes(email)){
                     alert("A permission for: "+email+" group already exists."+
                     " Please edit the permission if you want to change it");
@@ -82,7 +77,7 @@ export default function AddPermissionModal(props) {
                 var currentSnapshotId = result.data.currentSnapshotId;//retrieve the id here for the current snapshot
                 var address = '/snapshot/'+currentSnapshotId;
                 window.location.href = address;
-                //alert("Permission for "+email+" added successfully");
+                //above redirects to current snapshot id page.
             }
         }
     }

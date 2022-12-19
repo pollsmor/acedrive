@@ -7,9 +7,9 @@ export default function PermissionListItem(props) {
     const permission = props.permission
     const file = props.file
     let editedPermissionsList = props.editedPermissionsList
+    //editedPermissionsList is passed down from FileDetailsModal
     let setEditedPermissionsList = props.setEditedPermissionsList;
     const [removingPerm, setRemovingPerm] = useState(false);
-    //console.log(file.permissions);// just a line to check wheter we can see permissionId of permission objects
 
     function handleRemovePermission(){
         //set state
@@ -23,6 +23,7 @@ export default function PermissionListItem(props) {
     function handlePermissionChange(){
         var classNameMaker = "roledropdown"+permission.permissionId;
         var role = document.getElementsByClassName(classNameMaker)[0].value;
+        //role now has dropdown selection for role for permission
         if(editedPermissionsList.length != 0){
             var doubleEditFlag = false;//flag to help update a permission change in our editpermissionslist
             //if editedpermslist is not empty then we might need to replace perm with edited perm values to stop duplicates
@@ -35,7 +36,7 @@ export default function PermissionListItem(props) {
                     return [permission, role];//replacing old change value with new change value for same permissionId
                 }
             });
-            //newEditedPermissionsList has handled previously changed permissions, and
+            //newEditedPermissionsList has handled changed permissions, and
             //newEditedPermissionsList has handled same permission being changed multiple times
             //thus we only need to add a change for a permission that is being added to the list for the first time
             if(!doubleEditFlag){
@@ -48,8 +49,7 @@ export default function PermissionListItem(props) {
 
         }
         else{
-            //if editedpermslist is empty then this is the first change
-            //editedPermissionsList = editedPermissionsList.concat([permission, role])
+            //if editedpermslist is empty then this is the first permission being changed
             editedPermissionsList.push([permission, role]);//adding first change out of any permissions
         }
         setEditedPermissionsList(editedPermissionsList);

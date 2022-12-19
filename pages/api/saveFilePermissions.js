@@ -26,7 +26,7 @@ const fields = [
   "driveId",
 ];
 
-let successfulChanges=[];//this list will hold permissions for a file that were changed. 
+let successfulChanges=[];//this list will hold permissions for a file that were changed successfully. 
 
 
 export default async function saveFilePermissions(req, res) {

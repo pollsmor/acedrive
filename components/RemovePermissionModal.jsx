@@ -1,38 +1,32 @@
 import { Form, Container, Row, Col, ListGroup, Accordion, Modal, Button} from "react-bootstrap";
 import axios from "axios";
-import { useState } from "react";
-import SnapshotCard from "./SnapshotCard";
 
 export default function RemovePermissionModal(props) {
     const file = props.file
     let show = props.removingPerm
     const permission = props.permission
-    //console.log(permission);
-    const [updatingSnapshot, setUpdatingSnapshot] = useState(false);
- 
+     
     function handleClose() {
         props.handlePermClose();
     }
 
     async function postPermission(){
-        //edit the request underneath
+        //Making a custom permission array just like for addPermissions 
         var requestType = "delete permission";
-        //pushing the into the permission array
+        //pushing this into the permission array
         const permission = [requestType, file.id, props.permission.permissionId];
-        //console.log("request: "+permission);
         //Now we send the permission array and file
         const result = await axios.post("/api/saveFilePermissions", { permission , file });
-        //console.log(result.data);
+        //if Bad request is returned by the above post request
         if(result.data === "Bad Request"){
             alert("Permission could not be deleted");
         }
         else{
-            //alert(props.permission.email+" no longer has access. Please take a new snapshot to view changes");
-            setUpdatingSnapshot(true);//this might be unnecessary
-            
+            //if the post request results are valid then the currentSnaphotId can be retrieved from result
             var currentSnapshotId = result.data.currentSnapshotId;//retrieve the id here for the current snapshot
             var address = '/snapshot/'+currentSnapshotId;
             window.location.href = address;
+            //redirecting above
         }
 
     }

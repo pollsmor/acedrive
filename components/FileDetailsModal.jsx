@@ -7,43 +7,54 @@ import axios from "axios";
 
 export default function FileDetailsModal(props) {
     const file = props.file
+    //addingPerm is for the add permissio modal 
     const [addingPerm, setAddingPerm] = useState(false);
-    //this list must have edited info and respective permission ids
     const [editedPermissionsList, setEditedPermissionsList] = useState([]);
+    //editedPermissionsList will have edited info for permissions in the form:
+    //[[permission, desired role], [], [], ...]
     const groupsMap = new Map()
     for (let snapshot of props.group_snapshots) {
       groupsMap.set(snapshot.groupEmail, snapshot.members)
     }
 
     function handleClose() {
-        setEditedPermissionsList([]);
-        props.closeFileDetails()
+      //On close of FileDetailsModal, the modal on reopen will set dropdown values to default.values 
+      //on rendering again. Thus we need to set the editedPermissionsList to empty.
+      setEditedPermissionsList([]);
+      props.closeFileDetails()
     }
 
     function handleAddPermission(){
-      //set state
+      //set state for addPermission modal
       setAddingPerm(true);
     }
 
     function handlePermClose() {
+      //set statte to close addPermission modal
       setAddingPerm(false);
     }
 
     async function postEditPermissions(){
+      //The custom permission array here has "" string fields to keep the format of the
+      //permission array used in other request types such as 'add' and 'remove'
       const permission = ["permission edits","","","", file.id];//formatted for convenience in saveFilePermissions
       const result = await axios.post("/api/saveFilePermissions", { permission, file , editedPermissionsList });
       window.alert("Updating Snapshot");
       var currentSnapshotId = result.data.currentSnapshotId;//retrieve the id here for the current snapshot
       var address = '/snapshot/'+currentSnapshotId;
       window.location.href = address;
+      //redirect to current snapshot page
     }
 
     function handleConfirmEdits(){
       if(editedPermissionsList.length >0){
         //async function for api call in saveFilePermissions
-        postEditPermissions()
-        //close modal
-        handleClose();
+        let promptAnswer = window.confirm("Edit Changed permissions?");
+        if(promptAnswer){
+          postEditPermissions()
+          //close modal
+          handleClose();
+        }
       }
     }
 
@@ -60,18 +71,17 @@ export default function FileDetailsModal(props) {
           alert("Could not acquire a view link");
       }
       else{
-          //console.log("link: "+result.data.webViewLink.data.webViewLink);
-
+          //We get the link from the post response
           let link = result.data.webViewLink.data.webViewLink;
 
           // The link here gives access based on what kind of options
-          // for link sharing are chosen on google drive.
+          // for an (anyone) permission were added. Otherwise, default options for 
+          // sharing through web link stands.
 
           window.prompt("Sharable Link here: ", link);
       }
   }
 
-    // console.log(error)
     return (
       <>
       {addingPerm? 
