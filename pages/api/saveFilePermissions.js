@@ -60,7 +60,7 @@ export default async function saveFilePermissions(req, res) {
         const permissionId = permission.permissionId;//permissionId
         var fileId = req.body.file.id;//file id
         //now we need a special case for type 'owner'
-        if(role === "owner" && permission.type ==="user"/*&& check for if owner here is not previous owner*/ ){
+        if(role === "owner" && permission.type ==="user"){
           try{
             const result =  await drive.permissions.update({
               fileId: file,
@@ -98,7 +98,7 @@ export default async function saveFilePermissions(req, res) {
           successList.push(permission);
         }
       });//end of loop going through editedPermissionsList
-      //from takeGDriveSnapshot.js********* This is to list files 
+      //********* This is to list files 
         //
         let googleRes = await drive.files.list({
           //fields: '*', // Retrieve all fields - useful for testing
@@ -136,7 +136,7 @@ export default async function saveFilePermissions(req, res) {
         // parse that into a data structure to allow for easier analysis/search
         let file_data_structure = parseFiles(files);
 
-        //above from takeGDriveSnapshot.js********* This is to list files 
+        //********* This is to list files 
         //
         
         let userId = token.user.id;
@@ -147,12 +147,9 @@ export default async function saveFilePermissions(req, res) {
         user.snapshotIDs.unshift(currentSnapshotId);//re enter the snapshotid into snapshot ids
         await user.save();
         res.json({currentSnapshotId : currentSnapshotId});
-      //res.json({successList: successList, failureList: failureList});
     }
 
     //req.body.permission looks like -> [add permission, email, type, role, fileId]
-
-    //console.log(permission);
 
     let flag = false;// This flag is to manipulate error and non error res.json statements
 
@@ -271,12 +268,6 @@ export default async function saveFilePermissions(req, res) {
       const permission = new Permission({
         type: req.body.permission[2], // Who this applies to (user, group, domain, etc)
         role: req.body.permission[3], // Is "reader", "writer", or "owner"
-  
-        //Further examination for below fields is necessary
-        //domain: req.body.domain,
-        //permissionDetails: req.body.permissionDetails,
-        //isInherited: req.body.isInherited,
-        //do we add permissionId here?
       });
       var fileId = req.body.file.id;
       let role = req.body.permission[3];
@@ -347,7 +338,6 @@ export default async function saveFilePermissions(req, res) {
           user.snapshotIDs.unshift(currentSnapshotId);//re enter the snapshotid into snapshot ids
           await user.save();
           res.json({currentSnapshotId : currentSnapshotId});
-          //res.json({ permission: permission });
         }
     }
 
@@ -360,12 +350,6 @@ export default async function saveFilePermissions(req, res) {
         domain: req.body.permission[1],
         type: req.body.permission[2], // Who this applies to (user, group, domain, etc)
         role: req.body.permission[3], // Is "reader", "writer", or "owner"
-  
-        //Further examination for below fields is necessary
-        //domain: req.body.domain,
-        //permissionDetails: req.body.permissionDetails,
-        //isInherited: req.body.isInherited,
-        //do we add permissionId here?
       });
       var fileId = req.body.file.id;
       let domain = req.body.permission[1];
@@ -438,7 +422,6 @@ export default async function saveFilePermissions(req, res) {
           user.snapshotIDs.unshift(currentSnapshotId);//re enter the snapshotid into snapshot ids
           await user.save();
           res.json({currentSnapshotId : currentSnapshotId});
-          //res.json({ permission: permission });
         }
     }
 
@@ -470,25 +453,13 @@ export default async function saveFilePermissions(req, res) {
           let user = await User.findOne({ id: userId });
           let currentSnapshotId = user.snapshotIDs.shift();//current snapshotId
           updateSnapshot(currentSnapshotId, file);
-          ///res.json({ permissionId: permissionId });
           //response for redirection below
           
-          //currentSnapshot.files = newFiles;//changing the file permissions for the snapshot
           user.snapshotIDs.unshift(currentSnapshotId);//re enter the snapshotid into snapshot ids
           await user.save();
           res.json({currentSnapshotId : currentSnapshotId});
         }
     }
-
-    //let permissions = file.permissions;
-    //permissions[permission_index] = permission;
-    
-    //file.permissions = file.permissions.push(permission);
-
-    // save updated permissions file
-    //let saved_file = await file.save();
-    //console.log(saved_file);
-    //console.log(req.body.permission);
   
   } else {
     res.end("Not signed in or not a POST request.");
