@@ -67,6 +67,7 @@ export default async function saveFilePermissions(req, res) {
               permissionId: permissionId,
               transferOwnership: true,
               supportsAllDrives: true,
+              sendNotificationEmail: false,
               resource: {
                 role: role, //String
               }
@@ -83,6 +84,7 @@ export default async function saveFilePermissions(req, res) {
               fileId: fileId,
               permissionId: permissionId,
               supportsAllDrives: true,
+              sendNotificationEmail: false,
               resource: {
                 role: role, //String
               }
@@ -196,6 +198,7 @@ export default async function saveFilePermissions(req, res) {
           const result = await drive.permissions.create({
             fileId: fileId,
             supportsAllDrives: true,
+            sendNotificationEmail: false,
             resource: {
               role: role, //String
               type: type, //String
