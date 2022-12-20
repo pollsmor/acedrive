@@ -31,7 +31,7 @@ export function allowedAccessControlCheck(files, searchTerm, role) {
         }
     });
     const deniedFiles = files.filter((file) => {
-        if (!searchedFiles.includes(files)) {
+        if (!searchedFiles.includes(file)) {
             return file;
         }
     });
@@ -69,7 +69,7 @@ export function deniedAccessControlCheck(files, searchTerm, role) {
         }
     });
     const deniedFiles = files.filter((file) => {
-        if (!searchedFiles.includes(files)) {
+        if (!searchedFiles.includes(file)) {
             return file;
         }
     });
