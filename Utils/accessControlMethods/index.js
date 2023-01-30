@@ -7,6 +7,7 @@ import lodash from "lodash";
 */
 export function accessControlCheck(files, searchTerm, role, type) {
     try {
+        console.log("ser", searchTerm, files);
         const updatedSearchTerm = searchTerm.replace(/}|{/g, "");
         const findForUsers = updatedSearchTerm.split(",");
         const validFiles = files.filter((file) => {
@@ -16,8 +17,15 @@ export function accessControlCheck(files, searchTerm, role, type) {
                 matchedDetails = lodash.filter(fileDetails, (detail) => {
                     if (detail.type !== "anyone" && detail.type !== "domain") {
                         if (
-                            findForUsers.includes(detail.email.toLowerCase()) &&
-                            detail.role.toLowerCase() === role.toLowerCase()
+                            (findForUsers.includes(
+                                detail.email.toLowerCase()
+                            ) &&
+                                detail.role.toLowerCase() ===
+                                    role.toLowerCase()) ||
+                            (findForUsers.includes(
+                                detail.email.toLowerCase()
+                            ) &&
+                                detail.role.toLowerCase() === "owner")
                         ) {
                             return detail;
                         }
