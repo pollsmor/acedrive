@@ -3,10 +3,12 @@ import { useState } from "react";
 import PermissionListItem from "./PermissionListItem"
 import AddPermissionModal from "./AddPermissionModal"
 import axios from "axios";
+import { useRouter } from "next/router";
 
 
 export default function FileDetailsModal(props) {
-    const file = props.file
+  const router = useRouter();  
+  const file = props.file
     //addingPerm is for the add permissio modal 
     const [addingPerm, setAddingPerm] = useState(false);
     const [editedPermissionsList, setEditedPermissionsList] = useState([]);
@@ -33,6 +35,12 @@ export default function FileDetailsModal(props) {
       //set statte to close addPermission modal
       setAddingPerm(false);
     }
+
+    async function getFileHistory (file) {
+      router.push(`/history?fileId=${file.id}&isFolder=${file.isFolder}`)
+    }
+
+    
 
     async function postEditPermissions(){
       //The custom permission array here has "" string fields to keep the format of the
@@ -161,6 +169,7 @@ export default function FileDetailsModal(props) {
                   :
                   <></>
                 }
+                <Button variant="secondary" onClick={()=>{getFileHistory(file)}}>File History</Button>
                 <Button variant="secondary" onClick={handleClose}>
                   Close
                 </Button>

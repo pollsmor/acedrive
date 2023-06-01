@@ -15,6 +15,7 @@ const googleScopes = [
   "email",
   "profile",
   "https://www.googleapis.com/auth/drive",
+  'https://www.googleapis.com/auth/drive.activity.readonly'
 ];
 const microsoftScopes = [
   "openid",
