@@ -76,9 +76,9 @@ export default function FileHistory(props) {
       <ErrorModal error={error} closeErrorModal={closeError} />
       <Container fluid>
         <div className="mt-2">
-          <Table responsive bordered hover>
+          <Table responsive bordered hover style={{borderColor: "lightgreen"}}>
             <thead>
-              <tr>
+              <tr style={{color: "lightgreen", backgroundColor: "black"}}>
                 <th>S.No</th>
                 {isFolder == "true" && <th>File Name</th>}
                 <th>Action Name</th>
@@ -86,6 +86,7 @@ export default function FileHistory(props) {
                 {/* <th>Modification</th> */}
                 <th>TimeStamp</th>
                 <th>Parent Event</th>
+                <th></th>
               </tr>
             </thead>
             <tbody>

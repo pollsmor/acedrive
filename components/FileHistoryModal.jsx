@@ -33,9 +33,9 @@ export default function FileHistoryModal(props) {
 
   const getModifiedCreate = () => {
     const createMethods = {
-      new: "A new file has been created",
-      copy: "A new file has been copied",
-      upload: "A new file has been upload",
+      new: "A new file has been created!",
+      copy: "A new file has been copied!",
+      upload: "A new file has been uploaded!",
     };
     for (const key in activity.primaryActionDetail[currentEvent]) {
       mods[key] = [createMethods[key]];
@@ -65,8 +65,8 @@ export default function FileHistoryModal(props) {
 
   return (
     <>
-      <Modal show={setShow} onHide={handleClose} size="lg">
-        <Modal.Header closeButton>
+      <Modal show={setShow} onHide={handleClose} size="lg" >
+        <Modal.Header closeButton style={{color: "lightgreen", backgroundColor: "black"}}>
           <Modal.Title>File Details</Modal.Title>
         </Modal.Header>
         <Modal.Body>
